@@ -1,0 +1,58 @@
+//
+// Copyright Institute of Automotive Engineering
+// of Technical University of Darmstadt 2020.
+// Licensed under the EUPL-1.2-or-later
+//
+// This work covered by the EUPL can be used/merged and distributed
+// in other works covered by GPL-2.0, GPL-3.0, LGPL, AGPL, CeCILL,
+// OSL, EPL, MPL and other licences listed as compatible in the EUPL
+// Appendix. This applies to the other (combined) work, while the
+// original project stays covered by the EUPL without re-licensing.
+//
+// Alternatively, the contents of this file may be used under the
+// terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, you can obtain one at
+// http://mozilla.org/MPL/2.0/.
+//
+
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+
+#ifdef _WIN32
+#include <math.h>
+#else
+#include <cmath>
+#endif
+
+namespace model::profile::VLP32 {
+
+    Profile generate() {
+        Profile VLP32;
+
+        VLP32.sensor_view_configuration.mutable_update_cycle_time()->set_seconds(0);
+        VLP32.sensor_view_configuration.mutable_update_cycle_time()->set_nanos(40000000);
+        VLP32.sensor_view_configuration.set_range(400.0);
+        VLP32.sensor_view_configuration.set_field_of_view_horizontal(180.0 / 180 * M_PI);
+        VLP32.sensor_view_configuration.set_field_of_view_vertical(170.0 / 180 * M_PI);
+        VLP32.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_x(0.0);
+        VLP32.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_y(0.0);
+        VLP32.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_z(0.0);
+        VLP32.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_roll(0.0 / 180 * M_PI);
+        VLP32.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_pitch(0.0 / 180 * M_PI);
+        VLP32.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_yaw(0.0 / 180 * M_PI);
+
+        auto lidar_sensor_view_configuration = VLP32.sensor_view_configuration.add_lidar_sensor_view_configuration();
+        lidar_sensor_view_configuration->set_field_of_view_horizontal(180.24 / 180 * M_PI);
+        lidar_sensor_view_configuration->set_field_of_view_vertical(30.2 / 180 * M_PI);
+        lidar_sensor_view_configuration->set_number_of_rays_horizontal(4506);
+        lidar_sensor_view_configuration->set_number_of_rays_vertical(804);
+        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_x(1.5205); // from middle of rear axle, in m // 1.3705 + 0.15
+        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_y(0.0); // from middle of rear axle, in m
+        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_z(1.232);  // from middle of rear axle, in m // 0.382 + 0.85
+        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
+        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_pitch(0.0);
+        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
+
+        /// The following parameters can be defined for multiple sensors.
+        VLP32.min_range = {0.3};

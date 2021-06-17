@@ -1,0 +1,4 @@
+
+    struct segmentation_parameters {
+        float tolerance_for_segmentation; // Tolerance in m that is added to object dimensions for point cloud segmentation
+    } segmentation_parameters;

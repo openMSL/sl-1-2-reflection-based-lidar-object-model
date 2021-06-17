@@ -1,0 +1,19 @@
+
+    struct tracking_parameters {
+        uint64_t classification_flag;           // 0 = from ground truth; 1 = all "UNKNOWN"
+        uint64_t orientation_flag;              // 0 = from ground truth; 1 = from current point cloud segment;
+        uint64_t dimension_and_position_flag;   // 0 = from ground truth;
+                                                // 1 = from current point cloud segment;
+                                                // 2 = dimension from current point cloud segments with lower bounds, position as center of manipulated pcl segment;
+                                                // 3 = maximum dimension of current and mean of historical point cloud segments, position as center of manipulated pcl segment;
+                                                // 4 = maximum dimension of current and mean of historical point cloud segments with lower bounds, position as center of manipulated pcl segment;
+        osi3::Dimension3d minimum_object_dimension;   // Minimum dimension in m for detected objects
+        uint64_t historical_limit_dimension;    // Limits the historical data used for historical mean dimension calculation
+        uint64_t velocity_flag;                 // 0 = from ground truth; 1 = derivation of position
+        uint64_t historical_limit_velocity;     // Limits the historical data used for velocity calculation by position differentiation
+        uint64_t tracking_flag;                 // 0 = ideal (track all ground truth objects); 1 = realistic lidar tracking behaviour
+        float existence_probability_threshold_for_tracking; // Threshold for existence probability, tracking is enabled above threshold
+        uint64_t min_detections_in_segment_for_tracking;    // Minimum no. of detections per segment to track it
+        float existence_probability_increment;  // Increment for existence probability
+        float existence_probability_decrement;  // Decrement for existence probability
+    } tracking_parameters;

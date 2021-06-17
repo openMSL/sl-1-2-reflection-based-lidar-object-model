@@ -1,0 +1,79 @@
+//
+// Copyright Clemens Linnhoff, M. Sc.
+// Institute of Automotive Engineering
+// of Technical University of Darmstadt, 2021.
+// Licensed under the EUPL-1.2-or-later
+//
+// This work covered by the EUPL can be used/merged and distributed
+// in other works covered by GPL-2.0, GPL-3.0, LGPL, AGPL, CeCILL,
+// OSL, EPL, MPL and other licences listed as compatible in the EUPL
+// Appendix. This applies to the other (combined) work, while the
+// original project stays covered by the EUPL without re-licensing.
+//
+// Alternatively, the contents of this file may be used under the
+// terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, you can obtain one at
+// http://mozilla.org/MPL/2.0/.
+//
+
+#ifndef TRANSFORMATIONFUNCTIONS_H
+#define TRANSFORMATIONFUNCTIONS_H
+
+#include "osi_sensordata.pb.h"
+#include <model/include/strategy.hpp>
+#include <Dense>
+
+using namespace osi3;
+
+namespace model {
+
+    class TransformationFunctions {
+    public:
+        struct EgoData {
+            BaseMoving ego_base;
+            MountingPosition sensor_mounting_parameters;
+            Identifier ego_vehicle_id;
+            MovingObject::VehicleAttributes ego_vehicle_attributes;
+            int ego_vehicle_no;
+        };
+
+        static Orientation3d calc_relative_orientation_to_local(const Orientation3d& object_orientation, const Orientation3d& ego_orientation);
+        static Orientation3d calc_relative_orientation_from_local(const Orientation3d& object_orientation, const Orientation3d& ego_orientation);
+
+        static Eigen::Matrix3d calc_rotation_matrix_from_euler_angles(const Orientation3d& orientation);
+        static Orientation3d calc_euler_angles_from_rotation_matrix(Eigen::Matrix3d R);
+
+        static Vector3d transform_to_local_coordinates(const Vector3d& input_coordinates, const Orientation3d& new_origin_rotation, const Vector3d& new_origin_translation);
+        static Vector3d transform_from_local_coordinates(const Vector3d& input_coordinates, const Orientation3d& new_origin_rotation, const Vector3d& new_origin_translation);
+
+        static Vector3d transform_position_from_world_to_ego_coordinates(const Vector3d &input_in_world_coordinates, const TransformationFunctions::EgoData &ego_data);
+        static Vector3d transform_position_from_ego_to_world_coordinates(const Vector3d &position_in_ego_coordinates, const TransformationFunctions::EgoData &ego_data);
+
+        static Vector3d transform_position_from_world_to_sensor_coordinates(const Vector3d &input_in_world_coordinates, const TransformationFunctions::EgoData &ego_data, const MountingPosition &mounting_pose);
+
+        static Vector3d transform_position_from_object_to_ego_coordinates(const Vector3d &pcl_segment_position_in_object, const TransformationFunctions::EgoData &ego_data, const MovingObject &gt_object);
+        static Vector3d transform_position_from_ego_to_object_coordinates(const Vector3d &pcl_segment_position_in_ego, const EgoData &ego_data, const MovingObject &gt_object);
+
+        static Orientation3d transform_orientation_from_world_to_sensor_coordinates(const Orientation3d &orientation_in_world_coordinates, const TransformationFunctions::EgoData &ego_data, const MountingPosition &mounting_pose);
+        static Orientation3d transform_orientation_from_sensor_to_world_coordinates(const Orientation3d &orientation_in_sensor_coordinates, const EgoData &ego_data, const MountingPosition &mounting_pose);
+
+        static Spherical3d transform_cartesian_to_spherical(const Vector3d &input_relative_position);
+        static void transform_spherical_to_cartesian(const Spherical3d &input_spherical_coordinate, Vector3d &vector_xyz);
+
+        static double projection_to_spherical_surface(std::vector<Spherical3d> &spherical_coordinates, double distance);
+        static void projection_onto_unit_distance_cylinder(const Spherical3d &input_spherical_coordinate, Vector2d &output_position_on_plane);
+
+        static double get_abs_velocity(const Vector3d &velocity_3d);
+
+        static bool get_ego_info(TransformationFunctions::EgoData &ego_data, const SensorView &input_sensor_view);
+
+        static MountingPosition get_sensor_mounting_pose(const Profile &profile, const Alert &alert);
+
+        static Vector3d vector_translation(const Vector3d &vector_a, const Vector3d &vector_b, double factor_for_vector_b);
+
+        static double dot_product(const Vector3d &vector_a, const Vector3d &vector_b);
+        static Vector3d cross_product(const Vector3d &vector_a, const Vector3d &vector_b);
+    };
+}
+
+#endif //TRANSFORMATIONFUNCTIONS_H

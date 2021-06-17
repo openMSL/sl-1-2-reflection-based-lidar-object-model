@@ -1,0 +1,26 @@
+The work in folder src/model is licensed under the European Public
+   Licence (EUPL), version 1.2 or later. See LICENCE-EUPL-1.2.txt or
+   https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12 for
+   licence text.
+The work covered by the EUPL can be used/merged and distributed in other
+   works covered by GPL-2.0, GPL-3.0, LGPL, AGPL, CeCILL, OSL, EPL, MPL
+   and other licences listed as compatible in the EUPL Appendix. This
+   applies to the other (combined) work, while the original project
+   stays covered by the EUPL without re-licensing.
+Alternatively, the work in folder src/model may be used under the
+   terms of the Mozilla Public License, v. 2.0. If a copy of the
+   MPL was not distributed with this file, you can obtain one at
+   http://mozilla.org/MPL/2.0/.
+
+Both the work in folder src/osmp and the work in folder
+   lib/open-simulation-interface is subject to the terms of the
+   Mozilla Public License, v. 2.0 (MPL-2.0). See LICENCE-MPL-2.0.txt or
+   http://mozilla.org/MPL/2.0/ for licence text.
+
+The files in folder lib/fmi2 are licensed by the copyright holders
+   under the 2-Clause BSD License. See lib/fmi2/LICENCE.txt or
+   https://opensource.org/licenses/BSD-2-Clause for licence text.
+
+The work in folder lib/eigen is distributed under
+   Mozilla Public License, v. 2.0. See 
+   http://eigen.tuxfamily.org/index.php?title=Main_Page#License for licence text.

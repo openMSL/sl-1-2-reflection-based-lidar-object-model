@@ -1,0 +1,7 @@
+cmake*
+build*
+.vscode/
+.editorconfig
+out/
+.idea/
+.vs/

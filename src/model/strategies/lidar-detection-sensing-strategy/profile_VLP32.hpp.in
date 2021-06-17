@@ -1,0 +1,24 @@
+
+        /// detection_sensing_parameters
+        /// The following parameters can be defined for multiple sensors.
+        VLP32.detection_sensing_parameters.no_of_beams_vertical = {32};
+        VLP32.detection_sensing_parameters.no_of_beams_horizontal = {450};
+        VLP32.detection_sensing_parameters.horizontal_angle_min_rad = {-90.12/180*M_PI};
+        VLP32.detection_sensing_parameters.beam_layer_angles_rad = {{15.0/180*M_PI, 10.333/180*M_PI, 7.0/180*M_PI, 4.667/180*M_PI, 3.333/180*M_PI, 2.333/180*M_PI, 1.667/180*M_PI, 1.333/180*M_PI, 1.000/180*M_PI, 0.667/180*M_PI, 0.333/180*M_PI, 0.0/180*M_PI, -0.333/180*M_PI, -0.667/180*M_PI, -1.0/180*M_PI, -1.333/180*M_PI, -1.667/180*M_PI, -2.000/180*M_PI, -2.333/180*M_PI, -2.667/180*M_PI, -3.0/180*M_PI, -3.333/180*M_PI, -3.667/180*M_PI, -4.0/180*M_PI, -4.667/180*M_PI, -5.333/180*M_PI, -6.148/180*M_PI, -7.254/180*M_PI, -8.843/180*M_PI, -11.310/180*M_PI, -15.639/180*M_PI, -25.0/180*M_PI}};
+        VLP32.detection_sensing_parameters.beam_resolution_horizontal_rad = {0.4/180*M_PI};
+        VLP32.detection_sensing_parameters.beam_height_rad = {0.0015};
+        VLP32.detection_sensing_parameters.beam_width_rad = {0.003};
+        VLP32.detection_sensing_parameters.max_echos_per_beam = {1};
+
+        VLP32.detection_sensing_parameters.rays_per_beam_vertical = {25};
+        VLP32.detection_sensing_parameters.rays_per_beam_horizontal = {10};
+        VLP32.detection_sensing_parameters.ray_resolution_vertical_rad = {0.05/180*M_PI};
+        VLP32.detection_sensing_parameters.ray_resolution_horizontal_rad = {0.04/180*M_PI};
+
+        VLP32.detection_sensing_parameters.distance_resolution_adc = {0.03};     // Specified distance resolution of the adc in m, 0.3 means time resolution of 0.1 ns
+        VLP32.detection_sensing_parameters.distance_resolution = {0.01};         // Specified distance resolution of the sensor output in m
+        VLP32.detection_sensing_parameters.distance_stddev = {0.0};              // Specified distance standard deviation in m for gaussian noise model
+        VLP32.detection_sensing_parameters.intensity_resolution = {0.01};        // Specified intensity resolution of the sensor output in %
+        VLP32.detection_sensing_parameters.intensity_threshold_in_dB = {-120.0}; // Specified intensity threshold of the sensor at output in dB
+        VLP32.detection_sensing_parameters.echo_separation_distance = {5.0};     // Distance for separation of two echos in m, when no reflections registered in between
+        VLP32.detection_sensing_parameters.echo_determination_mode = {"peak"};   // Determines what part of the echo pulse is taken for distance. Options: {"peak", "start", "center", "end"}

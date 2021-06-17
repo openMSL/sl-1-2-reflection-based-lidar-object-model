@@ -1,0 +1,24 @@
+
+        /// detection_sensing_parameters
+        /// The following parameters can be defined for multiple sensors.
+        Ibeo_LUX_2010.detection_sensing_parameters.no_of_beams_vertical = {4};
+        Ibeo_LUX_2010.detection_sensing_parameters.no_of_beams_horizontal = {241};
+        Ibeo_LUX_2010.detection_sensing_parameters.horizontal_angle_min_rad = {-60.25/180*M_PI};
+        Ibeo_LUX_2010.detection_sensing_parameters.beam_layer_angles_rad = {{1.35/180*M_PI, 0.45/180*M_PI, -0.45/180*M_PI, -1.35/180*M_PI}};
+        Ibeo_LUX_2010.detection_sensing_parameters.beam_resolution_horizontal_rad = {0.458506224/180*M_PI};
+        Ibeo_LUX_2010.detection_sensing_parameters.beam_height_rad = {0.9 / 180 * M_PI};
+        Ibeo_LUX_2010.detection_sensing_parameters.beam_width_rad = {0.25 / 180 * M_PI};
+        Ibeo_LUX_2010.detection_sensing_parameters.max_echos_per_beam = {3};
+
+        Ibeo_LUX_2010.detection_sensing_parameters.rays_per_beam_vertical = {33};
+        Ibeo_LUX_2010.detection_sensing_parameters.rays_per_beam_horizontal = {9};
+        Ibeo_LUX_2010.detection_sensing_parameters.ray_resolution_vertical_rad = {0.028787879/180*M_PI};
+        Ibeo_LUX_2010.detection_sensing_parameters.ray_resolution_horizontal_rad = {0.055555556/180*M_PI};
+
+        Ibeo_LUX_2010.detection_sensing_parameters.distance_resolution_adc = {0.03};     // Specified distance resolution of the adc in m, 0.3 means time resolution of 0.1 ns
+        Ibeo_LUX_2010.detection_sensing_parameters.distance_resolution = {0.01};         // Specified distance resolution of the sensor output in m
+        Ibeo_LUX_2010.detection_sensing_parameters.distance_stddev = {0.025};            // Specified distance standard deviation in m for gaussian noise model
+        Ibeo_LUX_2010.detection_sensing_parameters.intensity_resolution = {0.01};        // Specified intensity resolution of the sensor output in %
+        Ibeo_LUX_2010.detection_sensing_parameters.intensity_threshold_in_dB = {-105.0}; // Specified intensity threshold of the sensor at output in dB
+        Ibeo_LUX_2010.detection_sensing_parameters.echo_separation_distance = {5.0};     // Distance for separation of two echos in m, when no reflections registered in between
+        Ibeo_LUX_2010.detection_sensing_parameters.echo_determination_mode = {"peak"};   // Determines what part of the echo pulse is taken for distance. Options: {"peak", "start", "center", "end"}

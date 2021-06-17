@@ -1,0 +1,6 @@
+[submodule "lib/eigen"]
+	path = lib/eigen
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "lib/open-simulation-interface"]
+	path = lib/open-simulation-interface
+	url = git@github.com:OpenSimulationInterface/open-simulation-interface.git
