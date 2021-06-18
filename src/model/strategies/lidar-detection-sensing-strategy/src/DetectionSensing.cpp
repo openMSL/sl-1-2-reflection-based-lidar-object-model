@@ -252,10 +252,12 @@ void DetectionSensing::apply(SensorData &sensor_data) {
 								double elevation = beam_layer_angles_rad[layer];
 
 								/// Noise on distance
-								std::knuth_b generator(std::rand());     // rand used for Windows compatibility
-								std::normal_distribution<double> distribution_distance(0, profile.detection_sensing_parameters.distance_stddev[sensor_idx]);
-								double distance_noise = distribution_distance(generator);
-								distance += distance_noise;
+								if (profile.detection_sensing_parameters.distance_stddev[sensor_idx] > 0.0) {
+									std::knuth_b generator(std::rand()); // rand used for Windows compatibility
+									std::normal_distribution<double> distribution_distance(0, profile.detection_sensing_parameters.distance_stddev[sensor_idx]); // dist(mean, stddev)
+									double distance_noise = distribution_distance(generator);
+									distance += distance_noise;
+								}
 								distance = round(distance / distance_resolution) * distance_resolution;
 
 								/// Add new detection and fill it
