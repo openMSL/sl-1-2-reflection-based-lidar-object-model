@@ -1,4 +1,4 @@
-# Install protobuf for Win64 and Visual Studio 2017
+# Install model for Win64 and Visual Studio 2017
 
 1. Create and run Shell-Script (e.g. with cmd.exe):
     ```bash
