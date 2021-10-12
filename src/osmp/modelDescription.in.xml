@@ -143,12 +143,6 @@
                 </Tool>
             </Annotations>
         </ScalarVariable>
-        <ScalarVariable name="valid" valueReference="0" causality="output" variability="discrete" initial="exact">
-            <Boolean start="false"/>
-        </ScalarVariable>
-        <ScalarVariable name="count" valueReference="12" causality="output" variability="discrete" initial="exact">
-            <Integer start="0"/>
-        </ScalarVariable>
         <ScalarVariable name="profile" valueReference="0" causality="parameter" variability="fixed">
             <String start="@FIRST_PROFILE@" />
         </ScalarVariable>
@@ -158,13 +152,11 @@
             <Unknown index="4"/>
             <Unknown index="5"/>
             <Unknown index="6"/>
-            <Unknown index="13"/>
-            <Unknown index="14"/>
         </Outputs>
         <InitialUnknowns>
-            <Unknown index="7" dependencies="10 11 12 15"/>
-            <Unknown index="8" dependencies="10 11 12 15"/>
-            <Unknown index="9" dependencies="10 11 12 15"/>
+            <Unknown index="7" dependencies="10 11 12 13"/>
+            <Unknown index="8" dependencies="10 11 12 13"/>
+            <Unknown index="9" dependencies="10 11 12 13"/>
         </InitialUnknowns>
     </ModelStructure>
 </fmiModelDescription>

@@ -46,9 +46,7 @@
  */
 
 /* Boolean Variables */
-#define FMI_BOOLEAN_VALID_IDX 0
-#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_VALID_IDX
-#define FMI_BOOLEAN_VARS (FMI_BOOLEAN_LAST_IDX+1)
+#define FMI_BOOLEAN_VARS 0
 
 /* Integer Variables */
 #define FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX 0
@@ -63,14 +61,10 @@
 #define FMI_INTEGER_SENSORVIEW_CONFIG_BASELO_IDX 9
 #define FMI_INTEGER_SENSORVIEW_CONFIG_BASEHI_IDX 10
 #define FMI_INTEGER_SENSORVIEW_CONFIG_SIZE_IDX 11
-#define FMI_INTEGER_COUNT_IDX 12
-#define FMI_INTEGER_LAST_IDX FMI_INTEGER_COUNT_IDX
+#define FMI_INTEGER_LAST_IDX FMI_INTEGER_SENSORVIEW_CONFIG_SIZE_IDX
 #define FMI_INTEGER_VARS (FMI_INTEGER_LAST_IDX+1)
 
 /* Real Variables */
-//#define FMI_REAL_NOMINAL_RANGE_IDX 0
-//#define FMI_REAL_LAST_IDX FMI_REAL_NOMINAL_RANGE_IDX
-//#define FMI_REAL_VARS (FMI_REAL_LAST_IDX+1)
 #define FMI_REAL_VARS 0
 
 /* String Variables */
@@ -147,7 +141,7 @@ protected:
     doStart(fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime, fmi2Boolean stopTimeDefined,
             fmi2Real stopTime);
 
-    static fmi2Status doEnterInitializationMode();
+    fmi2Status doEnterInitializationMode();
 
     fmi2Status doExitInitializationMode();
 
@@ -273,14 +267,6 @@ protected:
     std::string lastConfigRequestBuffer;
 
     /* Simple Accessors */
-    fmi2Boolean fmi_valid() { return boolean_vars[FMI_BOOLEAN_VALID_IDX]; }
-
-    void set_fmi_valid(fmi2Boolean value) { boolean_vars[FMI_BOOLEAN_VALID_IDX] = value; }
-
-    fmi2Integer fmi_count() { return integer_vars[FMI_INTEGER_COUNT_IDX]; }
-
-    void set_fmi_count(fmi2Integer value) { integer_vars[FMI_INTEGER_COUNT_IDX] = value; }
-
     std::string fmi_profile(){ return string_vars[FMI_STRING_PROFILE_IDX]; }
 
     void set_fmi_profile(std::string value){ string_vars[FMI_STRING_PROFILE_IDX] = std::move(value); }
@@ -302,8 +288,10 @@ protected:
     void refresh_fmi_sensor_view_config_request();
 
 private:
+    void load_profile_or_complain(const std::string &name);
     bool try_load_profile(const std::string &name);
 
+    bool is_profile_loaded = false;
     model::profile::Profile profile;
     model::Sequence strategy;
     model::Log message_sink;

@@ -161,15 +161,23 @@ void CFrameworkPackaging::reset_fmi_sensor_data_out() {
     integer_vars[FMI_INTEGER_SENSORDATA_OUT_BASELO_IDX] = 0;
 }
 
+void CFrameworkPackaging::load_profile_or_complain(const std::string &name) {
+    if (try_load_profile(name)) {
+        is_profile_loaded = true;
+        normal_log("OSMP", "Loaded profile: '%s'", name.c_str());
+    } else {
+        error_log("OSMP", "Could not load profile '%s'", name.c_str());
+    }
+}
+
 void CFrameworkPackaging::refresh_fmi_sensor_view_config_request() {
     osi3::SensorViewConfiguration config;
     if (get_fmi_sensor_view_config(config))
         set_fmi_sensor_view_config_request(config);
     else {
+        load_profile_or_complain(fmi_profile());
         config.Clear();
-        config.CopyFrom(profile.sensor_view_configuration);
-        config.mutable_version()->CopyFrom(
-                osi3::InterfaceVersion::descriptor()->file()->options().GetExtension(osi3::current_interface_version));
+        config.MergeFrom(profile.sensor_view_configuration);
         set_fmi_sensor_view_config_request(config);
     }
 }
@@ -210,14 +218,24 @@ fmi2Status CFrameworkPackaging::doStart(fmi2Boolean toleranceDefined, fmi2Real t
 fmi2Status CFrameworkPackaging::doEnterInitializationMode() {
     DEBUGBREAK()
 
+    /*
+     * Pre-initialisation of the profile in case the master does not care about the model description.
+     * If this is not the case, the value is overwritten anyway.
+     */
+    #include <model/profiles/init_profile.hpp>
+
     return fmi2OK;
 }
 
 fmi2Status CFrameworkPackaging::doExitInitializationMode() {
     DEBUGBREAK()
 
-    if (fmi_profile().empty()) {
-        #include <model/profiles/init_profile.hpp>
+    /*
+     * The profile was only preloaded when a request was made to configure the sensor view.
+     */
+    if (!is_profile_loaded) {
+		normal_log("OSMP", "Config request was not queried, therefore default profile's config will be loaded!");
+        load_profile_or_complain(fmi_profile());
     }
 
     osi3::SensorViewConfiguration config;
@@ -234,13 +252,7 @@ fmi2Status CFrameworkPackaging::doExitInitializationMode() {
                    config.mounting_position().orientation().pitch(), config.mounting_position().orientation().yaw());
     }
 
-    if (try_load_profile(string_vars[FMI_STRING_PROFILE_IDX])) {
-        normal_log("OSMP", "Loaded profile: '%s'", string_vars[FMI_STRING_PROFILE_IDX].c_str());
-        return fmi2OK;
-    }
-
-    error_log("OSMP", "Invalid profile specified: '%s'", string_vars[FMI_STRING_PROFILE_IDX].c_str());
-    return fmi2Error;
+    return fmi2OK;
 }
 
 #include <model/profiles/profile_list.hpp>
@@ -262,14 +274,10 @@ fmi2Status CFrameworkPackaging::doCalc(fmi2Real currentCommunicationPoint, fmi2R
 
         /* Serialize */
         set_fmi_sensor_data_out(currentOut);
-        set_fmi_valid(true);
-        set_fmi_count(currentOut.moving_object_size());
     } else {
         /* We have no valid input, so no valid output */
         normal_log("OSI", "No valid input, therefore providing no valid output.");
         reset_fmi_sensor_data_out();
-        set_fmi_valid(false);
-        set_fmi_count(0);
     }
     return fmi2OK;
 }
