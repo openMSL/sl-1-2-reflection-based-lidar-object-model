@@ -1,8 +1,8 @@
 Build the model by running the following bash script in MSYS-2020:
    ```bash
    #!/bin/bash
-   export CC="gcc -std=c++17 -s"
-   export CXX="g++ -std=c++17 -s"
+   export CC="gcc -std=c++17 -s -static-libgcc -static-libstdc++ -static"
+   export CXX="g++ -std=c++17 -s -static-libgcc -static-libstdc++ -static"
    mkdir -p build-MSYS && cd build-MSYS && rm -r *
    mkdir -p install-osi
    "C:/Program Files/CMake/bin/cmake.exe" \
