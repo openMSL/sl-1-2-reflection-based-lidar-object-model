@@ -144,7 +144,16 @@
             </Annotations>
         </ScalarVariable>
         <ScalarVariable name="profile" valueReference="0" causality="parameter" variability="fixed">
-            <String start="@FIRST_PROFILE@" />
+            <String start="@FIRST_PROFILE@"/>
+        </ScalarVariable>
+        <ScalarVariable name="switch_for_csv_output" valueReference="0" causality="parameter" variability="fixed">
+            <Boolean start="false"/>
+        </ScalarVariable>
+        <ScalarVariable name="switch_for_pcd_output" valueReference="1" causality="parameter" variability="fixed">
+            <Boolean start="false"/>
+        </ScalarVariable>
+        <ScalarVariable name="switch_for_ros_output" valueReference="2" causality="parameter" variability="fixed">
+            <Boolean start="false"/>
         </ScalarVariable>
     </ModelVariables>
     <ModelStructure>
@@ -154,9 +163,9 @@
             <Unknown index="6"/>
         </Outputs>
         <InitialUnknowns>
-            <Unknown index="7" dependencies="10 11 12 13"/>
-            <Unknown index="8" dependencies="10 11 12 13"/>
-            <Unknown index="9" dependencies="10 11 12 13"/>
+            <Unknown index="7" dependencies="10 11 12 13 14 15 16"/>
+            <Unknown index="8" dependencies="10 11 12 13 14 15 16"/>
+            <Unknown index="9" dependencies="10 11 12 13 14 15 16"/>
         </InitialUnknowns>
     </ModelStructure>
 </fmiModelDescription>

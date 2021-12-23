@@ -46,7 +46,11 @@
  */
 
 /* Boolean Variables */
-#define FMI_BOOLEAN_VARS 0
+#define FMI_BOOLEAN_SWITCH_FOR_CSV_OUTPUT_IDX 0
+#define FMI_BOOLEAN_SWITCH_FOR_PCD_OUTPUT_IDX 1
+#define FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX 2
+#define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX
+#define FMI_BOOLEAN_VARS (FMI_BOOLEAN_LAST_IDX+1)
 
 /* Integer Variables */
 #define FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX 0
@@ -270,6 +274,18 @@ protected:
     std::string fmi_profile(){ return string_vars[FMI_STRING_PROFILE_IDX]; }
 
     void set_fmi_profile(std::string value){ string_vars[FMI_STRING_PROFILE_IDX] = std::move(value); }
+    
+    bool fmi_switch_for_csv_output(){ return boolean_vars[FMI_BOOLEAN_SWITCH_FOR_CSV_OUTPUT_IDX]; }
+
+    void set_fmi_switch_for_csv_output(bool value){ boolean_vars[FMI_BOOLEAN_SWITCH_FOR_CSV_OUTPUT_IDX] = value; }
+    
+    bool fmi_switch_for_pcd_output(){ return boolean_vars[FMI_BOOLEAN_SWITCH_FOR_PCD_OUTPUT_IDX]; }
+
+    void set_fmi_switch_for_pcd_output(bool value){ boolean_vars[FMI_BOOLEAN_SWITCH_FOR_PCD_OUTPUT_IDX] = value; }
+    
+    bool fmi_switch_for_ros_output(){ return boolean_vars[FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX]; }
+
+    void set_fmi_switch_for_ros_output(bool value){ boolean_vars[FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX] = value; }
 
     /* Protocol Buffer Accessors */
     bool get_fmi_sensor_view_config(osi3::SensorViewConfiguration &data);
@@ -290,10 +306,14 @@ protected:
 private:
     void load_profile_or_complain(const std::string &name);
     bool try_load_profile(const std::string &name);
+    void set_output_switches(const bool csv_switch, const bool pcd_switch, const bool ros_switch);
 
+    bool csv_output_enabled = false;
+    bool pcd_output_enabled = false;
+    bool ros_output_enabled = false;
     bool is_profile_loaded = false;
     model::profile::Profile profile;
-    model::Sequence strategy;
+    model::Sequence sequence_of_strategies;
     model::Log message_sink;
     model::Alert alert_sink;
 };

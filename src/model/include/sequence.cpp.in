@@ -23,12 +23,57 @@ namespace model {
 
     Sequence::Sequence(const Profile &profile, const Log &log, const Alert &alert) : Strategy(profile, log, alert) {
         @STRATEGY_INSTANCES@
+        @CSV_OUTPUT_STRATEGY_INSTANCES@
+        @PCD_OUTPUT_STRATEGY_INSTANCES@
+        @ROS_OUTPUT_STRATEGY_INSTANCES@
     }
 
     void Sequence::apply(osi3::SensorData &data) {
         for (const auto &strategy : strategies) {
             strategy->apply(data);
         }
+        if (csv_output_enabled) {
+            if (!csv_output_strategies.empty()) {
+                for (const auto &strategy : csv_output_strategies) {
+                    strategy->apply(data);
+                }
+            } else {
+                alert("FMU does not contain output strategies for output to .csv-files, but FMU parameter 'switch_for_csv_output' has been enabled!");
+                alert("Set FMU parameter 'switch_for_csv_output' to false or change file csv_output_sequence.conf accordingly!");
+            }
+        }
+        if (pcd_output_enabled) {
+            if (!pcd_output_strategies.empty()) {
+                for (const auto &strategy : pcd_output_strategies) {
+                    strategy->apply(data);
+                }
+            } else {
+                alert("FMU does not contain output strategies for output to .pcd-files, but FMU parameter 'switch_for_pcd_output' has been enabled!");
+                alert("Set FMU parameter 'switch_for_pcd_output' to false or change file pcd_output_sequence.conf accordingly!");
+            }
+        }
+        if (ros_output_enabled) {
+            if (!ros_output_strategies.empty()) {
+                for (const auto &strategy : ros_output_strategies) {
+                    strategy->apply(data);
+                }
+            } else {
+                alert("FMU does not contain output strategies for output to ROS, but FMU parameter 'switch_for_ros_output' has been enabled!");
+                alert("Set FMU parameter 'switch_for_ros_output' to false or change file ros_output_sequence.conf accordingly!");
+            }
+        }
+    }
+    
+    void Sequence::set_switch_for_csv_output(bool switch_for_csv_output) {
+        csv_output_enabled = switch_for_csv_output;
+    }
+    
+    void Sequence::set_switch_for_pcd_output(bool switch_for_pcd_output) {
+        pcd_output_enabled = switch_for_pcd_output;
+    }
+    
+    void Sequence::set_switch_for_ros_output(bool switch_for_ros_output) {
+        ros_output_enabled = switch_for_ros_output;
     }
 
 }
