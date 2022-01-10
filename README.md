@@ -8,7 +8,7 @@ It is a highly parameterizable sensor system model including detection calculati
 The model gets lidar reflection calculated in a simulation tool beforehand e.g. with ray tracing.
 The model outputs are lidar detections and detected moving objects.<br><br>
 
-<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/fbe795a590da26b40968a1c8673f028e/Reflectionbased_Model.gif" width="800" />
+<img src="https://user-images.githubusercontent.com/27010086/148824838-12edae52-fd20-4f4b-938e-fdd3ee8c3544.gif" width="800" />
 
 ## Modeling Approach
 
