@@ -7,3 +7,6 @@
 [submodule "src/model/strategies/transformation-functions"]
 	path = src/model/strategies/transformation-functions
 	url = https://gitlab.com/tuda-fzd/perception-sensor-modeling/utils/transformation-functions.git
+[submodule "lib/fmi2"]
+	path = lib/fmi2
+	url = https://github.com/modelica/fmi-standard.git

@@ -10,6 +10,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(lib/open-simulation-interface)
-include_directories(lib/fmi2 lib/eigen/Eigen)
+include_directories(lib/fmi2/headers lib/eigen/Eigen)
 add_subdirectory(src/model)
 add_subdirectory(src/osmp)
