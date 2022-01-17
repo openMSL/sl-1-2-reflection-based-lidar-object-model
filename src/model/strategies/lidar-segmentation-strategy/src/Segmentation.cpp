@@ -34,7 +34,7 @@ void model::Segmentation::apply(SensorData &in) {
             alert("Ego vehicle has no base, no id, or is not contained in GT moving objects.");
 
         /// Run through all objects in current frame except the host vehicle
-        for (uint64_t object_no_in = 0; object_no_in < no_of_moving_objects; object_no_in++) {
+        for (int object_no_in = 0; object_no_in < no_of_moving_objects; object_no_in++) {
             uint64_t object_id = in.sensor_view(0).global_ground_truth().moving_object(object_no_in).id().value();
             if (object_id != ego_data.ego_vehicle_id.value()) { // Continue in case of ego car
                 /// Get corners of current object and set the object id for all points
@@ -73,7 +73,7 @@ std::vector<Vector3d> Segmentation::get_bounding_box_corners(const MovingObject 
     return bounding_box_corners;
 }
 
-uint64_t Segmentation::calculate_segment_of_point_cloud(SensorData &in, uint64_t object_no_in, const std::vector<Vector3d> &bounding_box_corners, const TransformationFunctions::EgoData &ego_data, const Profile &profile, const Log &log) {
+uint64_t Segmentation::calculate_segment_of_point_cloud(SensorData &in, int object_no_in, const std::vector<Vector3d> &bounding_box_corners, const TransformationFunctions::EgoData &ego_data, const Profile &profile, const Log &log) {
 
     /// Bounding box corners with tolerance for segmentation
     double x_min = bounding_box_corners.at(2).x() - profile.segmentation_parameters.tolerance_for_segmentation;
@@ -85,7 +85,7 @@ uint64_t Segmentation::calculate_segment_of_point_cloud(SensorData &in, uint64_t
 
     /// Run through all logical_detections
     uint64_t segment_size_of_current_object = 0;
-    for (uint64_t logical_detection_idx = 0; logical_detection_idx < in.logical_detection_data().logical_detection_size(); logical_detection_idx++) {
+    for (int logical_detection_idx = 0; logical_detection_idx < in.logical_detection_data().logical_detection_size(); logical_detection_idx++) {
         Vector3d logical_detection_in_world_coordinates = TransformationFunctions::transform_position_from_ego_to_world_coordinates(in.logical_detection_data().logical_detection(logical_detection_idx).position(), ego_data);
         Vector3d logical_detection_in_object_coordinates = TransformationFunctions::transform_to_local_coordinates(logical_detection_in_world_coordinates,
                                                                                                                    in.sensor_view(0).global_ground_truth().moving_object(object_no_in).base().orientation(),

@@ -52,8 +52,8 @@ void PointcloudFusion::apply(SensorData &in) {
 void PointcloudFusion::calculate_fused_pointcloud_for_given_sensors(SensorData &in, const Profile &profile, const Log &log) {
     in.mutable_logical_detection_data()->clear_logical_detection();
 
-    for (uint64_t sensor_idx = 0; sensor_idx < in.feature_data().lidar_sensor_size(); sensor_idx++) {
-        for (uint64_t detection_no = 0; detection_no < in.feature_data().lidar_sensor(sensor_idx).detection_size(); detection_no++) {
+    for (int sensor_idx = 0; sensor_idx < in.feature_data().lidar_sensor_size(); sensor_idx++) {
+        for (int detection_no = 0; detection_no < in.feature_data().lidar_sensor(sensor_idx).detection_size(); detection_no++) {
 
             double elevation = in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).position().elevation();
             double azimuth   = in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).position().azimuth();
