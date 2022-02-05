@@ -63,7 +63,7 @@ void PointcloudFusion::calculate_fused_pointcloud_for_given_sensors(SensorData &
             point_cartesian_sensor.set_x(distance * cos(elevation) * cos(azimuth));
             point_cartesian_sensor.set_y(distance * cos(elevation) * sin(azimuth));
             point_cartesian_sensor.set_z(distance * sin(elevation));
-            Vector3d point_cartesian_in_ego_coordinates = TransformationFunctions::transform_from_local_coordinates(point_cartesian_sensor,
+            Vector3d point_cartesian_in_ego_coordinates = TF::transform_from_local_coordinates(point_cartesian_sensor,
                                                           profile.sensor_view_configuration.lidar_sensor_view_configuration(sensor_idx).mounting_position().orientation(),
                                                           profile.sensor_view_configuration.lidar_sensor_view_configuration(sensor_idx).mounting_position().position());
 

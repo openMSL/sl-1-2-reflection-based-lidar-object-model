@@ -58,11 +58,11 @@ namespace model {
         void set_object_dimension_with_tracking(const Dimension3d &current_dimension, Dimension3d *new_dimension, bool object_contained_in_history, uint64_t historical_object_no, const Vector3d &current_pcl_segment_position_in_object,
                                                 Vector3d *new_pcl_segment_position_in_object) const;
 
-        static void transform_gt_object_to_ego_coordinate_system(const MovingObject &current_GT_object, DetectedMovingObject *current_moving_object, const TransformationFunctions::EgoData &ego_data);
+        static void transform_gt_object_to_ego_coordinate_system(const MovingObject &current_GT_object, DetectedMovingObject *current_moving_object, const TF::EgoData &ego_data);
 
-        static void get_pcl_segment_of_current_object(const LogicalDetectionData& logical_detection_data, Tracking::Data &data_of_current_time_step, uint64_t gt_object_id, const TransformationFunctions::EgoData &ego_data);
+        static void get_pcl_segment_of_current_object(const LogicalDetectionData& logical_detection_data, Tracking::Data &data_of_current_time_step, uint64_t gt_object_id, const TF::EgoData &ego_data);
 
-        static void calculate_object_dimension_and_position_in_object_from_pcl_segment(Tracking::Data &data_of_current_time_step, const MovingObject& current_GT_object, const TransformationFunctions::EgoData &ego_data);
+        static void calculate_object_dimension_and_position_in_object_from_pcl_segment(Tracking::Data &data_of_current_time_step, const MovingObject& current_GT_object, const TF::EgoData &ego_data);
 
         void update_history(Tracking::Data &data_of_current_time_step, const SensorData &in);
 
@@ -86,10 +86,10 @@ namespace model {
         void write_data_back_to_osi(SensorData &in, Data &data_of_current_time_step);
 
         void calculate_dimension_and_position_from_pcl(const MovingObject& current_GT_object, Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, bool object_contained_in_history, uint64_t historical_object_no,
-                                                       const TransformationFunctions::EgoData &ego_data);
+                                                       const TF::EgoData &ego_data);
 
         void continue_tracking_for_current_pcl_segment(Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, const MovingObject &current_GT_object, bool object_tracked_in_history, uint64_t historical_object_no,
-                                                       const TransformationFunctions::EgoData &ego_data);
+                                                       const TF::EgoData &ego_data);
 
         void start_tracking_for_current_pcl_segment(Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, const MovingObject &current_GT_object);
 
