@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<srmd:SimulationResourceMetaData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://apps.pmsf.net/STMD/SimulationResourceMetaData SRMD.xsd"
+    xmlns:srmd="http://apps.pmsf.net/STMD/SimulationResourceMetaData"
+    version="0.5" name="Sensor Model XXX Meta-Data">
+	
+	<!-- This Template contains all SRMD Classifications and all ClassificationEntries defined in SET Level for Simulation Models -->
+	<!-- Feel free to remove the optional parts not applicable to your model -->	
+	
+    <srmd:Classification xmlns="http://apps.pmsf.net/SSPTraceability/SSPTraceabilityCommon" type="de.setlevel.srmd.model-meta-data">
+        
+		<!-- Mandatory Model Type related information -->
+        <srmd:ClassificationEntry keyword="model.type">sensor</srmd:ClassificationEntry>
+		
+		<!-- Optional original Sensor related information if applicable for model type -->
+        <srmd:ClassificationEntry keyword="sensor.manufacturer">Ibeo</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.family">Lux</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.name">Lux 2010</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.version"></srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.manufacturer.partnumber"></srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.type">Lidar</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.technology">Lidar</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="sensor.technology.variant"></srmd:ClassificationEntry>
+		
+		
+        <!-- Model related information -->
+        <srmd:ClassificationEntry keyword="model.manufacturer">Technische Universität Darmstadt - Fachgebiet Fahrzeugtechnik (FZD)</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.family">Perception Sensor Models</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.name">Reflection Based Lidar Object Model</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.version">1.0</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.releasedate">02-02-22</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.status">Released</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.guid"></srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.purpose">Model for use in SETLevel SUC3</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.use-restrictions">Legal or contractual restrictions on the use and distribution of the model that have to be respected</srmd:ClassificationEntry>
+        
+        <srmd:ClassificationEntry keyword="model.modelling-approach">This is the FZD Reflection Based Lidar Model based on the FZD OSI Sensor Model Packaging Framework. It is a highly parameterizable sensor system model including detection calculation and object tracking simulation. The model gets lidar reflection calculated in a simulation tool beforehand e.g. with ray tracing. The model outputs are lidar detections and detected moving objects.</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.preconditions"></srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.validity-range">Not validated, yet</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.specification">-</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.verification.status">false</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.verification.report">-</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.validation.concept">-</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.validation.status">false</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.validation.platform">-</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.validation.report">-</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.limitations">-</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.limitations">-</srmd:ClassificationEntry>
+        
+        <!-- Model implementation and integration related information -->
+        <srmd:ClassificationEntry keyword="model.implementation.format">OSMP 1.0/OSI 3.1.2/FMI 2.0</srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.implementation.preconditions"></srmd:ClassificationEntry>
+        <srmd:ClassificationEntry keyword="model.implementation.performance-characteristics">About 20 % real-time on desktop PC</srmd:ClassificationEntry>
+        
+        <srmd:ClassificationEntry keyword="model.integration.requirements">See REEDME.md in Model folder</srmd:ClassificationEntry>
+        
+    </srmd:Classification>
+	
+	<!-- Model ISO-11010-X Classification related information -->
+	<srmd:Classification xmlns="http://apps.pmsf.net/SSPTraceability/SSPTraceabilityCommon" type="de.setlevel.srmd.ISO-11010-X">
+		<srmd:ClassificationEntry keyword="part">The part of the ISO-11010 relevant for model, for example 1 if ISO-11010-1</srmd:ClassificationEntry>
+		<srmd:ClassificationEntry keyword="plant">The relevant nomencalture convention for the plant part of the model if applicable, for example a Model of the Brake physical system: BRM2.2</srmd:ClassificationEntry>
+		<srmd:ClassificationEntry keyword="controller">The relevant nomencalture convention for the controller part of the model if applicable, for example a Model of the Brake controller system: BRC2.1</srmd:ClassificationEntry>
+	</srmd:Classification>
+</srmd:SimulationResourceMetaData>
+
