@@ -24,11 +24,11 @@
  *
  * Logging is controlled via three definitions:
  *
- * - If PRIVATE_LOG_PATH is defined it gives the name of a file
+ * - If PRIVATE_LOG_PATH_MODEL is defined it gives the name of a file
  *   that is to be used as a private log file.
- * - If PUBLIC_LOGGING is defined then we will (also) log to
+ * - If PUBLIC_LOGGING_MODEL is defined then we will (also) log to
  *   the FMI logging facility where appropriate.
- * - If VERBOSE_FMI_LOGGING is defined then logging of basic
+ * - If VERBOSE_FMI_LOGGING_MODEL is defined then logging of basic
  *   FMI calls is enabled, which can get very verbose.
  */
 
@@ -48,9 +48,11 @@
 /* Boolean Variables */
 #define FMI_BOOLEAN_SWITCH_FOR_CSV_OUTPUT_IDX 0
 #define FMI_BOOLEAN_SWITCH_FOR_PCD_OUTPUT_IDX 1
-#define FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX 2
+#define FMI_BOOLEAN_SWITCH_FOR_BIN_OUTPUT_IDX 2
+#define FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX 3
 #define FMI_BOOLEAN_LAST_IDX FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX
 #define FMI_BOOLEAN_VARS (FMI_BOOLEAN_LAST_IDX+1)
+
 
 /* Integer Variables */
 #define FMI_INTEGER_SENSORVIEW_IN_BASELO_IDX 0
@@ -158,18 +160,18 @@ protected:
 
 protected:
     /* Private File-based Logging just for Debugging */
-#ifdef PRIVATE_LOG_PATH
+#ifdef PRIVATE_LOG_PATH_MODEL
     static std::ofstream private_log_file;
 #endif
 
     static void fmi_verbose_log_global(const char *format, ...) {
-#ifdef VERBOSE_FMI_LOGGING
-#ifdef PRIVATE_LOG_PATH
+#ifdef VERBOSE_FMI_LOGGING_MODEL
+#ifdef PRIVATE_LOG_PATH_MODEL
         va_list ap;
         va_start(ap, format);
         char buffer[1024];
         if (!private_log_file.is_open())
-            private_log_file.open(PRIVATE_LOG_PATH, std::ios::out | std::ios::app);
+            private_log_file.open(PRIVATE_LOG_PATH_MODEL, std::ios::out | std::ios::app);
         if (private_log_file.is_open()) {
 #ifdef _WIN32
             vsnprintf_s(buffer, 1024, format, ap);
@@ -184,22 +186,22 @@ protected:
     }
 
     void internal_log(const char *category, const fmi2Status status, const char *format, va_list arg) {
-#if defined(PRIVATE_LOG_PATH) || defined(PUBLIC_LOGGING)
+#if defined(PRIVATE_LOG_PATH_MODEL) || defined(PUBLIC_LOGGING_MODEL)
         char buffer[1024];
 #ifdef _WIN32
         vsnprintf_s(buffer, 1024, format, arg);
 #else
         vsnprintf(buffer, 1024, format, arg);
 #endif
-#ifdef PRIVATE_LOG_PATH
+#ifdef PRIVATE_LOG_PATH_MODEL
         if (!private_log_file.is_open())
-            private_log_file.open(PRIVATE_LOG_PATH, std::ios::out | std::ios::app);
+            private_log_file.open(PRIVATE_LOG_PATH_MODEL, std::ios::out | std::ios::app);
         if (private_log_file.is_open()) {
             private_log_file << "FrameworkPackaging" << "::" << instanceName << "<" << ((void*)this) << ">:" << category << ": " << buffer << std::endl;
             private_log_file.flush();
         }
 #endif
-#ifdef PUBLIC_LOGGING
+#ifdef PUBLIC_LOGGING_MODEL
         if (loggingOn && loggingCategories.count(category))
             functions.logger(functions.componentEnvironment,instanceName.c_str(),status,category,buffer);
 #endif
@@ -207,7 +209,7 @@ protected:
     }
 
     void fmi_verbose_log(const char *format, ...) {
-#if  defined(VERBOSE_FMI_LOGGING) && (defined(PRIVATE_LOG_PATH) || defined(PUBLIC_LOGGING))
+#if  defined(VERBOSE_FMI_LOGGING_MODEL) && (defined(PRIVATE_LOG_PATH_MODEL) || defined(PUBLIC_LOGGING_MODEL))
         va_list ap;
         va_start(ap, format);
         internal_log("FMI",format,ap);
@@ -217,7 +219,7 @@ protected:
 
     /* Normal Logging */
     void normal_log(const char *category, const char *format, ...) {
-#if defined(PRIVATE_LOG_PATH) || defined(PUBLIC_LOGGING)
+#if defined(PRIVATE_LOG_PATH_MODEL) || defined(PUBLIC_LOGGING_MODEL)
         va_list ap;
         va_start(ap, format);
         internal_log(category, fmi2Status::fmi2OK, format, ap);
@@ -226,7 +228,7 @@ protected:
     }
 
     void error_log(const char *category, const char *format, ...) {
-#if defined(PRIVATE_LOG_PATH) || defined(PUBLIC_LOGGING)
+#if defined(PRIVATE_LOG_PATH_MODEL) || defined(PUBLIC_LOGGING_MODEL)
         va_list ap;
         va_start(ap, format);
         internal_log(category, fmi2Status::fmi2Error, format, ap);
@@ -283,9 +285,14 @@ protected:
 
     void set_fmi_switch_for_pcd_output(bool value){ boolean_vars[FMI_BOOLEAN_SWITCH_FOR_PCD_OUTPUT_IDX] = value; }
     
+    bool fmi_switch_for_bin_output(){ return boolean_vars[FMI_BOOLEAN_SWITCH_FOR_BIN_OUTPUT_IDX]; }
+
+    void set_fmi_switch_for_bin_output(bool value){ boolean_vars[FMI_BOOLEAN_SWITCH_FOR_BIN_OUTPUT_IDX] = value; }
+
     bool fmi_switch_for_ros_output(){ return boolean_vars[FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX]; }
 
     void set_fmi_switch_for_ros_output(bool value){ boolean_vars[FMI_BOOLEAN_SWITCH_FOR_ROS_OUTPUT_IDX] = value; }
+
 
     /* Protocol Buffer Accessors */
     bool get_fmi_sensor_view_config(osi3::SensorViewConfiguration &data);
@@ -306,11 +313,13 @@ protected:
 private:
     void load_profile_or_complain(const std::string &name);
     bool try_load_profile(const std::string &name);
-    void set_output_switches(const bool csv_switch, const bool pcd_switch, const bool ros_switch);
+    void set_output_switches(const bool csv_switch, const bool pcd_switch, const bool bin_switch, const bool ros_switch);
 
     bool csv_output_enabled = false;
     bool pcd_output_enabled = false;
+    bool bin_output_enabled = false;
     bool ros_output_enabled = false;
+
     bool is_profile_loaded = false;
     model::profile::Profile profile;
     model::Sequence sequence_of_strategies;
