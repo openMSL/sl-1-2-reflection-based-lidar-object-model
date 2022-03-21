@@ -25,6 +25,7 @@ namespace model {
         @STRATEGY_INSTANCES@
         @CSV_OUTPUT_STRATEGY_INSTANCES@
         @PCD_OUTPUT_STRATEGY_INSTANCES@
+        @BIN_OUTPUT_STRATEGY_INSTANCES@
         @ROS_OUTPUT_STRATEGY_INSTANCES@
     }
 
@@ -52,6 +53,16 @@ namespace model {
                 alert("Set FMU parameter 'switch_for_pcd_output' to false or change file pcd_output_sequence.conf accordingly!");
             }
         }
+        if (bin_output_enabled) {
+            if (!bin_output_strategies.empty()) {
+                for (const auto &strategy : bin_output_strategies) {
+                    strategy->apply(data);
+                }
+            } else {
+                alert("FMU does not contain output strategies for output to binary, but FMU parameter 'switch_for_bin_output' has been enabled!");
+                alert("Set FMU parameter 'switch_for_bin_output' to false or change file bin_output_sequence.conf accordingly!");
+            }
+        }
         if (ros_output_enabled) {
             if (!ros_output_strategies.empty()) {
                 for (const auto &strategy : ros_output_strategies) {
@@ -70,6 +81,10 @@ namespace model {
     
     void Sequence::set_switch_for_pcd_output(bool switch_for_pcd_output) {
         pcd_output_enabled = switch_for_pcd_output;
+    }
+
+    void Sequence::set_switch_for_bin_output(bool switch_for_bin_output) {
+        bin_output_enabled = switch_for_bin_output;
     }
     
     void Sequence::set_switch_for_ros_output(bool switch_for_ros_output) {

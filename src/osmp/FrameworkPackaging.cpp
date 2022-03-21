@@ -23,7 +23,7 @@
  * Note that the FMU is likely to break all environments if no
  * Debugger is actually attached when the breaks are triggered.
  */
-#if defined(DEBUG_BREAKS) && !defined(NDEBUG)
+#if defined(DEBUG_BREAKS_MODEL) && !defined(NDEBUG)
 #if defined(__has_builtin) && !defined(__ibmxl__)
 #if __has_builtin(__builtin_debugtrap)
 #define DEBUGBREAK() __builtin_debugtrap()
@@ -52,8 +52,8 @@
 #include <algorithm>
 #include <cstdint>
 
-#ifdef PRIVATE_LOG_PATH
-ofstream CFrameworkPackaging::private_log_file;
+#ifdef PRIVATE_LOG_PATH_MODEL
+std::ofstream CFrameworkPackaging::private_log_file;
 #endif
 
 /*
@@ -170,11 +170,13 @@ void CFrameworkPackaging::load_profile_or_complain(const std::string &name) {
     }
 }
 
-void CFrameworkPackaging::set_output_switches(const bool csv_switch, const bool pcd_switch, const bool ros_switch) {
+void CFrameworkPackaging::set_output_switches(const bool csv_switch, const bool pcd_switch, const bool bin_switch, const bool ros_switch) {
     sequence_of_strategies.set_switch_for_csv_output(csv_switch);
         normal_log("OSMP", "Output to .csv-files enabled: %s", fmi_switch_for_csv_output() ? "true" : "false");
     sequence_of_strategies.set_switch_for_pcd_output(pcd_switch);
         normal_log("OSMP", "Output to .pcd-files enabled: %s", fmi_switch_for_pcd_output() ? "true" : "false");
+    sequence_of_strategies.set_switch_for_bin_output(bin_switch);
+        normal_log("OSMP", "Output to .osi-files enabled: %s", fmi_switch_for_bin_output() ? "true" : "false");
     sequence_of_strategies.set_switch_for_ros_output(ros_switch);
         normal_log("OSMP", "Output to ROS enabled: %s", fmi_switch_for_ros_output() ? "true" : "false");
 }
@@ -255,13 +257,13 @@ fmi2Status CFrameworkPackaging::doEnterInitializationMode() {
 fmi2Status CFrameworkPackaging::doExitInitializationMode() {
     DEBUGBREAK()
 
-    set_output_switches(fmi_switch_for_csv_output(), fmi_switch_for_pcd_output(), fmi_switch_for_ros_output());
+    set_output_switches(fmi_switch_for_csv_output(), fmi_switch_for_pcd_output(), fmi_switch_for_bin_output(), fmi_switch_for_ros_output());
 
     /*
      * The profile was only preloaded when a request was made to configure the sensor view.
      */
     if (!is_profile_loaded) {
-		normal_log("OSMP", "Config request has not been queried!");
+		normal_log("OSMP", "Config request was not queried, therefore default profile's config will be loaded!");
         load_profile_or_complain(fmi_profile());
     }
 
@@ -469,7 +471,7 @@ fmi2Status CFrameworkPackaging::GetBoolean(const fmi2ValueReference vr[], size_t
             value[i] = boolean_vars[vr[i]];
         else
             return fmi2Error;
-		fmi_verbose_log("OSMP", "fmi2GetBoolean %d: %d", vr[i], boolean_vars[vr[i]]);
+			fmi_verbose_log("OSMP", "fmi2GetBoolean %d: %d", vr[i], boolean_vars[vr[i]]);
     }
     return fmi2OK;
 }
@@ -481,7 +483,7 @@ fmi2Status CFrameworkPackaging::GetString(const fmi2ValueReference vr[], size_t 
             value[i] = string_vars[vr[i]].c_str();
         else
             return fmi2Error;
-		fmi_verbose_log("OSMP", "fmi2GetString %d: '%s'", vr[i], string_vars[vr[i]].c_str());
+			fmi_verbose_log("OSMP", "fmi2GetString %d: '%s'", vr[i], string_vars[vr[i]].c_str());
     }
     return fmi2OK;
 }
@@ -515,7 +517,7 @@ fmi2Status CFrameworkPackaging::SetBoolean(const fmi2ValueReference vr[], size_t
             boolean_vars[vr[i]] = value[i];
         else
             return fmi2Error;
-		fmi_verbose_log("OSMP", "fmi2SetBoolean %d: %d", vr[i], boolean_vars[vr[i]]);
+			fmi_verbose_log("OSMP", "fmi2SetBoolean %d: %d", vr[i], boolean_vars[vr[i]]);
     }
     return fmi2OK;
 }
@@ -527,7 +529,8 @@ fmi2Status CFrameworkPackaging::SetString(const fmi2ValueReference vr[], size_t 
             string_vars[vr[i]] = value[i];
         else
             return fmi2Error;
-		fmi_verbose_log("OSMP", "fmi2SetString %d: '%s'", vr[i], string_vars[vr[i]].c_str());
+			fmi_verbose_log("OSMP", "fmi2SetString %d: '%s'", vr[i], string_vars[vr[i]].c_str());
+
     }
     return fmi2OK;
 }
