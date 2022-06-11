@@ -54,6 +54,17 @@ The output of the tracking module is a list of tracked objects.
 
 <a name="Rosenberger2020">1</a>: P. Rosenberger, M. F. Holder, N. Cianciaruso, P. Aust, J. F. Tamm-Morschel, C. Linnhoff, and H. Winner, “Sequential lidar sensor system simulation: A modular approach for simulation-based safety validation of automated driving”, In Automotive and Engine Technology, vol. 5, no. 3-4, pp. 187–197, Dec. 2020.
 
+### Modeling of Road Spray in Lidar Point Cloud (feature in upcoming release)
+
+Shortly, a road spray model will be added in a new "environmental conditions" strategy.
+The road spray simulation is based on a methodical data set recorded in real spray condisions on a test track covering multiple vehicle classes, different pavement watering levels and object speeds ranging from 50 km/h to 130 km/h.
+Modeling parameters are extracted from the recorded data and utilized to calibrate a novel stochastic road spray model.
+The model is focused on simulating clustering effects appearing in the lidar point cloud due to turbulences in the spray plume.
+More detail can be found shortly in an upcoming publication, currently under review.
+The following video shows a sneek preview of the spray simulation with a van overtaking a stationary vehicle at 100 km/h.
+
+<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/163b40eee2d73c63dd8acb9b1c5d5a33/Spray.gif" width="800" />
+
 ## Parameterization
 
 The profiles are parameterized in the files `profile_*.hpp.in`.
