@@ -57,7 +57,7 @@ The output of the tracking module is a list of tracked objects.
 ### Modeling of Road Spray in Lidar Point Cloud (feature in upcoming release)
 
 Shortly, a road spray model will be added in a new "environmental conditions" strategy.
-The road spray simulation is based on a methodical data set recorded in real spray condisions on a test track covering multiple vehicle classes, different pavement watering levels and object speeds ranging from 50 km/h to 130 km/h.
+The road spray simulation is based on a methodical data set recorded in real spray conditions on a test track covering multiple vehicle classes, different pavement watering levels and object speeds ranging from 50 km/h to 130 km/h.
 Modeling parameters are extracted from the recorded data and utilized to calibrate a novel stochastic road spray model.
 The model is focused on simulating clustering effects appearing in the lidar point cloud due to turbulences in the spray plume.
 More detail can be found shortly in an upcoming publication, currently under review.
