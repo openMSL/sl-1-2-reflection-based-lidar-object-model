@@ -34,8 +34,6 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include <chrono>
-
 
 #endif
 //experimental structs
@@ -84,9 +82,7 @@ void DetectionEnvironmentalEffects::apply(SensorData &sensor_data) {
             add_hydrometeor_detections(sensor_data, current_sensor, sensor_idx, ego_data);
 
             ///Spray
-            std::chrono::milliseconds start_spray_calc = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch());
             add_spray_detections(sensor_data, current_sensor, sensor_idx, ego_data);
-            std::chrono::milliseconds stop_spray_calc = std::chrono::duration_cast< std::chrono::milliseconds >(std::chrono::system_clock::now().time_since_epoch());
 
             ///Sun blinding
             add_sun_blinding_detections(sensor_data, current_sensor, ego_data);
