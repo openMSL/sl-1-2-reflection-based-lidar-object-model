@@ -34,7 +34,7 @@ using namespace model;
 using namespace osi3;
 
 void PointcloudFusion::apply(SensorData &in) {
-    log("Starting Pointcloud Fusion");
+    log("Starting point cloud fusion");
 
     auto no_of_lidar_sensors = in.feature_data().lidar_sensor_size();
 
@@ -63,15 +63,20 @@ void PointcloudFusion::calculate_fused_pointcloud_for_given_sensors(SensorData &
             point_cartesian_sensor.set_x(distance * cos(elevation) * cos(azimuth));
             point_cartesian_sensor.set_y(distance * cos(elevation) * sin(azimuth));
             point_cartesian_sensor.set_z(distance * sin(elevation));
-            Vector3d point_cartesian_in_ego_coordinates = TF::transform_from_local_coordinates(point_cartesian_sensor,
+            /*Vector3d point_cartesian_in_ego_coordinates = TransformationFunctions::transform_from_local_coordinates(point_cartesian_sensor,
                                                           profile.sensor_view_configuration.lidar_sensor_view_configuration(sensor_idx).mounting_position().orientation(),
-                                                          profile.sensor_view_configuration.lidar_sensor_view_configuration(sensor_idx).mounting_position().position());
+                                                          profile.sensor_view_configuration.lidar_sensor_view_configuration(sensor_idx).mounting_position().position());*/
+            Vector3d point_cartesian_in_ego_coordinates = TF::transform_from_local_coordinates(point_cartesian_sensor,
+                                                                                               in.feature_data().lidar_sensor(sensor_idx).header().mounting_position().orientation(),
+                                                                                               in.feature_data().lidar_sensor(sensor_idx).header().mounting_position().position());
 
             auto current_logical_detection = in.mutable_logical_detection_data()->add_logical_detection();
             current_logical_detection->mutable_position()->CopyFrom(point_cartesian_in_ego_coordinates);
-            current_logical_detection->set_intensity(in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).intensity());
-			if (detection_no < 11) {
-				log("Logical detection " + std::to_string(detection_no) + ": " + std::to_string(point_cartesian_in_ego_coordinates.x()) + ", " + std::to_string(point_cartesian_in_ego_coordinates.y()) + ", " + std::to_string(point_cartesian_in_ego_coordinates.z()));
+			if (in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).has_intensity()) {
+				current_logical_detection->set_intensity(in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).intensity());
+			}
+			else if (in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).has_echo_pulse_width()) {
+				current_logical_detection->set_echo_pulse_width(in.feature_data().lidar_sensor(sensor_idx).detection(detection_no).echo_pulse_width()); //TODO: Field for echo pulse width within logical detections not existing, yet
 			}
         }
     }

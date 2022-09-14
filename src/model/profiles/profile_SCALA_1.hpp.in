@@ -29,6 +29,27 @@ namespace model::profile::SCALA_1 {
 
     Profile generate() {
         Profile SCALA_1;
+        
+        SCALA_1.no_of_frontends = 2;            // the number of lidar front-ends // 2 mirror sides represent 2 front-ends in case of SCALA 1
+        SCALA_1.no_of_layers = 3;               // the number of layers of every lidar front-end
+        SCALA_1.rays_per_beam_vertical = 49;    // vertical super-sampling factor of every lidar front-end
+        SCALA_1.rays_per_beam_horizontal = 5;   // horizontal super-sampling factor of every lidar front-end
+        SCALA_1.min_range = 0.3;                // minimal range to be able to detect anything
+        SCALA_1.max_range = 200.0;              // maximum range to be able to detect anything
+        SCALA_1.receiver_aperture_diameter_m = 0.002;   // diameter of the receiver aperture in m
+        SCALA_1.max_emitted_signal_strength_in_dBm = 30.0 + 10 * std::log10(98.0); // maximal emitted signal strength in dBm (typically at azimuth = 0)
+        SCALA_1.receiver_efficiency = 0.9;      // efficiency coefficient of the receiver, value [0,1], (1 - receiver loss)
+        SCALA_1.beam_step_elevation = 0.8;      // vertical step-size per beam of every lidar front-end in degrees
+        SCALA_1.vertical_angle_clamping = "center";    // determines where the echo's vertical angle is clamped to within the laser beam.
+                                                        // Options: {"center" (default), "max_abs", "top", "bottom"} (non-default needs beam_step_elevation > 0)
+        SCALA_1.beam_width = 0.08;              // beam_width in degrees, if smaller than the azimuth step inbetween beams, not-illuminated areas inbetween beams exist
+        SCALA_1.beam_height = 0.784;            // beam_height in degrees, if smaller than the elevation step inbetween beams, not-illuminated areas inbetween beams exist
+        float beam_step_azimuth = 0.25;         // horizontal step-size per beam of every lidar front-end in degrees
+        uint32_t rays_per_beam = SCALA_1.rays_per_beam_vertical * SCALA_1.rays_per_beam_horizontal;
+        float ray_step_azimuth   = SCALA_1.beam_width  / (SCALA_1.rays_per_beam_horizontal - 1);
+        float ray_step_elevation = SCALA_1.beam_height / (SCALA_1.rays_per_beam_vertical - 1);
+        float beam_center_azimuth_min = -72.5;
+        float beam_center_azimuth_max =  72.5;
 
         SCALA_1.sensor_view_configuration.mutable_update_cycle_time()->set_seconds(0);
         SCALA_1.sensor_view_configuration.mutable_update_cycle_time()->set_nanos(40000000);
@@ -41,18 +62,77 @@ namespace model::profile::SCALA_1 {
         SCALA_1.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_roll(0.0 / 180 * M_PI);
         SCALA_1.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_pitch(0.0 / 180 * M_PI);
         SCALA_1.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_yaw(0.0 / 180 * M_PI);
+        
+        // Azimuth-dependend attenuation of Valeo SCALA 1
+        std::vector<std::vector<float>> gain = {{beam_center_azimuth_min, 25.0},
+                                                {-70.0, 30.0},
+                                                {-60.0, 32.5},
+                                                {-50.0, 55.0},
+                                                {-40.0, 77.5},
+                                                {-30.0, 90.0},
+                                                {-20.0, 92.5},
+                                                {-10.0, 97.5},
+                                                {  0.0, 100.0},
+                                                { 10.0, 97.5},
+                                                { 20.0, 90.0},
+                                                { 30.0, 82.5},
+                                                { 40.0, 72.5},
+                                                { 50.0, 60.0},
+                                                { 60.0, 45.0},
+                                                { 70.0, 25.0},
+                                                {beam_center_azimuth_max, 12.5}};
 
-        auto lidar_sensor_view_configuration = SCALA_1.sensor_view_configuration.add_lidar_sensor_view_configuration();
-        lidar_sensor_view_configuration->set_field_of_view_horizontal(145.25 / 180 * M_PI);
-        lidar_sensor_view_configuration->set_field_of_view_vertical(3.6 / 180 * M_PI);
-        lidar_sensor_view_configuration->set_number_of_rays_horizontal(5229);
-        lidar_sensor_view_configuration->set_number_of_rays_vertical(132);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_x(1.5205); // from middle of rear axle, in m // 1.3705 + 0.15
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_y(0.0); // from middle of rear axle, in m
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_z(1.232);  // from middle of rear axle, in m // 0.382 + 0.85
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_pitch(0.0);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
+        for (uint32_t front_end = 0; front_end < SCALA_1.no_of_frontends; front_end++) {
+            auto lidar_sensor_view_config = SCALA_1.sensor_view_configuration.add_lidar_sensor_view_configuration();
+            lidar_sensor_view_config->set_emitter_wavelength(905);         // Wavelength of the sensor's emitter
+            lidar_sensor_view_config->set_max_number_of_interactions(1);   // Maximum number of interactions per emitted signal within the scene
+            lidar_sensor_view_config->set_max_path_length(400);            // The maximum length in m of one signal path. When reached, propagation is terminated
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_x(1.5205);  // from center of rear axle, in m // 1.3705 + 0.15
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_y(0.0);     // from center of rear axle, in m
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_z(1.232);   // from center of rear axle, in m // 0.382 + 0.85
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_pitch(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
 
-        /// The following parameters can be defined for multiple sensors.
-        SCALA_1.min_range = {0.3};
+            auto frontend_config = SCALA_1.beam_center_config.add_lidar_sensor_view_configuration();
+
+            for (uint32_t layer_idx = 0; layer_idx < SCALA_1.no_of_layers; layer_idx++) {
+                
+                uint32_t k = 1;
+                for (float beam_center_azimuth = beam_center_azimuth_min; beam_center_azimuth <= beam_center_azimuth_max + beam_step_azimuth / 4;
+                        beam_center_azimuth = beam_center_azimuth + beam_step_azimuth) {
+
+                    float azimuth_min = beam_center_azimuth - ray_step_azimuth * std::floor(SCALA_1.rays_per_beam_horizontal / 2);
+                    float azimuth_max = beam_center_azimuth + ray_step_azimuth * std::floor(SCALA_1.rays_per_beam_horizontal / 2);
+                    for (float azimuth = azimuth_min; azimuth < azimuth_max + ray_step_azimuth / 4; azimuth = azimuth + ray_step_azimuth) {
+
+                        // Find azimuth in gain table
+                        while ((k < gain.size() - 1) && (std::round(azimuth * 1000) >= std::round(gain[k][0] * 1000))) {
+                            k = k + 1;
+                        }
+                        // linear interpolation in gane table for actual attenuation
+                        float attenuation = (gain[k-1][1] + (gain[k][1] - gain[k-1][1]) / (gain[k][0] - gain[k-1][0]) * (azimuth - gain[k-1][0])) / 100;
+
+                        // Function from Valeo SCALA® 3D Laser Scanner (Gen 1) User Manual Version 1.2 November 2020
+                        float beam_center_elevation = std::pow(-1,front_end) * (-4.54e-8 * std::pow(azimuth,3) + 1.55e-5 * std::pow(azimuth,2) + 3.70e-3 * azimuth - 0.424) + SCALA_1.beam_step_elevation * float(layer_idx + front_end) - SCALA_1.beam_step_elevation;
+
+                        if ((azimuth > beam_center_azimuth - ray_step_azimuth / 4) && (azimuth < beam_center_azimuth + ray_step_azimuth / 4)) {
+                            auto beam = frontend_config->add_emitted_signal();
+                            beam->set_horizontal_angle(beam_center_azimuth / 180 * M_PI); // azimuth in rad
+                            beam->set_vertical_angle(beam_center_elevation / 180 * M_PI); // elevation in rad
+                            beam->set_signal_strength(SCALA_1.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation));
+                        }
+
+                        float elevation_min = beam_center_elevation - ray_step_elevation * std::floor(SCALA_1.rays_per_beam_vertical / 2);
+                        float elevation_max = beam_center_elevation + ray_step_elevation * std::floor(SCALA_1.rays_per_beam_vertical / 2);
+                        for (float elevation = elevation_min; elevation < elevation_max + ray_step_elevation / 4; elevation = elevation + ray_step_elevation) {
+                            auto ray = lidar_sensor_view_config->add_emitted_signal();
+                            ray->set_horizontal_angle(azimuth / 180 * M_PI); // azimuth in rad
+                            ray->set_vertical_angle(elevation / 180 * M_PI); // elevation in rad
+                            ray->set_signal_strength(SCALA_1.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation) - 10 * std::log10(rays_per_beam)); // assuming equal distribution of beam power per ray
+						    lidar_sensor_view_config->add_time_offset_emission(front_end * 40000); // second mirror side gets time_offset of 40 ms
+                        }
+                    }
+                }
+            }
+        }

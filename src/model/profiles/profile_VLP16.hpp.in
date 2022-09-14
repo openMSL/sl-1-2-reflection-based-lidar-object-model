@@ -1,0 +1,124 @@
+//
+// Copyright Institute of Automotive Engineering
+// of Technical University of Darmstadt 2020.
+// Licensed under the EUPL-1.2-or-later
+//
+// This work covered by the EUPL can be used/merged and distributed
+// in other works covered by GPL-2.0, GPL-3.0, LGPL, AGPL, CeCILL,
+// OSL, EPL, MPL and other licences listed as compatible in the EUPL
+// Appendix. This applies to the other (combined) work, while the
+// original project stays covered by the EUPL without re-licensing.
+//
+// Alternatively, the contents of this file may be used under the
+// terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, you can obtain one at
+// http://mozilla.org/MPL/2.0/.
+//
+
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+
+#ifdef _WIN32
+#include <math.h>
+#else
+#include <cmath>
+#endif
+
+namespace model::profile::VLP16 {
+
+    Profile generate() {
+        Profile VLP16;
+        
+        VLP16.no_of_frontends = 1;                  // the number of lidar front-ends
+        VLP16.no_of_layers = 16;                    // the number of layers of every lidar front-end
+        VLP16.rays_per_beam_vertical = 3;           // vertical super-sampling factor
+        VLP16.rays_per_beam_horizontal = 3;         // horizontal super-sampling factor
+        VLP16.min_range = 0.5;                      // minimal range to be able to detect anything
+        VLP16.max_range = 124.0;                    // maximum range to be able to detect anything
+        VLP16.receiver_aperture_diameter_m = 0.002; // diameter of the receiver aperture in m
+        //VLP16.max_emitted_signal_strength_in_dBm = 30.0 + 10 * std::log10(99); // maximal emitted signal strength in dBm (typically at azimuth = 0)
+        VLP16.max_emitted_signal_strength_in_dBm = 10 * std::log10(3444*VLP16.rays_per_beam_vertical*VLP16.rays_per_beam_horizontal); // maximal emitted signal strength in dBm (typically at azimuth = 0)
+        VLP16.receiver_efficiency = 0.9;            // efficiency coefficient of the receiver, value [0,1], (1 - receiver loss)
+        VLP16.beam_center_elevation = {-15.000, -13.000, -11.000, - 9.000,
+                                            -7.000,  -5.000,  -3.000, - 1.000,
+                                            1.000,   3.000,   5.000,   7.000,
+                                            9.000,  11.000,  13.000,  15.000};
+        VLP16.vertical_angle_clamping = "center"; // determines where the echo's vertical angle is clamped to within the laser beam. Options: {"center" (default), "max_abs", "top", "bottom"}
+        float beam_step_azimuth = 0.2;            // horizontal step-size per beam in degrees of VLP16 at 600 rpm (10 Hz) with VLP16's fixed firing_cycle of  of 55.296e^(-6) s
+        VLP16.beam_width = 0.18;                  // beam_width in degrees, if it is smaller that beam_step_azimuth, there is a not-illuminated area inbetween beams of every lidar front-end //TODO
+        VLP16.beam_height = 0.09;                 // beam_height in degrees, if it is smaller that beam_step_elevation, there is a not-illuminated area inbetween beams of every lidar front-end //TODO
+        uint32_t rays_per_beam = VLP16.rays_per_beam_vertical * VLP16.rays_per_beam_horizontal;
+        float ray_step_azimuth   = VLP16.beam_width  / (VLP16.rays_per_beam_horizontal - 1);
+        float ray_step_elevation = VLP16.beam_height / (VLP16.rays_per_beam_vertical - 1);
+        float beam_center_azimuth_min = -180.0;
+        float beam_center_azimuth_max = 179.7;
+
+        VLP16.sensor_view_configuration.mutable_update_cycle_time()->set_seconds(0);
+        VLP16.sensor_view_configuration.mutable_update_cycle_time()->set_nanos(100000000);
+        VLP16.sensor_view_configuration.set_range(100.0);
+        VLP16.sensor_view_configuration.set_field_of_view_horizontal(180.0 / 180 * M_PI);
+        VLP16.sensor_view_configuration.set_field_of_view_vertical(170.0 / 180 * M_PI);
+        VLP16.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_x(0.0);
+        VLP16.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_y(0.0);
+        VLP16.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_z(0.0);
+        VLP16.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_roll(0.0 / 180 * M_PI);
+        VLP16.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_pitch(0.0 / 180 * M_PI);
+        VLP16.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_yaw(0.0 / 180 * M_PI);
+        
+        // // Azimuth-dependend attenuation of VLP16
+        // std::vector<std::vector<float>> gain = {{beam_center_azimuth_min, 100.0},
+        //                                         {beam_center_azimuth_max, 100.0}};
+
+        for (uint32_t front_end = 0; front_end < VLP16.no_of_frontends; front_end++) {
+            auto lidar_sensor_view_config = VLP16.sensor_view_configuration.add_lidar_sensor_view_configuration();
+            lidar_sensor_view_config->set_emitter_wavelength(905);         // Wavelength of the sensor's emitter
+            lidar_sensor_view_config->set_max_number_of_interactions(1);   // Maximum number of interactions per emitted signal within the scene
+            lidar_sensor_view_config->set_max_path_length(100);            // The maximum length in m of one signal path. When reached, propagation is terminated
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_x(4.105);  // from center of rear axle, in m // 1.3705 + 0.15
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_y(0.0);     // from center of rear axle, in m
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_z(0.247);   // from center of rear axle, in m // 0.382 + 0.85
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_pitch(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
+
+            auto frontend_config = VLP16.beam_center_config.add_lidar_sensor_view_configuration();
+
+            for (uint32_t layer_idx = 0; layer_idx < VLP16.no_of_layers; layer_idx++) {        
+                
+                uint32_t k = 1;
+                for (float beam_center_azimuth = beam_center_azimuth_min; beam_center_azimuth <= beam_center_azimuth_max + beam_step_azimuth / 4;
+                        beam_center_azimuth = beam_center_azimuth + beam_step_azimuth) {
+
+                    float azimuth_min = beam_center_azimuth - ray_step_azimuth * std::floor(VLP16.rays_per_beam_horizontal / 2);
+                    float azimuth_max = beam_center_azimuth + ray_step_azimuth * std::floor(VLP16.rays_per_beam_horizontal / 2);
+                    for (float azimuth = azimuth_min; azimuth < azimuth_max + ray_step_azimuth / 4; azimuth = azimuth + ray_step_azimuth) {
+
+                        // // Find azimuth in gain table
+                        // while ((k < gain.size() - 1) && (std::round(azimuth * 1000) >= std::round(gain[k][0] * 1000))) {
+                        //     k = k + 1;
+                        // }
+                        // // linear interpolation in gane table for actual attenuation
+                        // float attenuation = (gain[k-1][1] + (gain[k][1] - gain[k-1][1]) / (gain[k][0] - gain[k-1][0]) * (azimuth - gain[k-1][0])) / 100;
+                        float attenuation = 1.0;
+
+                        if ((azimuth > beam_center_azimuth - ray_step_azimuth / 4) && (azimuth < beam_center_azimuth + ray_step_azimuth / 4)) {
+                            auto beam = frontend_config->add_emitted_signal();
+                            beam->set_horizontal_angle(beam_center_azimuth / 180 * M_PI); // azimuth in rad
+                            beam->set_vertical_angle(VLP16.beam_center_elevation[layer_idx] / 180 * M_PI); // elevation in rad
+                            beam->set_signal_strength(VLP16.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation));
+                        }
+
+                        float elevation_min = VLP16.beam_center_elevation[layer_idx] - ray_step_elevation * std::floor(VLP16.rays_per_beam_vertical / 2);
+                        float elevation_max = VLP16.beam_center_elevation[layer_idx] + ray_step_elevation * std::floor(VLP16.rays_per_beam_vertical / 2);
+                        for (float elevation = elevation_min; elevation < elevation_max + ray_step_elevation / 4; elevation = elevation + ray_step_elevation) {
+                            auto ray = lidar_sensor_view_config->add_emitted_signal();
+                            ray->set_horizontal_angle(azimuth / 180 * M_PI); // azimuth in rad
+                            ray->set_vertical_angle(elevation / 180 * M_PI); // elevation in rad
+                            ray->set_signal_strength(VLP16.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation) - 10 * std::log10(rays_per_beam)); // assuming equal distribution of beam power per ray
+						    lidar_sensor_view_config->add_time_offset_emission(0); // second mirror side gets time_offset of 40 ms
+                        }
+                    }
+                }
+            }
+        }

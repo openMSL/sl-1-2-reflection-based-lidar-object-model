@@ -1,0 +1,20 @@
+
+        /// tracking_parameters
+        ReflectionRadar.tracking_parameters.classification_flag = 0;            // 0 = from ground truth; 1 = all "UNKNOWN"
+        ReflectionRadar.tracking_parameters.orientation_flag = 0;               // 0 = from ground truth; 1 = from current point cloud segment;
+        ReflectionRadar.tracking_parameters.dimension_and_position_flag = 4;    // 0 = from ground truth;
+                                                                        // 1 = from current point cloud segment;
+                                                                        // 2 = dimension from current point cloud segments with lower bounds, position as center of manipulated pcl segment;
+                                                                        // 3 = maximum dimension of current and mean of historical point cloud segments, position as center of manipulated pcl segment;
+                                                                        // 4 = mean dimension of current and historical point cloud segments with lower bounds, position as center of manipulated pcl segment;
+        ReflectionRadar.tracking_parameters.minimum_object_dimension.set_length(0.8); // Minimum length in m for detected objects
+        ReflectionRadar.tracking_parameters.minimum_object_dimension.set_width(0.5);  // Minimum width in m for  detected objects
+        ReflectionRadar.tracking_parameters.minimum_object_dimension.set_height(0.5);   // Minimum height in m for detected objects
+        ReflectionRadar.tracking_parameters.historical_limit_dimension = 3;           // Limits the historical data used for historical mean dimension calculation
+        ReflectionRadar.tracking_parameters.velocity_flag = 0;             // 0 = from ground truth; 1 = derivation of position
+        ReflectionRadar.tracking_parameters.historical_limit_velocity = 10; // Limits the historical data used for velocity calculation by position differentiation
+        ReflectionRadar.tracking_parameters.tracking_flag = 1;                                     // 0 = ideal (track all ground truth objects); 1 = realistic lidar tracking behaviour
+        ReflectionRadar.tracking_parameters.existence_probability_threshold_for_tracking = 0.5;    // Threshold for existence probability, tracking is enabled above threshold
+        ReflectionRadar.tracking_parameters.min_detections_in_segment_for_tracking = 1;            // Minimum no. of detections per segment to track it
+        ReflectionRadar.tracking_parameters.existence_probability_increment = 0.2;    // Increment for existence probability
+        ReflectionRadar.tracking_parameters.existence_probability_decrement = 0.055;   // Decrement for existence probability

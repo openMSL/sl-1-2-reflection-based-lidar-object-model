@@ -1,24 +1,21 @@
 
     struct detection_sensing_parameters {
-        /// The following parameters can be defined for multiple sensors.
-        std::vector<uint64_t> no_of_beams_vertical;                    //number of layers of the lidar
-        std::vector<uint64_t> no_of_beams_horizontal;
-        std::vector<float> horizontal_angle_min_rad;                   //leftmost (negative) horizontal angle incl. beam divergence
-        std::vector<std::vector<float>> beam_layer_angles_rad;         //vertical angles of the individual layers of the sensor starting with the highest positive angle
-        std::vector<float> beam_resolution_horizontal_rad;             //horizontal beam spacing in rad
-        std::vector<float> beam_height_rad;                            //vertical beam divergence in rad
-        std::vector<float> beam_width_rad;                             //horizontal beam divergence in rad
-        std::vector<uint64_t> max_echos_per_beam;
-        std::vector<uint64_t> rays_per_beam_vertical;
-        std::vector<uint64_t> rays_per_beam_horizontal;
-        std::vector<float> ray_resolution_vertical_rad;                //angle distance between rays in rad
-        std::vector<float> ray_resolution_horizontal_rad;              //angle distance between rays in rad
+        
+        size_t max_echos_per_beam;              // maximum number of detections that are calculated per beam
+        float distance_resolution_adc;          // Specified distance resolution of the adc in m, 0.3 means time resolution of 1 ns
+        float distance_resolution;              // Specified distance resolution of the sensor output in m
+        float distance_stddev;                  // Specified distance standard deviation in m for gaussian noise model
+        bool range_comp_threshold;              // Apply range compensation (*r^2) to received signal strength before thresholding
+        float signal_strength_threshold_in_dBm; // Specified signal_strength threshold of the sensor at output in dBm
+        float echo_separation_distance;         // Distance for separation of two echos in m, when no reflections registered in between
+        float pulse_duration_mean = 4.5;        // Mean duration of the emitted laser pulse in ns
+        float pulse_duration_stddev = 0.5;      // Standard deviation of the pulse duration of the emitted laser pulse in ns
+        std::string echo_determination_mode;    // Determines what part of the echo pulse is taken for distance. Options: {"start" (default), "peak"}
+        size_t intensity_or_epw;                // 0: Detections with intensity in %, 1: Detections with echo pulse width (epw) in m
+        float epw_resolution;                   // Specified epw resolution of the sensor output in m
+        float intensity_resolution;             // Specified intensity resolution of the sensor output in %
+        float intensity_stddev;                 // Specified intensity standard deviation in %
+        bool range_compensate_intensity;        // Compensate intensity by range with a factor of range^4
+        std::vector<std::vector<float>> signal_strength_to_epw; // Lookup table for linear interpolation of epw part that correlates with signal strength in dBm
 
-        std::vector<float> distance_resolution_adc;   // Specified distance resolution of the adc in m, 0.3 means time resolution of 1 ns
-        std::vector<float> distance_resolution;       // Specified distance resolution of the sensor output in m
-        std::vector<float> distance_stddev;           // Specified distance standard deviation in m for gaussian noise model
-        std::vector<float> intensity_resolution;      // Specified intensity resolution of the sensor output in %
-        std::vector<float> intensity_threshold_in_dB; // Specified intensity threshold of the sensor at output in dB
-        std::vector<float> echo_separation_distance;  // Distance for separation of two echos in m, when no reflections registered in between
-        std::vector<std::string> echo_determination_mode;  // Determines what part of the echo pulse is taken for distance. Options: {"peak", "start", "center", "end"}
     } detection_sensing_parameters;

@@ -25,6 +25,8 @@
 #include <model/profiles/profile_SCALA_1.hpp>
 #include <model/profiles/profile_Ibeo_LUX_2010.hpp>
 #include <model/profiles/profile_VLP32.hpp>
+#include <model/profiles/profile_VLP16.hpp>
+#include <model/profiles/profile_Blickfeld.hpp>
 
 bool CFrameworkPackaging::try_load_profile(const std::string &name) {
     /* TODO add further profile generators here */
@@ -38,6 +40,14 @@ bool CFrameworkPackaging::try_load_profile(const std::string &name) {
     }
     if (name == "VLP32") {
         profile = model::profile::VLP32::generate();
+        return true;
+    }
+    if (name == "VLP16") {
+        profile = model::profile::VLP16::generate();
+        return true;
+    }
+    if (name == "Blickfeld") {
+        profile = model::profile::Blickfeld::generate();
         return true;
     }
 

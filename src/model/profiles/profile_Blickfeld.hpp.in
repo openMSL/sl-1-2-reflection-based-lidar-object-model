@@ -1,0 +1,154 @@
+//
+// Copyright Institute of Automotive Engineering
+// of Technical University of Darmstadt 2021.
+// Licensed under the EUPL-1.2-or-later
+//
+// This work covered by the EUPL can be used/merged and distributed
+// in other works covered by GPL-2.0, GPL-3.0, LGPL, AGPL, CeCILL,
+// OSL, EPL, MPL and other licences listed as compatible in the EUPL
+// Appendix. This applies to the other (combined) work, while the
+// original project stays covered by the EUPL without re-licensing.
+//
+// Alternatively, the contents of this file may be used under the
+// terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, you can obtain one at
+// http://mozilla.org/MPL/2.0/.
+//
+
+#ifndef _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
+#endif
+
+#ifdef _WIN32
+#include <math.h>
+#else
+#include <cmath>
+#endif
+
+// Linear interpolation following MATLAB linspace
+std::vector<double> LinearSpacedArray(double min, double max, double step_size)
+{
+    std::uint32_t N = (max - min)/step_size + 2;
+    std::vector<double> xs(N);
+    std::vector<double>::iterator x;
+    double val;
+    for (x = xs.begin(), val = min; x != xs.end(); ++x, val += step_size) {
+        *x = val;
+    }
+    return xs;
+}
+
+namespace model::profile::Blickfeld {
+
+    Profile generate() {
+        Profile Blickfeld;
+
+        Blickfeld.no_of_frontends = 1;                  // the number of lidar front-ends
+        Blickfeld.no_of_layers = 32;                    // the number of layers of every lidar front-end: here: total number of periods
+        Blickfeld.rays_per_beam_vertical = 11;          // vertical super-sampling factor    (needs to be odd)
+        Blickfeld.rays_per_beam_horizontal = 11;        // horizontal super-sampling factor   (needs to be odd)
+        Blickfeld.max_range = 200.0;                    // maximum range to be able to detect anything
+        Blickfeld.min_range = 1.0;                      // minimal range to be able to detect anything
+        Blickfeld.receiver_aperture_diameter_m = 0.002; // diameter of the receiver aperture in m
+        Blickfeld.max_emitted_signal_strength_in_dBm = 30.0 + 10 * std::log10(99); // maximal emitted signal strength in dBm (typically at azimuth = 0)
+        Blickfeld.receiver_efficiency = 0.9;            // efficiency coefficient of the receiver, value [0,1], (1 - receiver loss)
+        Blickfeld.vertical_angle_clamping = "center";   // determines where the echo's vertical angle is clamped to within the laser beam. Options: {"center" (default), "max_abs", "top", "bottom"}
+        uint32_t upramping_periods = 32;
+        //uint32_t no_downramping_periods = 5;   //NOT IMPLEMENTED YET
+        float beam_center_azimuth_max =  36.0;
+        float beam_center_elevation_max = 10.0;
+        float upramping_time_in_s = 0.1;
+        //float downramping_time_in_s = upramping_time_in_s/upramping_periods*no_downramping_periods;
+        float angle_spacing_deg = 0.4;
+        Blickfeld.beam_width  = 0.4;
+        Blickfeld.beam_height = 0.4;
+        std::vector<double> azimuth_angles_per_period = LinearSpacedArray(-beam_center_azimuth_max, beam_center_azimuth_max, angle_spacing_deg);
+        std::reverse(azimuth_angles_per_period.begin(), azimuth_angles_per_period.end());
+        std::vector<double> azimuth_angles_second_half_period = LinearSpacedArray(-beam_center_azimuth_max+angle_spacing_deg, beam_center_azimuth_max-angle_spacing_deg, angle_spacing_deg);
+        azimuth_angles_per_period.insert( azimuth_angles_per_period.end(), azimuth_angles_second_half_period.begin(), azimuth_angles_second_half_period.end() );
+        float mirror_frequency = (float)upramping_periods / upramping_time_in_s;
+
+        float ray_step_azimuth   = Blickfeld.beam_width  / (Blickfeld.rays_per_beam_horizontal - 1);
+        float ray_step_elevation = Blickfeld.beam_height / (Blickfeld.rays_per_beam_vertical   - 1);
+        auto rays_per_beam = Blickfeld.rays_per_beam_vertical * Blickfeld.rays_per_beam_horizontal;
+
+        Blickfeld.sensor_view_configuration.mutable_update_cycle_time()->set_seconds(0);
+        Blickfeld.sensor_view_configuration.mutable_update_cycle_time()->set_nanos(119000000);
+        Blickfeld.sensor_view_configuration.set_range(250.0);
+        Blickfeld.sensor_view_configuration.set_field_of_view_horizontal(72.0 / 180 * M_PI);
+        Blickfeld.sensor_view_configuration.set_field_of_view_vertical(20.0 / 180 * M_PI);
+        Blickfeld.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_x(0.0);
+        Blickfeld.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_y(0.0);
+        Blickfeld.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_z(0.0);
+        Blickfeld.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_roll(0.0 / 180 * M_PI);
+        Blickfeld.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_pitch(0.0 / 180 * M_PI);
+        Blickfeld.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_yaw(0.0 / 180 * M_PI);
+        
+        // Azimuth-dependend attenuation of Blickfeld //todo
+                std::vector<std::vector<float>> gain = {{-beam_center_azimuth_max, 80.0},
+                                                        {-30.0, 90.0},
+                                                        {-20.0, 92.5},
+                                                        {-10.0, 97.5},
+                                                        {  0.0, 100.0},
+                                                        { 10.0, 97.5},
+                                                        { 20.0, 92.5},
+                                                        { 30.0, 90.0},
+                                                        {beam_center_azimuth_max, 80.0}};
+
+        for (uint32_t front_end = 0; front_end < Blickfeld.no_of_frontends; front_end++) {
+            auto lidar_sensor_view_config = Blickfeld.sensor_view_configuration.add_lidar_sensor_view_configuration();
+            lidar_sensor_view_config->set_emitter_wavelength(905);         // Wavelength of the sensor's emitter
+            lidar_sensor_view_config->set_max_number_of_interactions(1);   // Maximum number of interactions per emitted signal within the scene
+            lidar_sensor_view_config->set_max_path_length(250);            // The maximum length in m of one signal path. When reached, propagation is terminated
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_x(3.600);  // from center of rear axle, in m //
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_y(0.0);     // from center of rear axle, in m
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_z(0.46);   // from center of rear axle, in m //
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_pitch(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
+
+            auto frontend_config = Blickfeld.beam_center_config.add_lidar_sensor_view_configuration();
+
+            for (uint32_t period_idx = 0; period_idx < upramping_periods; period_idx++) {
+                uint32_t beam_center_azimuth_idx = 1;
+                uint32_t k = 1;
+                for (float beam_center_azimuth : azimuth_angles_per_period) {
+                    float timestep;
+                    if (beam_center_azimuth_idx <= (azimuth_angles_per_period.size()/2)) {
+                        timestep = std::acos(beam_center_azimuth / beam_center_azimuth_max) / (2 * M_PI * mirror_frequency) + period_idx / mirror_frequency;
+                    } else {
+                        float timestep_azimuth_max = std::acos(-beam_center_azimuth_max / beam_center_azimuth_max) / (2 * M_PI * mirror_frequency) + period_idx / mirror_frequency;
+                        float timestep_inverted = std::acos(beam_center_azimuth / beam_center_azimuth_max) / (2 * M_PI * mirror_frequency) + period_idx / mirror_frequency;
+                        timestep = 2 * timestep_azimuth_max - timestep_inverted;
+                    }
+                    float beam_center_elevation = std::sin(2 * M_PI * mirror_frequency * timestep) * beam_center_elevation_max / upramping_time_in_s * timestep;
+
+                    // Find azimuth in gain table
+                    while ((k < gain.size() - 1) && (std::round(beam_center_azimuth * 1000) >= std::round(gain[k][0] * 1000))) {
+                        k = k + 1;
+                    }
+                    // linear interpolation in gain table for actual attenuation
+                    float attenuation = (gain[k-1][1] + (gain[k][1] - gain[k-1][1]) / (gain[k][0] - gain[k-1][0]) * (beam_center_azimuth - gain[k-1][0])) / 100;
+
+                    auto beam = frontend_config->add_emitted_signal();
+                    beam->set_horizontal_angle(beam_center_azimuth / 180 * M_PI); // azimuth in rad
+                    beam->set_vertical_angle(beam_center_elevation / 180 * M_PI); // elevation in rad
+                    beam->set_signal_strength(Blickfeld.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation));
+
+                    float azimuth_min = beam_center_azimuth - ray_step_azimuth * std::floor(Blickfeld.rays_per_beam_horizontal / 2);
+                    float azimuth_max = beam_center_azimuth + ray_step_azimuth * std::floor(Blickfeld.rays_per_beam_horizontal / 2);
+                    for (float azimuth = azimuth_min; azimuth < azimuth_max + ray_step_azimuth / 4; azimuth = azimuth + ray_step_azimuth) {
+                        float elevation_min = beam_center_elevation - ray_step_elevation * std::floor(Blickfeld.rays_per_beam_vertical / 2);
+                        float elevation_max = beam_center_elevation + ray_step_elevation * std::floor(Blickfeld.rays_per_beam_vertical / 2);
+                        for (float elevation = elevation_min; elevation < elevation_max + ray_step_elevation / 4; elevation = elevation + ray_step_elevation) {
+                            auto ray = lidar_sensor_view_config->add_emitted_signal();
+                            ray->set_horizontal_angle(azimuth / 180 * M_PI); // azimuth in rad
+                            ray->set_vertical_angle(elevation / 180 * M_PI); // elevation in rad
+                            ray->set_signal_strength(Blickfeld.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation) - 10 * std::log10(rays_per_beam)); // assuming equal distribution of beam power per ray
+                            lidar_sensor_view_config->add_time_offset_emission(0); // second mirror side gets time_offset of 40 ms
+                        }
+                    }
+                    beam_center_azimuth_idx++;
+                }
+            }
+        }

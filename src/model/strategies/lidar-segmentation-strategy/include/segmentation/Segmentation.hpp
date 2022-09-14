@@ -37,7 +37,7 @@ namespace model {
 	private:
 
         static std::vector<Vector3d> get_bounding_box_corners(const MovingObject &current_moving_object);
-        static uint64_t calculate_segment_of_point_cloud(SensorData &in, int object_no_in, const std::vector<Vector3d> &bounding_box_corners, const TF::EgoData &ego_data, const Profile &profile, const Log &log);
+        static size_t calculate_segment_of_point_cloud(SensorData &in, int object_no_in, const std::vector<Vector3d> &bounding_box_corners, const TF::EgoData &ego_data, const Profile &profile, const Log &log);
 
     };
 

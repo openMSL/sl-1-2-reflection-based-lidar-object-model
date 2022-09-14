@@ -23,10 +23,30 @@
 
 namespace model::profile {
     struct Profile {
+        uint32_t no_of_frontends;                   // the number of lidar front-ends
+        uint32_t no_of_layers;                      // the number of layers of every lidar front-end
+        uint32_t rays_per_beam_vertical;            // vertical super-sampling factor of every lidar front-end
+        uint32_t rays_per_beam_horizontal;          // horizontal super-sampling factor of every lidar front-end
+        float min_range;                            // minimal range to be able to detect anything
+        float max_range;                            // maximum range to be able to detect anything
+        float beam_width;
+        float beam_height;
+        float receiver_aperture_diameter_m;         // Diameter of the receiver aperture in m
+        float max_emitted_signal_strength_in_dBm;   // maximal emitted signal strength in dBm (typically at azimuth = 0)
+        float receiver_efficiency;                  // efficiency coefficient of the receiver, value [0,1], (1 - receiver loss)
+        float beam_step_elevation = 0.0;            // (optional) vertical step-size per layer of every lidar front-end in degrees
+        std::vector<float> beam_center_elevation = {0.0};  // (optional) vector with all layer's beam center elevation angles in degrees
+        std::string vertical_angle_clamping;        // determines where the echo's vertical angle is clamped to within the laser beam.
+                                                    // Options: {"center" (default), "max_abs", "top", "bottom"} (non-default needs beam_step_elevation > 0)
+
         osi3::SensorViewConfiguration sensor_view_configuration;
 
-        /// The following parameters can be defined for multiple sensors.
-        std::vector<double> min_range;
+        osi3::SensorViewConfiguration beam_center_config;   // SensorViewConfiguration, which contains
+                                                            // N LidarSensorViewConfigurations for every lidar front-end,
+                                                            // each having M beams of that front-end n.
+                                                            // It describes every beam center in contrast to
+                                                            // the (possibly) super-sampling sensor_view_configuration
+                                                            // for rendering that is exchanged with the simulation engine.
 
         @PROFILE_STRUCTS@
 

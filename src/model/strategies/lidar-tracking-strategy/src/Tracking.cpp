@@ -27,136 +27,140 @@
 #include <math.h>
 #else
 #include <cmath>
-#include <iostream>
 
 #endif
 
 using namespace model;
 using namespace osi3;
 
-void Tracking::apply(SensorData &in) {
-    log("Starting Tracking");
+void Tracking::apply(SensorData &sensor_data) {
+    log("Starting tracking");
 
     Tracking::Data data_of_current_time_step;
+    
+    if ((sensor_data.sensor_view_size() == 0) || !sensor_data.sensor_view(0).has_global_ground_truth() || !sensor_data.sensor_view(0).global_ground_truth().has_timestamp()) {
+        alert("No valid sensor view available!");
+        return;
+    }
 
-    if ((in.sensor_view_size() > 0) && in.sensor_view(0).has_global_ground_truth() && in.sensor_view(0).global_ground_truth().has_timestamp()) {
+    data_of_current_time_step.sensor_data.mutable_timestamp()->set_nanos(sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos());
+    data_of_current_time_step.sensor_data.mutable_timestamp()->set_seconds(sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds());
+    sensor_data.mutable_timestamp()->set_nanos(sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos());
+    sensor_data.mutable_timestamp()->set_seconds(sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds());
 
-        data_of_current_time_step.sensor_data.mutable_timestamp()->set_nanos(in.sensor_view(0).global_ground_truth().timestamp().nanos());
-        data_of_current_time_step.sensor_data.mutable_timestamp()->set_seconds(in.sensor_view(0).global_ground_truth().timestamp().seconds());
-        in.mutable_timestamp()->set_nanos(in.sensor_view(0).global_ground_truth().timestamp().nanos());
-        in.mutable_timestamp()->set_seconds(in.sensor_view(0).global_ground_truth().timestamp().seconds());
+    calculate_delta_t_of_current_time_step(data_of_current_time_step);
 
-        calculate_delta_t_of_current_time_step(data_of_current_time_step);
+    TF::EgoData ego_data;
+    if(!TF::get_ego_info(ego_data, sensor_data.sensor_view(0))) {
+        alert("Ego vehicle has no base, no id, or is not contained in GT moving objects.");
+        return;
+    }
 
-        TF::EgoData ego_data;
-        if(!TF::get_ego_info(ego_data, in.sensor_view(0)))
-            alert("Ego vehicle has no base, no id, or is not contained in GT moving objects.");
+    log("Ego car " + std::to_string(ego_data.ego_vehicle_id.value()) + ": absolute velocity: " + std::to_string(std::sqrt(std::pow(ego_data.ego_base.velocity().x(), 2)
+                                                                                                + std::pow(ego_data.ego_base.velocity().y(), 2)
+                                                                                                + std::pow(ego_data.ego_base.velocity().z(), 2)) * 3.6) + " km/h");
 
-        log("Ego car " + std::to_string(ego_data.ego_vehicle_id.value()) + ": absolute velocity: " + std::to_string(std::sqrt(std::pow(ego_data.ego_base.velocity().x(), 2)
-                                                                                                   + std::pow(ego_data.ego_base.velocity().y(), 2)
-                                                                                                   + std::pow(ego_data.ego_base.velocity().z(), 2)) * 3.6) + " km/h");
+    /// Loop over all GT objects in current frame
+    int historical_object_no = 0;
+    for (const MovingObject& current_GT_object : sensor_data.sensor_view(0).global_ground_truth().moving_object()) {
 
-        /// Loop over all GT objects in current frame
-        int historical_object_no = 0;
-        for (const MovingObject& current_GT_object : in.sensor_view(0).global_ground_truth().moving_object()) {
-            /// Continue in case of ego car
-            auto object_id = current_GT_object.id().value();
-            if (object_id == ego_data.ego_vehicle_id.value()) {
-                continue;
-            }
-
-            /// Start detected object for current time stamp
-            DetectedMovingObject *current_moving_object = data_of_current_time_step.sensor_data.mutable_moving_object()->Add();
-            DetectedMovingObject::CandidateMovingObject *current_moving_object_candidate = current_moving_object->add_candidate();
-
-            bool object_contained_in_history = false;
-            bool object_tracked_in_history = false;
-
-            /// Check and get object ID
-            if (current_GT_object.has_id()) {
-                current_moving_object->mutable_header()->add_ground_truth_id()->CopyFrom(current_GT_object.id());
-                current_moving_object->mutable_header()->mutable_tracking_id()->CopyFrom(current_GT_object.id());
-            } else {
-                alert("Object " + std::to_string(current_GT_object.id().value()) + " has no id!");
-            }
-            if (current_GT_object.has_base()) {
-                transform_gt_object_to_ego_coordinate_system(current_GT_object, current_moving_object, ego_data);
-
-                find_object_in_history(object_contained_in_history, historical_object_no, current_moving_object, object_tracked_in_history);
-
-                get_pcl_segment_of_current_object(in.logical_detection_data(), data_of_current_time_step, current_GT_object.id().value(), ego_data);
-                if (!data_of_current_time_step.pcl_segment_points_in_ego_coordinates.empty()) {
-                    if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized position and dimension from GT
-                        calculate_dimension_and_position_from_pcl(current_GT_object, data_of_current_time_step, current_moving_object, object_contained_in_history, historical_object_no, ego_data);
-                    }
-                    if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized orientation from GT
-                        calculate_orientation_from_pcl(data_of_current_time_step, current_moving_object);
-                    }
-                    if (profile.tracking_parameters.velocity_flag > 0) { // 0: Idealized velocity from GT
-                        calculate_velocity_from_pcl(in, data_of_current_time_step, current_moving_object, object_contained_in_history, historical_object_no);
-                    }
-                }
-                else {
-                    log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": NO logical detections in bounding box!");
-                    if (object_contained_in_history && history.sensor_data.back().moving_object(historical_object_no).has_base()) {
-                        if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized position and dimension from GT
-                            calculate_dimension_and_position_from_history(data_of_current_time_step, current_moving_object, historical_object_no);
-                        }
-                        if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized orientation from GT
-                            calculate_orientation_from_history(data_of_current_time_step, current_moving_object, historical_object_no);
-                        }
-                        if (profile.tracking_parameters.velocity_flag > 0) { // 0: Idealized velocity from GT
-                            current_moving_object->mutable_base()->mutable_velocity()->CopyFrom(history.sensor_data.back().moving_object(historical_object_no).base().velocity());
-                        }
-                    }
-                }
-                log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": position: x: " + std::to_string(current_moving_object->base().position().x()) +
-                                                                                                            " m, y: " + std::to_string(current_moving_object->base().position().y()) +
-                                                                                                            " m, z: " + std::to_string(current_moving_object->base().position().z()) + " m");
-                log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": orientation: roll: " + std::to_string(current_moving_object->base().orientation().roll() * 180 / M_PI) +
-                                                                                                               "°, pitch: " + std::to_string(current_moving_object->base().orientation().pitch() * 180 / M_PI) +
-                                                                                                                 "°, yaw: " + std::to_string(current_moving_object->base().orientation().yaw() * 180 / M_PI) + "°");
-                log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": relative velocity: x:" + std::to_string(current_moving_object->base().velocity().x() * 3.6) +
-                                                                                                                 " km/h, y:" + std::to_string(current_moving_object->base().velocity().y() * 3.6) +
-                                                                                                                 " km/h, z:" + std::to_string(current_moving_object->base().velocity().z() * 3.6) + " km/h");
-
-                if (object_contained_in_history && history.sensor_data.back().moving_object(historical_object_no).has_base()) {
-                    if (profile.tracking_parameters.tracking_flag == 0) { // 0: Idealized tracking
-                        current_moving_object->mutable_header()->CopyFrom(history.sensor_data.back().moving_object(historical_object_no).header());
-                        current_moving_object->mutable_header()->set_existence_probability(1);
-                        current_moving_object->mutable_header()->set_age(history.sensor_data.back().moving_object(historical_object_no).header().age() + 1);
-                    } else {
-                            continue_tracking_for_current_pcl_segment(data_of_current_time_step, current_moving_object, current_GT_object, object_tracked_in_history, historical_object_no, ego_data);
-                    }
-                } else {
-                    start_tracking_for_current_pcl_segment(data_of_current_time_step, current_moving_object, current_GT_object);
-                }
-                limit_existence_probability_to_0_and_1(current_moving_object);
-                log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": existence_probability: " + std::to_string(current_moving_object->header().existence_probability()) +
-                                                                                                                      ", age: " + std::to_string(current_moving_object->header().age()));
-
-                determine_object_type(current_moving_object_candidate, current_GT_object);
-                log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": type: " + get_type_string(current_moving_object_candidate) +
-                                                                                            ", vehicle type: " + get_vehicle_type_string(current_moving_object_candidate));
-                if(!profile.sensor_view_configuration.radar_sensor_view_configuration().empty()) { // radar
-                    set_rcs(current_moving_object);
-                    log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": rcs: " + std::to_string(current_moving_object->radar_specifics().rcs()));
-                }
-            } else {
-                alert("GT Object has no base information!");
-            }
-        } // End of loop over all GT objects
-
-        if (!data_of_current_time_step.sensor_data.moving_object().empty()) {
-            update_history(data_of_current_time_step, in);
-            in.mutable_moving_object()->Clear();
-            write_data_back_to_osi(in, data_of_current_time_step);
-        } else {
-            log("No moving objects detected in this time stamp!");
-            in.mutable_moving_object()->Clear();
+        if (!current_GT_object.has_base()) {
+            alert("GT Object has no base information!");
+            return;
         }
+
+        /// Continue in case of ego car
+        auto object_id = current_GT_object.id().value();
+        if (object_id == ego_data.ego_vehicle_id.value()) {
+            continue;
+        }
+
+        /// Start detected object for current time stamp
+        DetectedMovingObject *current_moving_object = data_of_current_time_step.sensor_data.mutable_moving_object()->Add();
+        DetectedMovingObject::CandidateMovingObject *current_moving_object_candidate = current_moving_object->add_candidate();
+
+        bool object_contained_in_history = false;
+        bool object_tracked_in_history = false;
+
+        /// Check and get object ID
+        if (current_GT_object.has_id()) {
+            current_moving_object->mutable_header()->add_ground_truth_id()->CopyFrom(current_GT_object.id());
+            current_moving_object->mutable_header()->mutable_tracking_id()->CopyFrom(current_GT_object.id());
+        } else {
+            alert("Object " + std::to_string(current_GT_object.id().value()) + " has no id!");
+            continue;
+        }
+        transform_gt_object_to_ego_coordinate_system(current_GT_object, current_moving_object, ego_data);
+
+        find_object_in_history(object_contained_in_history, historical_object_no, current_moving_object, object_tracked_in_history);
+
+        get_pcl_segment_of_current_object(sensor_data.logical_detection_data(), data_of_current_time_step, current_GT_object.id().value(), ego_data);
+        if (!data_of_current_time_step.pcl_segment_points_in_ego_coordinates.empty()) {
+            if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized position and dimension from GT
+                calculate_dimension_and_position_from_pcl(current_GT_object, data_of_current_time_step, current_moving_object, object_contained_in_history, historical_object_no, ego_data);
+            }
+            if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized orientation from GT
+                calculate_orientation_from_pcl(data_of_current_time_step, current_moving_object);
+            }
+            if (profile.tracking_parameters.velocity_flag > 0) { // 0: Idealized velocity from GT
+                calculate_velocity_from_pcl(sensor_data, data_of_current_time_step, current_moving_object, object_contained_in_history, historical_object_no);
+            }
+        }
+        else {
+            log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": NO logical detections in bounding box!");
+            if (object_contained_in_history && history.sensor_data.back().moving_object(historical_object_no).has_base()) {
+                if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized position and dimension from GT
+                    calculate_dimension_and_position_from_history(data_of_current_time_step, current_moving_object, historical_object_no);
+                }
+                if (profile.tracking_parameters.dimension_and_position_flag > 0) { // 0: Idealized orientation from GT
+                    calculate_orientation_from_history(data_of_current_time_step, current_moving_object, historical_object_no);
+                }
+                if (profile.tracking_parameters.velocity_flag > 0) { // 0: Idealized velocity from GT
+                    current_moving_object->mutable_base()->mutable_velocity()->CopyFrom(history.sensor_data.back().moving_object(historical_object_no).base().velocity());
+                }
+            }
+        }
+        log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": position: x: " + std::to_string(current_moving_object->base().position().x()) +
+                                                                                                    " m, y: " + std::to_string(current_moving_object->base().position().y()) +
+                                                                                                    " m, z: " + std::to_string(current_moving_object->base().position().z()) + " m");
+        log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": orientation: roll: " + std::to_string(current_moving_object->base().orientation().roll() * 180 / M_PI) +
+                                                                                                        "°, pitch: " + std::to_string(current_moving_object->base().orientation().pitch() * 180 / M_PI) +
+                                                                                                            "°, yaw: " + std::to_string(current_moving_object->base().orientation().yaw() * 180 / M_PI) + "°");
+        log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": relative velocity: x:" + std::to_string(current_moving_object->base().velocity().x() * 3.6) +
+                                                                                                            " km/h, y:" + std::to_string(current_moving_object->base().velocity().y() * 3.6) +
+                                                                                                            " km/h, z:" + std::to_string(current_moving_object->base().velocity().z() * 3.6) + " km/h");
+
+        if (object_contained_in_history && history.sensor_data.back().moving_object(historical_object_no).has_base()) {
+            if (profile.tracking_parameters.tracking_flag == 0) { // 0: Idealized tracking
+                current_moving_object->mutable_header()->CopyFrom(history.sensor_data.back().moving_object(historical_object_no).header());
+                current_moving_object->mutable_header()->set_existence_probability(1);
+                current_moving_object->mutable_header()->set_age(history.sensor_data.back().moving_object(historical_object_no).header().age() + 1);
+            } else {
+                    continue_tracking_for_current_pcl_segment(data_of_current_time_step, current_moving_object, current_GT_object, object_tracked_in_history, historical_object_no, ego_data);
+            }
+        } else {
+            start_tracking_for_current_pcl_segment(data_of_current_time_step, current_moving_object, current_GT_object);
+        }
+        limit_existence_probability_to_0_and_1(current_moving_object);
+        log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": existence_probability: " + std::to_string(current_moving_object->header().existence_probability()) +
+                                                                                                                ", age: " + std::to_string(current_moving_object->header().age()));
+
+        determine_object_type(current_moving_object_candidate, current_GT_object);
+        log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": type: " + get_type_string(current_moving_object_candidate) +
+                                                                                    ", vehicle type: " + get_vehicle_type_string(current_moving_object_candidate));
+        if(!profile.sensor_view_configuration.radar_sensor_view_configuration().empty()) { // radar
+            set_rcs(current_moving_object);
+            log("Object " + std::to_string(current_moving_object->header().tracking_id().value()) + ": rcs: " + std::to_string(current_moving_object->radar_specifics().rcs()));
+        }
+    } // End of loop over all GT objects
+
+    if (!data_of_current_time_step.sensor_data.moving_object().empty()) {
+        update_history(data_of_current_time_step, sensor_data);
+        sensor_data.mutable_moving_object()->Clear();
+        write_data_back_to_osi(sensor_data, data_of_current_time_step);
     } else {
-        alert("No sensor view available!");
+        log("No moving objects detected in this time stamp!");
+        sensor_data.mutable_moving_object()->Clear();
     }
 }
 
@@ -224,7 +228,7 @@ void Tracking::transform_gt_object_to_ego_coordinate_system(const MovingObject &
             TF::calc_relative_orientation_to_local(current_GT_object.base().orientation_acceleration(), ego_data.ego_base.orientation_acceleration()));
 }
 
- void Tracking::get_pcl_segment_of_current_object(const LogicalDetectionData& logical_detection_data, Tracking::Data &data_of_current_time_step, uint64_t gt_object_id, const TF::EgoData &ego_data) {
+ void Tracking::get_pcl_segment_of_current_object(const LogicalDetectionData& logical_detection_data, Tracking::Data &data_of_current_time_step, size_t gt_object_id, const TF::EgoData &ego_data) {
      data_of_current_time_step.pcl_segment_points_in_ego_coordinates.clear();
      data_of_current_time_step.pcl_segment_points_in_ego_coordinates.reserve(logical_detection_data.logical_detection_size());
     for (const auto& logical_detection : logical_detection_data.logical_detection()){
@@ -235,7 +239,7 @@ void Tracking::transform_gt_object_to_ego_coordinate_system(const MovingObject &
 }
 
 void Tracking::calculate_dimension_and_position_from_pcl(const MovingObject& current_GT_object, Data &data_of_current_time_step, DetectedMovingObject *current_moving_object,
-                                                         bool object_contained_in_history, uint64_t historical_object_no,
+                                                         bool object_contained_in_history, int historical_object_no,
                                                          const TF::EgoData &ego_data) {
 
     calculate_object_dimension_and_position_in_object_from_pcl_segment(data_of_current_time_step, current_GT_object, ego_data);
@@ -244,7 +248,7 @@ void Tracking::calculate_dimension_and_position_from_pcl(const MovingObject& cur
             current_moving_object->mutable_base()->mutable_dimension()->CopyFrom(data_of_current_time_step.pcl_segment_dimension);
             current_moving_object->mutable_base()->mutable_position()->CopyFrom(
                     TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
-                                                                                               ego_data, current_GT_object));
+                                                                          ego_data, current_GT_object));
             break;
         case 2: // 2: Dimension from current point cloud segments with lower bounds, position as center of manipulated pcl segment
             eliminate_ground_clearance(
@@ -260,8 +264,8 @@ void Tracking::calculate_dimension_and_position_from_pcl(const MovingObject& cur
             current_moving_object->mutable_base()->mutable_dimension()->CopyFrom(data_of_current_time_step.pcl_segment_dimension);
 
             current_moving_object->mutable_base()->mutable_position()->CopyFrom(
-                TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
-                                                                                           ego_data, current_GT_object));
+                    TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
+                                                                          ego_data, current_GT_object));
             break;
         case 3: // 3: Maximum dimension of current and mean of historical point cloud segments, position as center of manipulated pcl segment
             eliminate_ground_clearance(
@@ -278,8 +282,8 @@ void Tracking::calculate_dimension_and_position_from_pcl(const MovingObject& cur
             current_moving_object->mutable_base()->mutable_dimension()->CopyFrom(data_of_current_time_step.pcl_segment_dimension);
 
             current_moving_object->mutable_base()->mutable_position()->CopyFrom(
-                TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
-                                                                                           ego_data, current_GT_object));
+                    TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
+                                                                          ego_data, current_GT_object));
             break;
         case 4: // 4: Maximum dimension of current and mean of historical point cloud segments with lower bounds, position as center of manipulated pcl segment
             eliminate_ground_clearance(
@@ -300,13 +304,13 @@ void Tracking::calculate_dimension_and_position_from_pcl(const MovingObject& cur
                                            &data_of_current_time_step.pcl_segment_position_in_object);
             current_moving_object->mutable_base()->mutable_dimension()->CopyFrom(data_of_current_time_step.pcl_segment_dimension);
             current_moving_object->mutable_base()->mutable_position()->CopyFrom(
-                TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
-                                                                                           ego_data, current_GT_object));
+                    TF::transform_position_from_object_to_ego_coordinates(data_of_current_time_step.pcl_segment_position_in_object,
+                                                                          ego_data, current_GT_object));
             break;
     }
 }
 
-void Tracking::calculate_dimension_and_position_from_history(Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, uint64_t historical_object_no) {
+void Tracking::calculate_dimension_and_position_from_history(Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, int historical_object_no) {
     current_moving_object->mutable_base()->mutable_dimension()->CopyFrom(history.sensor_data.back().moving_object(historical_object_no).base().dimension());
     Vector3d delta_position;
     delta_position.set_x(history.sensor_data.back().moving_object(historical_object_no).base().velocity().x() * data_of_current_time_step.delta_t);
@@ -391,11 +395,11 @@ void Tracking::calculate_dimension_with_lower_bounds(const Dimension3d &lower_bo
     }
 }
 
-void Tracking::set_object_dimension_with_tracking(const Dimension3d &current_dimension, Dimension3d *new_dimension, bool object_contained_in_history, uint64_t historical_object_no,
+void Tracking::set_object_dimension_with_tracking(const Dimension3d &current_dimension, Dimension3d *new_dimension, bool object_contained_in_history, int historical_object_no,
                                                   const Vector3d &current_pcl_segment_position_in_object, Vector3d *new_pcl_segment_position_in_object) const {
     if (!history.sensor_data.empty() && object_contained_in_history) {
         Dimension3d historical_dimensions_sum = current_dimension;
-        uint64_t no_of_historical_data_used = 1;
+        size_t no_of_historical_data_used = 1;
         for (auto historical_data = history.sensor_data.crbegin(); historical_data != history.sensor_data.crend(); ++historical_data) {
             if (historical_data->moving_object_size() > historical_object_no && historical_data->moving_object(historical_object_no).has_base()) {
                 if((historical_data->moving_object(historical_object_no).base().dimension().length() >= 0)
@@ -417,7 +421,7 @@ void Tracking::set_object_dimension_with_tracking(const Dimension3d &current_dim
     }
 }
 
-void Tracking::calculate_velocity_from_pcl(SensorData &in, Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, bool object_contained_in_history, uint64_t historical_object_no) {
+void Tracking::calculate_velocity_from_pcl(SensorData &in, Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, bool object_contained_in_history, int historical_object_no) {
     if (profile.tracking_parameters.velocity_flag == 1 && object_contained_in_history && history.sensor_data.back().moving_object(historical_object_no).has_base()) {
         calculate_velocity_as_derivation_of_position(data_of_current_time_step, current_moving_object, object_contained_in_history);
     }
@@ -430,10 +434,10 @@ void Tracking::calculate_velocity_as_derivation_of_position(Tracking::Data &data
     velocity.set_z(0);
 
     if (object_contained_in_history) {
-        uint64_t counter = 0;
+        int counter = 0;
         Vector3d historical_position;
         for (auto historical_data = history.sensor_data.crbegin(); historical_data != history.sensor_data.crend(); ++historical_data) {
-            for (uint64_t old_object_no = 0; old_object_no < historical_data->moving_object_size(); old_object_no++) {
+            for (int old_object_no = 0; old_object_no < historical_data->moving_object_size(); old_object_no++) {
                 if (current_moving_object->header().tracking_id().value() == historical_data->moving_object(old_object_no).header().tracking_id().value()) {
                     historical_position = historical_data->moving_object(old_object_no).base().position();
                     counter++;
@@ -456,7 +460,7 @@ void Tracking::calculate_orientation_from_pcl(Data &data_of_current_time_step, D
     // TODO fill this function
 }
 
-void Tracking::calculate_orientation_from_history(Tracking::Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, uint64_t historical_object_no) {
+void Tracking::calculate_orientation_from_history(Tracking::Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, int historical_object_no) {
     current_moving_object->mutable_base()->mutable_orientation()->set_roll(
             history.sensor_data.back().moving_object(historical_object_no).base().orientation().roll()
             + history.sensor_data.back().moving_object(historical_object_no).base().orientation_rate().roll() * data_of_current_time_step.delta_t);
@@ -468,7 +472,7 @@ void Tracking::calculate_orientation_from_history(Tracking::Data &data_of_curren
             + history.sensor_data.back().moving_object(historical_object_no).base().orientation_rate().yaw() * data_of_current_time_step.delta_t);
 }
 
-void Tracking::continue_tracking_for_current_pcl_segment(Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, const MovingObject &current_GT_object, bool object_tracked_in_history, uint64_t historical_object_no,
+void Tracking::continue_tracking_for_current_pcl_segment(Data &data_of_current_time_step, DetectedMovingObject *current_moving_object, const MovingObject &current_GT_object, bool object_tracked_in_history, int historical_object_no,
                                                          const TF::EgoData &ego_data) {
     double current_absolute_gt_velocity = TF::get_vector_abs(current_GT_object.base().velocity());
     current_moving_object->mutable_header()->CopyFrom(history.sensor_data.back().moving_object(historical_object_no).header());
@@ -582,8 +586,8 @@ void Tracking::write_data_back_to_osi(SensorData &in, Tracking::Data &data_of_cu
 
 void Tracking::calculate_delta_t_of_current_time_step(Tracking::Data &data_of_current_time_step) {
     if (!history.sensor_data.empty() && history.sensor_data.back().has_timestamp()) {
-        data_of_current_time_step.delta_t = data_of_current_time_step.sensor_data.timestamp().seconds() + double(data_of_current_time_step.sensor_data.timestamp().nanos()) / 1000000000
-                                            - (history.sensor_data.back().timestamp().seconds() + double(history.sensor_data.back().timestamp().nanos()) / 1000000000);
+        data_of_current_time_step.delta_t = (double)data_of_current_time_step.sensor_data.timestamp().seconds() + double(data_of_current_time_step.sensor_data.timestamp().nanos()) / 1000000000.0
+                                            - ((double)history.sensor_data.back().timestamp().seconds() + double(history.sensor_data.back().timestamp().nanos()) / 1000000000);
     } else {
         data_of_current_time_step.delta_t = 0;
     }
@@ -594,7 +598,7 @@ void Tracking::find_object_in_history(bool &object_contained_in_history, int &hi
         if (history.sensor_data.back().sensor_view(0).global_ground_truth().moving_object_size() > 0) {
             object_contained_in_history = false;
             object_tracked_in_history = false;
-            for (uint64_t old_object_no = 0; old_object_no < history.sensor_data.back().moving_object_size(); old_object_no++) {
+            for (int old_object_no = 0; old_object_no < history.sensor_data.back().moving_object_size(); old_object_no++) {
                 // check if object appeared in last time step
                 if (current_moving_object->header().tracking_id().value() == history.sensor_data.back().moving_object(old_object_no).header().tracking_id().value()) {
                     historical_object_no = old_object_no;
