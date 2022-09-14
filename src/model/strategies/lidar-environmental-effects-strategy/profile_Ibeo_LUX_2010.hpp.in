@@ -1,0 +1,22 @@
+
+        /// detection_environmental_effects_parameters
+
+        //weather
+        Ibeo_LUX_2010.det_envir_effects.calibrated_fog = false;                  // does a parameter set for fog calibrated from to world measurements exist?
+        Ibeo_LUX_2010.det_envir_effects.fog_det_prob_factor = 0;                // factor for linear function with meteorological visibility
+
+        Ibeo_LUX_2010.det_envir_effects.calibrated_rain = false;                 // does a parameter set for rain calibrated from to world measurements exist?
+        Ibeo_LUX_2010.det_envir_effects.rain_det_prob_factor = 0;      // factor for linear function with precipitation rate
+
+        Ibeo_LUX_2010.det_envir_effects.calibrated_snow = false;                 // does a parameter set for snow calibrated from to world measurements exist?
+        Ibeo_LUX_2010.det_envir_effects.snow_det_prob_factor = 0;         // factor for linear function with precipitation rate
+
+        Ibeo_LUX_2010.det_envir_effects.calibrated_sun = false;                 // does a parameter set for direct sun light calibrated to real world measurements exist?
+
+        Ibeo_LUX_2010.det_envir_effects.layer_comp_factors = {0};    // compensation factor for an uneven distribution of atmospheric detections between layers (length equal to number of layers)
+        Ibeo_LUX_2010.det_envir_effects.distance_distr_mu = 0;             // mean value of log-normal distance distribution
+        Ibeo_LUX_2010.det_envir_effects.distance_distr_sigma = 0;          // standard deviation of log-normal distance distribution
+        Ibeo_LUX_2010.det_envir_effects.intensity_distr_lambda = 0;       // mean value of poisson intensity distribution
+
+                //spray
+        Ibeo_LUX_2010.det_envir_effects.calibrated_spray = false;                // does a parameter set for spray calibrated to real world measurements exist?
