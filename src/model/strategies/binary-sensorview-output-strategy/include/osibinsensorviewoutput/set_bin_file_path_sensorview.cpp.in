@@ -1,0 +1,42 @@
+//
+// Copyright Institute of Automotive Engineering
+// of Technical University of Darmstadt 2022.
+// Licensed under the EUPL-1.2-or-later
+//
+// This work covered by the EUPL can be used/merged and distributed
+// in other works covered by GPL-2.0, GPL-3.0, LGPL, AGPL, CeCILL,
+// OSL, EPL, MPL and other licences listed as compatible in the EUPL
+// Appendix. This applies to the other (combined) work, while the
+// original project stays covered by the EUPL without re-licensing.
+//
+// Alternatively, the contents of this file may be used under the
+// terms of the Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, you can obtain one at
+// http://mozilla.org/MPL/2.0/.
+//
+
+time_t curr_time;
+struct tm *detl;
+char buf[80];
+time( &curr_time );
+detl = localtime( &curr_time );
+strftime(buf, 20, "%Y%m%dT%H%M%SZ", detl);
+
+std::string start_time = std::string(buf);
+
+std::string path_string = "@BIN_PATH@/";
+size_t pos;
+
+path_string = path_string + "@MODEL_NAME@" + "_" + start_time;
+std::string filename = start_time + "_sv_340_300_0000_protoBin.osi";
+
+#if defined(_WIN32)
+    while ((pos = path_string.find("/")) != std::string::npos) {
+        path_string.replace(pos, 1, "\\");
+    }
+    _mkdir(path_string.c_str());
+    file_path_tracefile = path_string + "\\" + filename;
+#else
+    mkdir(path_string.c_str(), 0777);
+    file_path_tracefile = path_string + "/" + filename;
+#endif

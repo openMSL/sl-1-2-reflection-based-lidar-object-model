@@ -1,0 +1,23 @@
+time_t curr_time;
+struct tm *detl;
+char buf[80];
+time( &curr_time );
+detl = localtime( &curr_time );
+// strftime(buf, 20, "%x - %I:%M%p", detl);
+strftime(buf, 20, "%Y-%m-%d_%H-%M-%S", detl);
+
+std::string start_time = std::string(buf);
+
+path_string = "@PCD_PATH@/";
+size_t pos;
+
+path_string = path_string + "@MODEL_NAME@" + "_" + start_time;
+
+#if defined(_WIN32)
+    while ((pos = path_string.find("/")) != std::string::npos) {
+        path_string.replace(pos, 1, "\\");
+    }
+    _mkdir(path_string.c_str());
+#else
+    mkdir(path_string.c_str(), 0777);
+#endif

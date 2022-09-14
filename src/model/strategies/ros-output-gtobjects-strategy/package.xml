@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+	<name>ros_gt_objects</name>
+	<version>1.0.0</version>
+	<description>Forward ground truth object data to ROS</description>
+	<maintainer email="clemens.linnhoff@tu-darmstadt.de">Clemens Linnhoff</maintainer>
+	<license>EUPL-1.2</license>
+	<url type="repository">https://git.rwth-aachen.de/fzd/sensormodeling/fmi-and-osi/visualization-and-output/ros-bridge-gt-objects-strategy</url>
+	<author
+			email="clemens.linnhoff@tu-darmstadt.de">Clemens Linnhoff
+	</author>
+	<buildtool_depend>catkin</buildtool_depend>
+	<build_depend>roscpp</build_depend>
+	<build_export_depend>roscpp</build_export_depend>
+	<exec_depend>roscpp</exec_depend>
+	<depend>std_msgs</depend>
+	<depend>sensor_msgs</depend>
+	<depend>tf</depend>
+	<depend>visualization_msgs</depend>
+</package>
