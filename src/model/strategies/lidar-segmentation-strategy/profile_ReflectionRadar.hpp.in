@@ -1,0 +1,3 @@
+
+        /// segmentation_parameters
+        ReflectionRadar.segmentation_parameters.tolerance_for_segmentation = 0.3; // Tolerance in m that is added to object dimensions for point cloud segmentation

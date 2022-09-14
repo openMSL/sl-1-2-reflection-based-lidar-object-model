@@ -29,42 +29,135 @@ namespace model::profile::Ibeo_LUX_2010 {
 
     Profile generate() {
         Profile Ibeo_LUX_2010;
-        int no_of_beams_vertical = 4;
-        int no_of_beams_horizontal = 241;
-        double min_range = 0.3;
-        double max_range = 400.0;
-        double horizontal_angle_min_rad = -60.25 / 180.0 * M_PI;
-        std::vector<double> beam_layer_angles_rad = {1.2 / 180.0 * M_PI, 0.4 / 180.0 * M_PI, -0.4 / 180.0 * M_PI, -1.2 / 180.0 * M_PI};
-        auto beam_width_rad  = 0.5 / 180.0 * M_PI;
-        auto beam_height_rad = 0.8 / 180.0 * M_PI;
-        int rays_per_beam_horizontal = 21;
-        int rays_per_beam_vertical = 33;
-        auto no_of_rays_horizontal = no_of_beams_horizontal * rays_per_beam_horizontal;
-        auto no_of_rays_vertical = no_of_beams_vertical * rays_per_beam_vertical;
+        
+        Ibeo_LUX_2010.no_of_frontends = 1;              // the number of lidar front-ends
+        Ibeo_LUX_2010.no_of_layers = 4;                 // the number of layers of every lidar front-end
+        Ibeo_LUX_2010.rays_per_beam_vertical   = 41;    // vertical super-sampling factor
+        Ibeo_LUX_2010.rays_per_beam_horizontal =  9;    // horizontal super-sampling factor
+        Ibeo_LUX_2010.min_range = 0.3;                  // minimal range to be able to detect anything
+        Ibeo_LUX_2010.max_range = 200.0;                // maximum range to be able to detect anything
+        Ibeo_LUX_2010.receiver_aperture_diameter_m = 0.002;     // diameter of the receiver aperture in m
+        Ibeo_LUX_2010.max_emitted_signal_strength_in_dBm = 30.0 + 10 * std::log10(100.0); // maximal emitted signal strength per beam in dBm (typically at azimuth = 0)
+        Ibeo_LUX_2010.receiver_efficiency = 0.9;        // efficiency coefficient of the receiver, value [0,1], (1 - receiver loss)
+        Ibeo_LUX_2010.beam_step_elevation = 0.8;        // vertical step-size per beam of every lidar front-end in degrees
+        Ibeo_LUX_2010.vertical_angle_clamping = "max_abs";  // determines where the echo's vertical angle is clamped to within the laser beam.
+                                                            // Options: {"center" (default), "max_abs", "top", "bottom"} (non-default needs beam_step_elevation > 0)
+        float beam_step_azimuth = 0.5;                  // horizontal step-size per beam of every lidar front-end in degrees
+        Ibeo_LUX_2010.beam_width = 0.08;                        // beam_width in degrees, if it is smaller than beam_step_azimuth, there is a not-illuminated area inbetween beams of every lidar front-end
+        Ibeo_LUX_2010.beam_height = 0.784;                      // beam_height in degrees, if it is smaller than beam_step_elevation, there is a not-illuminated area inbetween beams of every lidar front-end
+        uint32_t rays_per_beam = Ibeo_LUX_2010.rays_per_beam_vertical * Ibeo_LUX_2010.rays_per_beam_horizontal;
+        float ray_step_azimuth   = Ibeo_LUX_2010.beam_width  / (Ibeo_LUX_2010.rays_per_beam_horizontal - 1);
+        float ray_step_elevation = Ibeo_LUX_2010.beam_height / (Ibeo_LUX_2010.rays_per_beam_vertical   - 1);
+        float beam_center_azimuth_min = 0.0; // min azimuth of beams per layer per lidar sensor front-end in degrees
+        float beam_center_azimuth_max = 0.0; // max azimuth of beams per layer per lidar sensor front-end in degrees
 
         Ibeo_LUX_2010.sensor_view_configuration.mutable_update_cycle_time()->set_seconds(0);
         Ibeo_LUX_2010.sensor_view_configuration.mutable_update_cycle_time()->set_nanos(80000000);
-        Ibeo_LUX_2010.sensor_view_configuration.set_range(max_range);
-        Ibeo_LUX_2010.sensor_view_configuration.set_field_of_view_horizontal(180.0 / 180.0 * M_PI);
-        Ibeo_LUX_2010.sensor_view_configuration.set_field_of_view_vertical(170.0 / 180.0 * M_PI);
+        Ibeo_LUX_2010.sensor_view_configuration.set_range(400.0);
+        Ibeo_LUX_2010.sensor_view_configuration.set_field_of_view_horizontal(180.0 / 180 * M_PI);
+        Ibeo_LUX_2010.sensor_view_configuration.set_field_of_view_vertical(170.0 / 180 * M_PI);
         Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_x(0.0);
         Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_y(0.0);
         Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_position()->set_z(0.0);
-        Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_roll(0.0 / 180.0 * M_PI);
-        Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_pitch(0.0 / 180.0 * M_PI);
-        Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_yaw(0.0 / 180.0 * M_PI);
+        Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_roll(0.0  / 180 * M_PI);
+        Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_pitch(0.0 / 180 * M_PI);
+        Ibeo_LUX_2010.sensor_view_configuration.mutable_mounting_position()->mutable_orientation()->set_yaw(0.0   / 180 * M_PI);
 
-        auto lidar_sensor_view_configuration = Ibeo_LUX_2010.sensor_view_configuration.add_lidar_sensor_view_configuration();
-        lidar_sensor_view_configuration->set_field_of_view_horizontal(2.0 * std::abs(horizontal_angle_min_rad));
-        lidar_sensor_view_configuration->set_field_of_view_vertical(2.0 * (std::abs(beam_layer_angles_rad[0] + beam_height_rad / 2.0)));
-        lidar_sensor_view_configuration->set_number_of_rays_horizontal(no_of_rays_horizontal);
-        lidar_sensor_view_configuration->set_number_of_rays_vertical(no_of_rays_vertical);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_x(4.2);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_y(0.0);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_position()->set_z(0.0);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_roll(0.0 / 180.0 * M_PI);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_pitch(-0.5 / 180.0 * M_PI);
-        lidar_sensor_view_configuration->mutable_mounting_position()->mutable_orientation()->set_yaw(-0.25 / 180.0 * M_PI);
+        // Azimuth-dependend attenuation of Ibeo LUX 2010 from manual
+        std::vector<std::vector<float>> gain = {{ 52.0,  0.0 * 2,  0.0 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 50.0,  8.9 * 2,  9.5 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 48.0, 19.8 * 2, 20.9 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 46.0, 25.8 * 2, 27.1 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 43.0, 30.4 * 2, 31.8 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 40.0, 32.0 * 2, 33.3 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 38.0, 32.5 * 2, 34.2 * 2,  0.0 * 2,  0.0 * 2},
+                                                { 36.0, 33.1 * 2, 35.0 * 2,  5.0 * 2,  5.7 * 2},
+                                                { 34.0, 33.4 * 2, 35.0 * 2, 25.9 * 2, 25.0 * 2},
+                                                { 32.0, 34.6 * 2, 36.4 * 2, 34.4 * 2, 34.1 * 2},
+                                                { 25.0, 41.8 * 2, 43.8 * 2, 43.3 * 2, 42.5 * 2},
+                                                { 20.0, 45.0 * 2, 47.3 * 2, 47.0 * 2, 46.2 * 2},
+                                                { 10.0, 48.5 * 2, 50.0 * 2, 50.0 * 2, 49.5 * 2},
+                                                {  0.0, 50.0 * 2, 50.0 * 2, 50.0 * 2, 50.0 * 2},
+                                                {-10.0, 50.0 * 2, 50.0 * 2, 50.0 * 2, 50.0 * 2},
+                                                {-20.0, 50.0 * 2, 50.0 * 2, 50.0 * 2, 50.0 * 2},
+                                                {-30.0, 50.0 * 2, 50.0 * 2, 50.0 * 2, 50.0 * 2},
+                                                {-40.0, 46.6 * 2, 48.7 * 2, 48.8 * 2, 47.6 * 2},
+                                                {-46.0, 42.3 * 2, 44.2 * 2, 44.1 * 2, 43.6 * 2},
+                                                {-48.0, 38.4 * 2, 40.0 * 2, 42.5 * 2, 41.5 * 2},
+                                                {-50.0, 17.5 * 2, 18.0 * 2, 40.0 * 2, 39.5 * 2},
+                                                {-52.0,  0.0 * 2,  0.0 * 2, 37.6 * 2, 37.2 * 2},
+                                                {-54.0,  0.0 * 2,  0.0 * 2, 35.0 * 2, 34.5 * 2},
+                                                {-56.0,  0.0 * 2,  0.0 * 2, 32.2 * 2, 31.6 * 2},
+                                                {-58.0,  0.0 * 2,  0.0 * 2, 30.0 * 2, 30.0 * 2},
+                                                {-60.0,  0.0 * 2,  0.0 * 2, 22.1 * 2, 20.8 * 2},
+                                                {-62.0,  0.0 * 2,  0.0 * 2,  0.0 * 2,  0.0}};
+        std::reverse(gain.begin(),gain.end());
 
-        /// The following parameters can be defined for multiple sensors.
-        Ibeo_LUX_2010.min_range = {min_range};
+        for (uint32_t front_end = 0; front_end < Ibeo_LUX_2010.no_of_frontends; front_end++) {
+            auto lidar_sensor_view_config = Ibeo_LUX_2010.sensor_view_configuration.add_lidar_sensor_view_configuration();
+            lidar_sensor_view_config->set_emitter_wavelength(905);         // Wavelength of the sensor's emitter
+            lidar_sensor_view_config->set_max_number_of_interactions(1);   // Maximum number of interactions per emitted signal within the scene
+            lidar_sensor_view_config->set_max_path_length(400);            // The maximum length in m of one signal path. When reached, propagation is terminated
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_x(1.5205);  // from center of rear axle, in m // CM: 2.4155 - 0.895 // ASM: - 0.9595 + 2.48
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_y(0.0);     // from center of rear axle, in m
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_z(1.232);   // from center of rear axle, in m // CM: 1.545 - 0.323
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_pitch(0.0);
+            lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
+            // lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_x(5.000);   // from center of rear axle, in m // CM: 5.863 - 0.863
+            // lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_y(0.0);     // from center of rear axle, in m
+            // lidar_sensor_view_config->mutable_mounting_position()->mutable_position()->set_z(0.489);   // from center of rear axle, in m // CM: 0.779 - 0.290
+            // lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_roll(0.0);
+            // lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_pitch(-0.5/180*M_PI);
+            // lidar_sensor_view_config->mutable_mounting_position()->mutable_orientation()->set_yaw(0.0);
+
+            auto frontend_config = Ibeo_LUX_2010.beam_center_config.add_lidar_sensor_view_configuration();
+
+            for (uint32_t layer_idx = 0; layer_idx < Ibeo_LUX_2010.no_of_layers; layer_idx++) {
+
+                if (layer_idx < 2) {
+                    beam_center_azimuth_min = -50.25;
+                    beam_center_azimuth_max =  50.25;
+                }
+                else {
+                    beam_center_azimuth_min = -60.0;
+                    beam_center_azimuth_max =  36.0;
+                }                
+                
+                uint32_t k = 1;
+                for (float beam_center_azimuth = beam_center_azimuth_min; beam_center_azimuth <= beam_center_azimuth_max + beam_step_azimuth / 4;
+                        beam_center_azimuth = beam_center_azimuth + beam_step_azimuth) {
+
+                    float azimuth_min = beam_center_azimuth - ray_step_azimuth * std::floor(Ibeo_LUX_2010.rays_per_beam_horizontal / 2);
+                    float azimuth_max = beam_center_azimuth + ray_step_azimuth * std::floor(Ibeo_LUX_2010.rays_per_beam_horizontal / 2);
+                    for (float azimuth = azimuth_min; azimuth < azimuth_max + ray_step_azimuth / 4; azimuth = azimuth + ray_step_azimuth) {
+
+                        // Find azimuth in gain table
+                        while ((k < gain.size() - 1) && (std::round(azimuth * 1000) >= std::round(gain[k][0] * 1000))) {
+                            k = k + 1;
+                        }
+                        // linear interpolation in gane table for actual attenuation
+                        float attenuation = (gain[k-1][layer_idx+1] + (gain[k][layer_idx+1] - gain[k-1][layer_idx+1]) / (gain[k][0] - gain[k-1][0]) * (azimuth - gain[k-1][0])) / 100;
+
+                        float beam_center_elevation = -1.5 * Ibeo_LUX_2010.beam_step_elevation + layer_idx * Ibeo_LUX_2010.beam_step_elevation;
+
+                        if ((azimuth > beam_center_azimuth - ray_step_azimuth / 4) && (azimuth < beam_center_azimuth + ray_step_azimuth / 4)) {
+                            auto beam = frontend_config->add_emitted_signal();
+                            beam->set_horizontal_angle(beam_center_azimuth / 180 * M_PI); // azimuth in rad
+                            beam->set_vertical_angle(beam_center_elevation / 180 * M_PI); // elevation in rad
+                            beam->set_signal_strength(Ibeo_LUX_2010.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation));
+                        }
+                        
+                        float elevation_min = beam_center_elevation - ray_step_elevation * std::floor(Ibeo_LUX_2010.rays_per_beam_vertical / 2);
+                        float elevation_max = beam_center_elevation + ray_step_elevation * std::floor(Ibeo_LUX_2010.rays_per_beam_vertical / 2);
+                        for (float elevation = elevation_min; elevation < elevation_max + ray_step_elevation / 4; elevation = elevation + ray_step_elevation) {
+                            auto ray = lidar_sensor_view_config->add_emitted_signal();
+                            ray->set_horizontal_angle(azimuth / 180 * M_PI); // azimuth in rad
+                            ray->set_vertical_angle(elevation / 180 * M_PI); // elevation in rad
+                            ray->set_signal_strength(Ibeo_LUX_2010.max_emitted_signal_strength_in_dBm + 10 * std::log10(attenuation) - 10 * std::log10(rays_per_beam)); // assuming equal distribution of beam power per ray
+                            lidar_sensor_view_config->add_time_offset_emission(0);
+                        }
+                    }
+                }
+            }
+        }

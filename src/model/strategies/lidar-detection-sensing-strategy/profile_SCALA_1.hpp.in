@@ -1,24 +1,24 @@
 
         /// detection_sensing_parameters
-        /// The following parameters can be defined for multiple sensors.
-        SCALA_1.detection_sensing_parameters.no_of_beams_vertical = {4};
-        SCALA_1.detection_sensing_parameters.no_of_beams_horizontal = {581};
-        SCALA_1.detection_sensing_parameters.horizontal_angle_min_rad = {-72.625/180*M_PI};
-        SCALA_1.detection_sensing_parameters.beam_layer_angles_rad = {{1.35/180*M_PI, 0.45/180*M_PI, -0.45/180*M_PI, -1.35/180*M_PI}};
-        SCALA_1.detection_sensing_parameters.beam_resolution_horizontal_rad = {0.25/180*M_PI};
-        SCALA_1.detection_sensing_parameters.beam_height_rad = {0.9 /180*M_PI};
-        SCALA_1.detection_sensing_parameters.beam_width_rad = {0.25 /180*M_PI};
-        SCALA_1.detection_sensing_parameters.max_echos_per_beam = {3};
 
-        SCALA_1.detection_sensing_parameters.rays_per_beam_vertical = {33};
-        SCALA_1.detection_sensing_parameters.rays_per_beam_horizontal = {9};
-        SCALA_1.detection_sensing_parameters.ray_resolution_vertical_rad = {0.027272727/180*M_PI};
-        SCALA_1.detection_sensing_parameters.ray_resolution_horizontal_rad = {0.027777778/180*M_PI};
+        SCALA_1.detection_sensing_parameters.max_echos_per_beam = 3;                    // maximum number of detections that are calculated per beam
+        SCALA_1.detection_sensing_parameters.distance_resolution_adc = 0.03;            // Specified distance resolution of the adc in m, 0.03 means time resolution of 0.1 ns
+        SCALA_1.detection_sensing_parameters.distance_resolution = 0.01;                // Specified distance resolution of the sensor output in m
+        SCALA_1.detection_sensing_parameters.distance_stddev = 0.025;                   // Specified distance standard deviation in m for gaussian noise model
+        SCALA_1.detection_sensing_parameters.signal_strength_threshold_in_dBm = -120.0; // Specified signal_strength threshold of the sensor at output in dBm (-120 dBm = 1 fW)
+        SCALA_1.detection_sensing_parameters.echo_separation_distance = 5.0;            // Distance for separation of two echos in m, when no reflections registered in between
+        SCALA_1.detection_sensing_parameters.pulse_duration_mean = 4.5;                 // Mean duration of the emitted laser pulse in ns
+        SCALA_1.detection_sensing_parameters.pulse_duration_stddev = 0.5;               // Standard deviation of the pulse duration of the emitted laser pulse in ns
+        SCALA_1.detection_sensing_parameters.echo_determination_mode = "start";         // Determines what part of the echo pulse is taken for distance. Options: {"start" (default), "peak"}
+        SCALA_1.detection_sensing_parameters.intensity_or_epw = 1;                      // 0: Detections with intensity in %, 1: Detections with echo pulse width (epw) in m
+        SCALA_1.detection_sensing_parameters.range_compensate_intensity = false;         // Compensate intensity by range with a factor of range^4
+        SCALA_1.detection_sensing_parameters.epw_resolution = 0.01;                     // Specified intensity resolution of the sensor output in m
 
-        SCALA_1.detection_sensing_parameters.distance_resolution_adc = {0.03};     // Specified distance resolution of the adc in m, 0.3 means time resolution of 0.1 ns
-        SCALA_1.detection_sensing_parameters.distance_resolution = {0.01};         // Specified distance resolution of the sensor output in m
-        SCALA_1.detection_sensing_parameters.distance_stddev = {0.025};            // Specified distance standard deviation in m for gaussian noise model
-        SCALA_1.detection_sensing_parameters.intensity_resolution = {0.01};        // Specified intensity resolution of the sensor output in %
-        SCALA_1.detection_sensing_parameters.intensity_threshold_in_dB = {-120.0}; // Specified intensity threshold of the sensor at output in dB
-        SCALA_1.detection_sensing_parameters.echo_separation_distance = {5.0};     // Distance for separation of two echos in m, when no reflections registered in between
-        SCALA_1.detection_sensing_parameters.echo_determination_mode = {"peak"};   // Determines what part of the echo pulse is taken for distance. Options: {"peak", "start", "center", "end"}
+        /// Lookup table for linear interpolation of epw part that correlates with signal strength in dBm, taking measurements from BaTh Hadelli (https://tuprints.ulb.tu-darmstadt.de/11582/) into account //TODO
+        auto epw_by_pulse    = 299792458 * SCALA_1.detection_sensing_parameters.pulse_duration_mean / 1000000000;
+        auto epw_by_geometry = SCALA_1.detection_sensing_parameters.distance_resolution_adc;
+        SCALA_1.detection_sensing_parameters.signal_strength_to_epw = {{SCALA_1.detection_sensing_parameters.signal_strength_threshold_in_dBm, -(epw_by_pulse + epw_by_geometry)},
+                                        {-56.7, 0.45}, // V4, distance: 20 m
+                                        {-50.9, 0.61}, // V4, distance: 15 m
+                                        {-42.8, 0.65}, // V4, distance: 10 m
+                                        {SCALA_1.max_emitted_signal_strength_in_dBm - 10 * float(std::log10(rays_per_beam)), 5.0}};

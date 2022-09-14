@@ -1,9 +1,9 @@
 [submodule "lib/eigen"]
 	path = lib/eigen
 	url = https://gitlab.com/libeigen/eigen.git
-[submodule "lib/open-simulation-interface"]
-	path = lib/open-simulation-interface
-	url = https://github.com/OpenSimulationInterface/open-simulation-interface.git
 [submodule "lib/fmi2"]
 	path = lib/fmi2
 	url = https://github.com/modelica/fmi-standard.git
+[submodule "lib/open-simulation-interface"]
+	path = lib/open-simulation-interface
+	url = https://gitlab.setlevel.de/open/osi.git

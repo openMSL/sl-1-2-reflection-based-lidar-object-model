@@ -1,0 +1,18 @@
+
+        /// detection_sensing_parameters
+
+        VLP16.detection_sensing_parameters.max_echos_per_beam = 1;                      // maximum number of detections that are calculated per beam
+        VLP16.detection_sensing_parameters.distance_resolution_adc = 0.05;              // Specified distance resolution of the adc in m, 0.3 means time resolution of 0.1 ns
+        VLP16.detection_sensing_parameters.distance_resolution = 0.01;                  // Specified distance resolution of the sensor output in m
+        VLP16.detection_sensing_parameters.distance_stddev = 0.005;                       // Specified distance standard deviation in m for gaussian noise model
+        VLP16.detection_sensing_parameters.intensity_resolution = 0.39;                 // Specified intensity resolution of the sensor output in %
+        VLP16.detection_sensing_parameters.intensity_stddev = 0.39;                      // Specified intensity standard deviation in %
+        VLP16.detection_sensing_parameters.range_comp_threshold = true;
+        //VLP16.detection_sensing_parameters.signal_strength_threshold_in_dBm = -19.0;   // Specified signal_strength threshold of the sensor at output in dBm (-120 dBm = 1 fW)
+        VLP16.detection_sensing_parameters.signal_strength_threshold_in_dBm = -48.8;
+        VLP16.detection_sensing_parameters.echo_separation_distance = 5.0;              // Distance for separation of two echos in m, when no reflections registered in between
+        VLP16.detection_sensing_parameters.pulse_duration_mean = 4.5;                   // Mean duration of the emitted laser pulse in ns
+        VLP16.detection_sensing_parameters.pulse_duration_stddev = 0.5;                 // Standard deviation of the pulse duration of the emitted laser pulse in ns
+        VLP16.detection_sensing_parameters.echo_determination_mode = "start";           // Determines what part of the echo pulse is taken for distance. Options: {"start" (default), "peak"}
+        VLP16.detection_sensing_parameters.intensity_or_epw = 0;                        // 0: Detections with intensity in %, 1: Detections with echo pulse width (epw) in m
+        VLP16.detection_sensing_parameters.range_compensate_intensity = true;           // Compensate intensity by range with a factor of range^4
