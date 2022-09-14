@@ -57,16 +57,33 @@ The output of the tracking module is a list of tracked objects.
 
 <a name="Rosenberger2020">1</a>: P. Rosenberger, M. F. Holder, N. Cianciaruso, P. Aust, J. F. Tamm-Morschel, C. Linnhoff, and H. Winner, “Sequential lidar sensor system simulation: A modular approach for simulation-based safety validation of automated driving”, In Automotive and Engine Technology, vol. 5, no. 3-4, pp. 187–197, Dec. 2020.
 
-### Modeling of Road Spray in Lidar Point Cloud (feature in upcoming release)
+### Modeling of Weather Influence on Lidar Point Cloud
 
-Shortly, a road spray model will be added in a new "environmental conditions" strategy.
+In the "Lidar-Environmental-Effects-Strategy", several weather influences are added to the simulated point cloud.
+The influences are parameterizable via the sensor profiles and calibrated for certain sensors based on measurements published by Linnhoff et al.[[2](#Linnhoff2022)</sup>]
+The stochastically modeled weather conditions include
+- Direct Sun Light
+- Fog
+- Rain
+- Snow
+
+<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/dc9a1de25d433eb4ec0b68c725ec15b8/lidarModelRain.gif" width="800" />
+
+<a name="Linnhoff2022">2</a>: C. Linnhoff, K. Hofrichter, L. Elster, P. Rosenberger, H. Winner, "Measuring the Influence of Environmental Conditions on Automotive Lidar Sensors,” in MDPI Sensors Journal, vol. 22, no. 14, July 2022.
+
+
+### Modeling of Road Spray in Lidar Point Cloud
+
+The "Lidar-Environmental-Effects-Strategy" does not only contain weather effects, but also other environmental conditions, specifically the influence of road spray on lidar.
 The road spray simulation is based on a methodical data set recorded in real spray conditions on a test track covering multiple vehicle classes, different pavement watering levels and object speeds ranging from 50 km/h to 130 km/h.
 Modeling parameters are extracted from the recorded data and utilized to calibrate a novel stochastic road spray model.
 The model is focused on simulating clustering effects appearing in the lidar point cloud due to turbulences in the spray plume.
-More detail can be found shortly in an upcoming publication, currently under review.
-The following video shows a sneek preview of the spray simulation with a van overtaking a stationary vehicle at 100 km/h.
+More detail can be found shortly in an upcoming publication, currently under review.[[3](#Linnhoff2022-2)</sup>]
 
 <img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/163b40eee2d73c63dd8acb9b1c5d5a33/Spray.gif" width="800" />
+
+<a name="Linnhoff2022-2">3</a>: Under review: C. Linnhoff, D. Scheuble, M. Bijelic, L. Elster, P. Rosenberger, W. Ritter, D. Dai and H. Winner, "Simulating Road Spray Effects in Automotive Lidar Sensor Models,” submitted to IEEE Sensors Journal, 2022.
+
 
 ## Parameterization
 

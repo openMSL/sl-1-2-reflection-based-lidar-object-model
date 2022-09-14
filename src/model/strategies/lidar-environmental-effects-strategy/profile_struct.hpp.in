@@ -1,0 +1,25 @@
+
+    struct det_envir_effects {
+
+        //weather
+        bool calibrated_fog;                    // does a parameter set for fog calibrated from to world measurements exist?
+        float fog_det_prob_factor;              // factor for linear function with meteorological visibility
+
+        bool calibrated_rain;                   // does a parameter set for rain calibrated from to world measurements exist?
+        float rain_det_prob_factor;             // factor for linear function with precipitation rate
+
+        bool calibrated_snow;                   // does a parameter set for snow calibrated from to world measurements exist?
+        float snow_det_prob_factor;             // factor for linear function with precipitation rate
+
+        bool calibrated_sun;                    // does a parameter set for direct sun light calibrated to real world measurements exist?
+
+        std::vector<float> layer_comp_factors;  // compensation factor for an uneven distribution of atmospheric detections between layers (length equal to number of layers)
+        double distance_distr_mu;               // mean value of log-normal distance distribution
+        double distance_distr_sigma;            // standard deviation of log-normal distance distribution
+        double intensity_distr_lambda;          // mean value of poisson intensity distribution
+
+        //spray
+        bool calibrated_spray;                  // does a parameter set for spray calibrated to real world measurements exist?
+
+
+    } det_envir_effects;

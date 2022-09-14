@@ -1,0 +1,22 @@
+
+        /// detection_environmental_effects_parameters
+
+        //weather
+        VLP32.det_envir_effects.calibrated_fog = false;                  // does a parameter set for fog calibrated from to world measurements exist?
+        VLP32.det_envir_effects.fog_det_prob_factor = 0;                // factor for linear function with meteorological visibility
+
+        VLP32.det_envir_effects.calibrated_rain = false;                 // does a parameter set for rain calibrated from to world measurements exist?
+        VLP32.det_envir_effects.rain_det_prob_factor = 0.000169;      // factor for linear function with precipitation rate
+
+        VLP32.det_envir_effects.calibrated_snow = false;                 // does a parameter set for snow calibrated from to world measurements exist?
+        VLP32.det_envir_effects.snow_det_prob_factor = 0;         // factor for linear function with precipitation rate
+
+        VLP32.det_envir_effects.calibrated_sun = false;                 // does a parameter set for direct sun light calibrated to real world measurements exist?
+
+        VLP32.det_envir_effects.layer_comp_factors = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};    // compensation factor for an uneven distribution of atmospheric detections between layers (length equal to number of layers)
+        VLP32.det_envir_effects.distance_distr_mu = 1.4329;             // mean value of log-normal distance distribution
+        VLP32.det_envir_effects.distance_distr_sigma = 0.7868;          // standard deviation of log-normal distance distribution
+        VLP32.det_envir_effects.intensity_distr_lambda = 0.69312;       // mean value of poisson intensity distribution
+
+        //spray
+        VLP32.det_envir_effects.calibrated_spray = true;                // does a parameter set for spray calibrated to real world measurements exist?

@@ -2,9 +2,17 @@
 
 This strategy adds environmental effects due to fog, rain, sun light and road spray to the detections, previously calculated by the Detection Sensing Strategy.
 
-**The code will be published shortly...**
+## Fog, Rain, Snow, Sun Light
 
-## Fog, Rain, Sun Light
+In the "Lidar-Environmental-Effects-Strategy", several weather influences are added to the simulated point cloud.
+The influences are parameterizable via the sensor profiles and calibrated for certain sensors based on measurements published by Linnhoff et al.[[2](#Linnhoff2022)</sup>]
+The stochastically modeled weather conditions include
+- Direct Sun Light
+- Fog
+- Rain
+- Snow
+
+<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/dc9a1de25d433eb4ec0b68c725ec15b8/lidarModelRain.gif" width="800" />
 
 This section is based on
 
@@ -16,6 +24,11 @@ If you find our work useful in your research, please consider citing:
 @ARTICLE{linnhoff2022,
 author={Linnhoff, Clemens and Hofrichter, Kristof and Elster, Lukas and Rosenberger, Philipp and Winner, Hermann},
 journal={MDPI Sensors Journal},
+volume = {22},
+year = {2022},
+number = {14},
+article-number = {5266},
+url = {https://www.mdpi.com/1424-8220/22/14/5266},
 title={Measuring the Influence of Environmental Conditions on Automotive Lidar Sensors},
 year={2022}
 }
