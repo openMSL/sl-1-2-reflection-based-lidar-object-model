@@ -1,4 +1,7 @@
 [![pipeline status](https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/badges/master/pipeline.svg)](https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/-/commits/master) 
+
+:warning: **Current version not compliant with official ASAM OSI**: The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project. It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
+
 # Reflection Based Lidar Object Model
 
 <img align="right" src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/object-based-generic-perception-object-model/uploads/17c84e9ec0acf0fac2e35855f038ad0b/fzdlogo.jpg" width="100" />
