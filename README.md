@@ -1,8 +1,9 @@
-[![pipeline status](https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/badges/master/pipeline.svg)](https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/-/commits/master) 
+# Reflection Based Lidar Object Model
+
+![Build workflow](https://github.com/openMSL/reflection_based_lidar_object_model/actions/workflows/build.yml/badge.svg)
 
 :warning: **Current version not compliant with official ASAM OSI**: The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project. It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
 
-# Reflection Based Lidar Object Model
 
 <img align="right" src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/object-based-generic-perception-object-model/uploads/17c84e9ec0acf0fac2e35855f038ad0b/fzdlogo.jpg" width="100" />
 
@@ -246,15 +247,15 @@ Currently, all information on model input is passed to the output.
 ### Install Dependencies in Windows 10
 
 1. Install cmake from https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3-windows-x86_64.msi
-2. Install protobuf for [MSYS-2020](install_protobuf_Win64_MSYS-2020.md) or [Visual Studio 2017](install_protobuf_Win64_VS2017.md)
+2. Install protobuf for [MSYS-2020](doc/build-instructions/install_protobuf_Win64_MSYS-2020.md) or [Visual Studio 2017](doc/build-instructions/install_protobuf_Win64_VS2017.md)
 
 ### Clone with Submodules, Build, and Install in Windows 10
 
 1. Clone this repository <ins>with submodules</ins>:
    ```bash
-   $ git clone https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model.git --recurse-submodules
+   $ git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
    ```
-2. Build the model in [MSYS-2020](install_model_Win64_MSYS-2020.md) or [Visual Studio 2017](install_model_Win64_VS2017.md)
+2. Build the model in [MSYS-2020](doc/build-instructions/install_model_Win64_MSYS-2020.md) or [Visual Studio 2017](doc/build-instructions/install_model_Win64_VS2017.md)
 3. Take FMU from `FMU_INSTALL_DIR`
 
     (Please note that sources are not packed into the FMU at the moment.)
@@ -264,7 +265,7 @@ Currently, all information on model input is passed to the output.
 ### Install Dependencies in Ubuntu 18.04 / 20.04
 
 1. Install cmake 3.12
-   * as told in [these install instructions](install_cmake_ubuntu_3-12.md)
+   * as told in [these install instructions](doc/build-instructions/install_cmake_ubuntu_3-12.md)
 2. Install protobuf 3.0.0:
    * Check your version via `protoc --version`. It should output: `libprotoc 3.0.0`
    * If needed, you can install it via `sudo apt-get install libprotobuf-dev protobuf-compiler`
@@ -282,7 +283,7 @@ Currently, all information on model input is passed to the output.
 
 1. Clone this repository <ins>with submodules</ins>:
     ```bash
-    $ git clone https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model.git --recurse-submodules
+    $ git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
     ```
 2. Build the model by executing in the extracted project root directory:
     ```bash
