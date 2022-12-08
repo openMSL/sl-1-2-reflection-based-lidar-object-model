@@ -274,8 +274,7 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData *current_
 			detection->mutable_position()->set_distance(distance);
 			detection->mutable_position()->set_azimuth(azimuth);
 			detection->mutable_position()->set_elevation(elevation);
-
-            detection->mutable_object_id()->set_value(beam_idx);    //todo: used as hack as beam id does not exist in this OSI release
+            detection->set_beam_id(beam_idx);
 
 			if (profile.detection_sensing_parameters.intensity_or_epw == 0) {
                 double peak_intensity;
