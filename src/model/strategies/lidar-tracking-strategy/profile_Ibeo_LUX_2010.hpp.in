@@ -1,4 +1,7 @@
-
+//
+// Copyright 2022 Technical University of Darmstadt - FZD
+// SPDX-License-Identifier: MPL-2.0
+//
         /// tracking_parameters
         Ibeo_LUX_2010.tracking_parameters.classification_flag = 0;          // 0 = from ground truth; 1 = all "UNKNOWN"
         Ibeo_LUX_2010.tracking_parameters.orientation_flag = 1;             // 0 = from ground truth; 1 = from current point cloud segment;

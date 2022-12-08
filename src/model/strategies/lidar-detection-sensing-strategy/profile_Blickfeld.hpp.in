@@ -1,4 +1,7 @@
-
+//
+// Copyright 2022 Technical University of Darmstadt - FZD
+// SPDX-License-Identifier: MPL-2.0
+//
         /// detection_sensing_parameters
 
         Blickfeld.detection_sensing_parameters.max_echos_per_beam = 1;                      // maximum number of detections that are calculated per beam

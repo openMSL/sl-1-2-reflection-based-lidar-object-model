@@ -1,4 +1,7 @@
-
+//
+// Copyright 2022 Technical University of Darmstadt - FZD
+// SPDX-License-Identifier: MPL-2.0
+//
         /// detection_sensing_parameters
 
         Ibeo_LUX_2010.detection_sensing_parameters.max_echos_per_beam = 3;                      // maximum number of detections that are calculated per beam

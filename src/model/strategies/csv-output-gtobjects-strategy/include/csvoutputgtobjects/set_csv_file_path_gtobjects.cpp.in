@@ -1,3 +1,8 @@
+//
+// Copyright 2022 Technical University of Darmstadt - FZD
+// SPDX-License-Identifier: MPL-2.0
+//
+
 time_t curr_time;
 struct tm *detl;
 char buf[80];
