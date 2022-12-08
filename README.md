@@ -5,14 +5,14 @@
 :warning: **Current version not compliant with official ASAM OSI**: The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project. It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
 
 
-<img align="right" src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/object-based-generic-perception-object-model/uploads/17c84e9ec0acf0fac2e35855f038ad0b/fzdlogo.jpg" width="100" />
+<img align="right" src="doc/img/fzd_logo.jpg" width="100" />
 
 This is the FZD Reflection Based Lidar Model based on the FZD OSI Sensor Model Packaging Framework.
 It is a highly parameterizable sensor system model including detection calculation and object tracking simulation.
 The model gets lidar reflection calculated in a simulation tool beforehand e.g. with ray tracing.
 The model outputs are lidar detections and detected moving objects.<br><br>
 
-<img src="https://user-images.githubusercontent.com/27010086/148824838-12edae52-fd20-4f4b-938e-fdd3ee8c3544.gif" width="800" />
+<img src="doc/img/model_video.gif" width="800" />
 
 ## Modeling Approach
 
@@ -26,7 +26,7 @@ This is where the magic happens.
 The `apply()` function of the strategy is called by the `do_calc()` function of the Framework.
 There are four subsequent strategies as shown in the image below.
 
-<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/ab8425c05dd6a6fe3c3d3e82232e5602/image.png" width="800" />
+<img src="doc/img/model_overview.png" width="800" />
 
 ### Modeling of Beam Divergence by Super-Sampling with Rays
 
@@ -39,7 +39,7 @@ It is not explicitly modeled, but indirectly covered by the threshold.
 Finally, the echo pulse width in m, depicted in the same figure as the widths [A, B] and [C, D], and the intensity for each echo are calculated based on the correctly summarized signal strengths from the corresponding reflections.
 Consequently, compared to single-ray-per-beam ray tracing, in partly occlusion scenarios, where the diverging lidar beam hits an object in front and another one behind, two detections can be derived, as it would be the case with a real lidar sensor.<br><br>
 
-<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/739aeea64d29a93212b882457dbbcb95/_reflection-based_model.png" width="800" />
+<img src="doc/img/over_sampling.png" width="800" />
 
 The image depicts the super-sampling of a lidar sensor beam and the detection calculation within the reflection-based lidar sensor simulation from [[1](#Rosenberger2020)</sup>, p. 192]. The intervals A-B and C-D mark the resulting echoes at the edge-shaped object (left) and in the signal (right). The ⊗ visualizes the center of a beam that one would get by single-ray-per-beam ray tracing without multi-echo capability.<br><br>
 
@@ -68,7 +68,7 @@ The stochastically modeled weather conditions include
 - Rain
 - Snow
 
-<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/dc9a1de25d433eb4ec0b68c725ec15b8/lidarModelRain.gif" width="800" />
+<img src="doc/img/rain.gif" width="800" />
 
 <a name="Linnhoff2022">2</a>: C. Linnhoff, K. Hofrichter, L. Elster, P. Rosenberger, H. Winner, "Measuring the Influence of Environmental Conditions on Automotive Lidar Sensors,” in MDPI Sensors Journal, vol. 22, no. 14, July 2022.
 
@@ -81,7 +81,7 @@ Modeling parameters are extracted from the recorded data and utilized to calibra
 The model is focused on simulating clustering effects appearing in the lidar point cloud due to turbulences in the spray plume.
 More detail can be found shortly in an upcoming publication, currently under review.[[3](#Linnhoff2022-2)</sup>]
 
-<img src="https://gitlab.com/tuda-fzd/perception-sensor-modeling/reflection-based-lidar-object-model/uploads/163b40eee2d73c63dd8acb9b1c5d5a33/Spray.gif" width="800" />
+<img src="doc/img/spray.gif" width="800" />
 
 <a name="Linnhoff2022-2">3</a>: Under review: C. Linnhoff, D. Scheuble, M. Bijelic, L. Elster, P. Rosenberger, W. Ritter, D. Dai and H. Winner, "Simulating Road Spray Effects in Automotive Lidar Sensor Models,” submitted to IEEE Sensors Journal, 2022.
 
