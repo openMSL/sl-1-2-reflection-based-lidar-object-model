@@ -1,4 +1,7 @@
-
+//
+// Copyright 2022 Technical University of Darmstadt - FZD
+// SPDX-License-Identifier: MPL-2.0
+//
     struct det_envir_effects {
 
         //weather

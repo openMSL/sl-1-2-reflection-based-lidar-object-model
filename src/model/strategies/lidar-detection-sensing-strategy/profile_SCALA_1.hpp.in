@@ -1,4 +1,7 @@
-
+//
+// Copyright 2022 Technical University of Darmstadt - FZD
+// SPDX-License-Identifier: MPL-2.0
+//
         /// detection_sensing_parameters
 
         SCALA_1.detection_sensing_parameters.max_echos_per_beam = 3;                    // maximum number of detections that are calculated per beam
