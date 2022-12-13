@@ -208,10 +208,10 @@ Possible values are "flat" or "structured".
   - sensor_view.global_ground_truth.moving_object.type
   - sensor_view.global_ground_truth.moving_object.vehicle_classification.type
   - sensor_view.global_ground_truth.moving_object.vehicle_attributes.bbcenter_to_rear
-  - sensor_view.global_ground_truth.moving_object.vehicle_attributes.ground_clearance
 - Lidar reflections
-  - sensor_view.lidar_sensor_view.reflection.time_of_flight
-  - sensor_view.lidar_sensor_view.reflection.signal_strength
+  - sensor_view.lidar_sensor_view.rendering_result.received_signal
+  - sensor_view.lidar_sensor_view.rendering_result.path_length
+  - sensor_view.lidar_sensor_view.rendering_result.emitted_signal_idx
 
 ### Additionally Filled Fields in OSI3 Sensor_Data by the Sensor Model
 
@@ -240,6 +240,9 @@ Currently, all information on model input is passed to the output.
 - sensor_data.moving_object.movement_state
 - sensor_data.moving_object.candidate.probability
 - sensor_data.moving_object.candidate.type
+- sensor_data.feature_data.lidar_sensor.detection.position
+- sensor_data.feature_data.lidar_sensor.detection.intensity
+- sensor_data.feature_data.lidar_sensor.detection.echo_pulse_width
 
 ## Build Instructions in Windows 10
 

@@ -350,7 +350,7 @@ osi3::LidarDetectionData DetectionEnvironmentalEffects::get_beam_indices(osi3::S
     osi3::LidarDetectionData existing_detections;
     for (int detection_idx = 0; detection_idx < sensor_data.feature_data().lidar_sensor(0).detection_size(); detection_idx++) {
         auto current_detection = sensor_data.feature_data().lidar_sensor(0).detection(detection_idx);
-        int emitted_signal_idx = (int)current_detection.object_id().value();   //todo: add beam id to detections in OSI, height only used as a hack
+        int emitted_signal_idx = (int)current_detection.beam_id();
         existing_detection_idx.at(emitted_signal_idx) = detection_idx;
         existing_detections.add_detection()->CopyFrom(current_detection);
     }
