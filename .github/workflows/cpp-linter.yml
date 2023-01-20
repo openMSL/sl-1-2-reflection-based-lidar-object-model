@@ -16,7 +16,6 @@ jobs:
         with:
           style: file
           files-changed-only: false
-          tidy-checks: bugprone-*,performance-*,readability-*
 
       - name: Fail fast?!
         if: steps.linter.outputs.checks-failed > 0
