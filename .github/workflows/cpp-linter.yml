@@ -3,6 +3,8 @@ name: cpp-linter
 on:
   push:
     branches: [ "cpp-linter" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   cpp-linter:
