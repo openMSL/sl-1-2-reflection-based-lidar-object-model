@@ -4,52 +4,53 @@
 //
 
 #include "segmentation/Segmentation.hpp"
+
 #include <string>
 
 using namespace model;
 using namespace osi3;
 
-void model::Segmentation::apply(SensorData &in) {
+void model::Segmentation::apply(SensorData& in)
+{
     log("Starting segmentation");
 
     auto no_of_moving_objects = in.sensor_view(0).global_ground_truth().moving_object_size();
     log("No. of moving objects from GT is " + std::to_string(no_of_moving_objects) + " (incl. ego vehicle)");
 
-    if (in.has_logical_detection_data()) {
+    if (in.has_logical_detection_data())
+    {
         TF::EgoData ego_data;
-        if(!TF::get_ego_info(ego_data, in.sensor_view(0)))
+        if (!TF::get_ego_info(ego_data, in.sensor_view(0)))
             alert("Ego vehicle has no base, no id, or is not contained in GT moving objects.");
 
         /// Run through all objects in current frame except the host vehicle
-        for (int object_no_in = 0; object_no_in < no_of_moving_objects; object_no_in++) {
+        for (int object_no_in = 0; object_no_in < no_of_moving_objects; object_no_in++)
+        {
             auto object_id = in.sensor_view(0).global_ground_truth().moving_object(object_no_in).id().value();
-            if (object_id != ego_data.ego_vehicle_id.value()) { // Continue in case of ego car
+            if (object_id != ego_data.ego_vehicle_id.value())
+            {  // Continue in case of ego car
                 /// Get corners of current object and set the object id for all points
                 std::vector<Vector3d> bounding_box_corners = get_bounding_box_corners(in.sensor_view(0).global_ground_truth().moving_object(object_no_in));
                 calculate_segment_of_point_cloud(in, object_no_in, bounding_box_corners, ego_data, profile, log);
             }
         }
     }
-    else{
-        auto timestamp = (double) in.sensor_view(0).global_ground_truth().timestamp().seconds() + (double) in.sensor_view(0).global_ground_truth().timestamp().nanos() / 1000000000;
+    else
+    {
+        auto timestamp = (double)in.sensor_view(0).global_ground_truth().timestamp().seconds() + (double)in.sensor_view(0).global_ground_truth().timestamp().nanos() / 1000000000;
         log("No logical detection data available for timestamp " + std::to_string(timestamp));
     }
 }
 
-std::vector<Vector3d> Segmentation::get_bounding_box_corners(const MovingObject &current_moving_object) {
+std::vector<Vector3d> Segmentation::get_bounding_box_corners(const MovingObject& current_moving_object)
+{
 
-    std::vector< Vector3d > bounding_box_corners;
-    std::vector< std::vector <double> > corner_factor_vectors = {{ 0.5,  0.5, -0.5},
-                                                       { 0.5, -0.5, -0.5},
-                                                       {-0.5,  0.5, -0.5},
-                                                       {-0.5, -0.5, -0.5},
-                                                       { 0.5,  0.5,  0.5},
-                                                       { 0.5, -0.5,  0.5},
-                                                       {-0.5,  0.5,  0.5},
-                                                       {-0.5, -0.5,  0.5}
-    };
+    std::vector<Vector3d> bounding_box_corners;
+    std::vector<std::vector<double> > corner_factor_vectors = {
+        {0.5, 0.5, -0.5}, {0.5, -0.5, -0.5}, {-0.5, 0.5, -0.5}, {-0.5, -0.5, -0.5}, {0.5, 0.5, 0.5}, {0.5, -0.5, 0.5}, {-0.5, 0.5, 0.5}, {-0.5, -0.5, 0.5}};
 
-    for (std::vector <double> &corner_factor_vector : corner_factor_vectors) {
+    for (std::vector<double>& corner_factor_vector : corner_factor_vectors)
+    {
         Vector3d current_corner;
         current_corner.set_x(corner_factor_vector.at(0) * current_moving_object.base().dimension().length());
         current_corner.set_y(corner_factor_vector.at(1) * current_moving_object.base().dimension().width());
@@ -60,7 +61,13 @@ std::vector<Vector3d> Segmentation::get_bounding_box_corners(const MovingObject 
     return bounding_box_corners;
 }
 
-size_t Segmentation::calculate_segment_of_point_cloud(SensorData &in, int object_no_in, const std::vector<Vector3d> &bounding_box_corners, const TF::EgoData &ego_data, const Profile &profile, const Log &log) {
+size_t Segmentation::calculate_segment_of_point_cloud(SensorData& in,
+                                                      int object_no_in,
+                                                      const std::vector<Vector3d>& bounding_box_corners,
+                                                      const TF::EgoData& ego_data,
+                                                      const Profile& profile,
+                                                      const Log& log)
+{
 
     /// Bounding box corners with tolerance for segmentation
     double x_min = bounding_box_corners.at(2).x() - profile.segmentation_parameters.tolerance_for_segmentation;
@@ -72,21 +79,29 @@ size_t Segmentation::calculate_segment_of_point_cloud(SensorData &in, int object
 
     /// Run through all logical_detections
     size_t segment_size_of_current_object = 0;
-    for (int logical_detection_idx = 0; logical_detection_idx < in.logical_detection_data().logical_detection_size(); logical_detection_idx++) {
-        Vector3d logical_detection_in_world_coordinates = TF::transform_position_from_ego_to_world_coordinates(in.logical_detection_data().logical_detection(logical_detection_idx).position(), ego_data);
-        Vector3d logical_detection_in_object_coordinates = TF::transform_to_local_coordinates(logical_detection_in_world_coordinates,
-                                                                                              in.sensor_view(0).global_ground_truth().moving_object(object_no_in).base().orientation(),
-                                                                                              in.sensor_view(0).global_ground_truth().moving_object(object_no_in).base().position());
+    for (int logical_detection_idx = 0; logical_detection_idx < in.logical_detection_data().logical_detection_size(); logical_detection_idx++)
+    {
+        Vector3d logical_detection_in_world_coordinates =
+            TF::transform_position_from_ego_to_world_coordinates(in.logical_detection_data().logical_detection(logical_detection_idx).position(), ego_data);
+        Vector3d logical_detection_in_object_coordinates =
+            TF::transform_to_local_coordinates(logical_detection_in_world_coordinates,
+                                               in.sensor_view(0).global_ground_truth().moving_object(object_no_in).base().orientation(),
+                                               in.sensor_view(0).global_ground_truth().moving_object(object_no_in).base().position());
 
         /// Check if Point is in GT Bounding Box
-        if((logical_detection_in_object_coordinates.x() >= x_min) && (logical_detection_in_object_coordinates.x() <= x_max)
-        && (logical_detection_in_object_coordinates.y() >= y_min) && (logical_detection_in_object_coordinates.y() <= y_max)
-        && (logical_detection_in_object_coordinates.z() >= z_min) && (logical_detection_in_object_coordinates.z() <= z_max)) {
+        if ((logical_detection_in_object_coordinates.x() >= x_min) && (logical_detection_in_object_coordinates.x() <= x_max) &&
+            (logical_detection_in_object_coordinates.y() >= y_min) && (logical_detection_in_object_coordinates.y() <= y_max) &&
+            (logical_detection_in_object_coordinates.z() >= z_min) && (logical_detection_in_object_coordinates.z() <= z_max))
+        {
             /// Set gt object id for each point
-            in.mutable_logical_detection_data()->mutable_logical_detection(logical_detection_idx)->mutable_object_id()->CopyFrom(in.sensor_view(0).global_ground_truth().moving_object(object_no_in).id());
+            in.mutable_logical_detection_data()
+                ->mutable_logical_detection(logical_detection_idx)
+                ->mutable_object_id()
+                ->CopyFrom(in.sensor_view(0).global_ground_truth().moving_object(object_no_in).id());
             segment_size_of_current_object++;
         }
     }
-    log("Segment size of detected object " + std::to_string(object_no_in) + " with object id " + std::to_string(in.sensor_view(0).global_ground_truth().moving_object(object_no_in).id().value()) + ": " + std::to_string(segment_size_of_current_object));
+    log("Segment size of detected object " + std::to_string(object_no_in) + " with object id " +
+        std::to_string(in.sensor_view(0).global_ground_truth().moving_object(object_no_in).id().value()) + ": " + std::to_string(segment_size_of_current_object));
     return segment_size_of_current_object;
 }

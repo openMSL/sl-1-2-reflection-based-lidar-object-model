@@ -6,27 +6,30 @@
 #ifndef BIN_OUTPUT_SENSORVIEW_STRATEGY_HPP
 #define BIN_OUTPUT_SENSORVIEW_STRATEGY_HPP
 
-#include <model/include/strategy.hpp>
 #include <string>
+
+#include <model/include/strategy.hpp>
 
 using namespace osi3;
 
-namespace model {
+namespace model
+{
 
-	class OSIBinSensorViewOutput : public Strategy {
+class OSIBinSensorViewOutput : public Strategy
+{
 
-        using Strategy::Strategy;
+    using Strategy::Strategy;
 
-        void apply(SensorData &) override;
+    void apply(SensorData&) override;
 
-        std::string file_path_tracefile;
-        bool first_call = true;
-    public:
+    std::string file_path_tracefile;
+    bool first_call = true;
 
-    private:
-        static void write_data_to_bin(const std::string& path, const SensorView &sensor_view);
-    };
+  public:
+  private:
+    static void write_data_to_bin(const std::string& path, const SensorView& sensor_view);
+};
 
-}
+}  // namespace model
 
-#endif //BIN_OUTPUT_SENSORVIEW_STRATEGY_HPP
+#endif  // BIN_OUTPUT_SENSORVIEW_STRATEGY_HPP
