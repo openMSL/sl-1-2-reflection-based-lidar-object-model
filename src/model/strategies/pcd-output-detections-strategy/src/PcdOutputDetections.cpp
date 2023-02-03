@@ -74,7 +74,7 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
 #else
     std::string path = path_string + "/" + filename;
 #endif
-    writePcdHeader(path, sensor_data, no_of_sensors);
+    write_pcd_header(path, sensor_data, no_of_sensors);
 
     for (int sensor_idx = 0; sensor_idx < no_of_sensors; sensor_idx++)
     {
@@ -88,7 +88,7 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
                 point_cartesian_sensor.set_y(detection.position().distance() * cos(detection.position().elevation()) * sin(detection.position().azimuth()));
                 point_cartesian_sensor.set_z(detection.position().distance() * sin(detection.position().elevation()));
                 auto intensity = float(detection.has_intensity() ? detection.intensity() : detection.echo_pulse_width());
-                write2Pcd(path, point_cartesian_sensor.x(), point_cartesian_sensor.y(), point_cartesian_sensor.z(), intensity);
+                write_2_pcd(path, point_cartesian_sensor.x(), point_cartesian_sensor.y(), point_cartesian_sensor.z(), intensity);
             }
         }
         else if (sensor_data.sensor_view(0).radar_sensor_view().size() > 0)
@@ -100,13 +100,13 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
                 point_cartesian_sensor.set_y(detection.position().distance() * cos(detection.position().elevation()) * sin(detection.position().azimuth()));
                 point_cartesian_sensor.set_z(detection.position().distance() * sin(detection.position().elevation()));
                 auto intensity = float(detection.rcs());
-                write2Pcd(path, point_cartesian_sensor.x(), point_cartesian_sensor.y(), point_cartesian_sensor.z(), intensity);
+                write_2_pcd(path, point_cartesian_sensor.x(), point_cartesian_sensor.y(), point_cartesian_sensor.z(), intensity);
             }
         }
     }
 }
 
-void PcdOutputDetections::writePcdHeader(const std::string& path, const SensorData& sensor_data, const size_t& no_of_sensors)
+void PcdOutputDetections::write_pcd_header(const std::string& path, const SensorData& sensor_data, const size_t& no_of_sensors)
 {
     size_t no_of_points = 0;
     for (int sensor_idx = 0; sensor_idx < no_of_sensors; sensor_idx++)
@@ -141,7 +141,7 @@ void PcdOutputDetections::writePcdHeader(const std::string& path, const SensorDa
     my_file.close();
 }
 
-void PcdOutputDetections::write2Pcd(const std::string& path, double x, double y, double z, double intensity)
+void PcdOutputDetections::write_2_pcd(const std::string& path, double x, double y, double z, double intensity)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);

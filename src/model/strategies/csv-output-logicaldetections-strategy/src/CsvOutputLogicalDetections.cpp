@@ -20,8 +20,6 @@
 using namespace model;
 using namespace osi3;
 
-static bool first_call = true;
-
 void model::CsvOutputLogicalDetections::apply(SensorData& sensor_data)
 {
     log("Starting .csv output for logical detections");
@@ -54,12 +52,12 @@ void model::CsvOutputLogicalDetections::apply(SensorData& sensor_data)
 #include <csvoutputlogicaldetections/set_csv_file_path_logicaldetections.cpp>
         if (sensor_data.sensor_view(0).radar_sensor_view_size() > 0)
         {
-            write_first_line_to_CSV(file_path_logicaldetections, 1);
+            write_first_line_to_csv(file_path_logicaldetections, 1);
             first_call = false;
         }
         else if (sensor_data.sensor_view(0).lidar_sensor_view_size() > 0)
         {
-            write_first_line_to_CSV(file_path_logicaldetections, sensor_data.logical_detection_data().logical_detection(0).has_intensity());
+            write_first_line_to_csv(file_path_logicaldetections, sensor_data.logical_detection_data().logical_detection(0).has_intensity());
             first_call = false;
         }
         else
@@ -71,7 +69,7 @@ void model::CsvOutputLogicalDetections::apply(SensorData& sensor_data)
     size_t logical_detection_idx = 0;
     for (const auto& logical_detection : sensor_data.logical_detection_data().logical_detection())
     {
-        write_data_to_CSV(file_path_logicaldetections,
+        write_data_to_csv(file_path_logicaldetections,
                           timestamp,
                           logical_detection_idx,
                           float(logical_detection.position().x()),
@@ -82,7 +80,7 @@ void model::CsvOutputLogicalDetections::apply(SensorData& sensor_data)
     }
 }
 
-void CsvOutputLogicalDetections::write_first_line_to_CSV(const std::string& path, const size_t& has_intensity)
+void CsvOutputLogicalDetections::write_first_line_to_csv(const std::string& path, const size_t& has_intensity)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);
@@ -90,7 +88,7 @@ void CsvOutputLogicalDetections::write_first_line_to_CSV(const std::string& path
     my_file.close();
 }
 
-void CsvOutputLogicalDetections::write_data_to_CSV(const std::string& path, double timestamp, size_t detection_idx, float x, float y, float z, float intensity)
+void CsvOutputLogicalDetections::write_data_to_csv(const std::string& path, double timestamp, size_t detection_idx, float x, float y, float z, float intensity)
 {
     // Debug output of Data
     std::fstream my_file;

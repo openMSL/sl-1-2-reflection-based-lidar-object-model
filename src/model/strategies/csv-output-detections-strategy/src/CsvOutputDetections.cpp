@@ -53,7 +53,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
         if (first_call && (sensor_data.feature_data().lidar_sensor(0).detection().size() > 0))
         {
 #include <csvoutputdetections/set_csv_file_path_detections.cpp>
-            write_first_line_to_CSV(file_path_detections, sensor_data.feature_data().lidar_sensor(0).detection(0).has_intensity());
+            write_first_line_to_csv(file_path_detections, sensor_data.feature_data().lidar_sensor(0).detection(0).has_intensity());
             first_call = false;
         }
         for (int sensor_idx = 0; sensor_idx < sensor_data.sensor_view(0).lidar_sensor_view_size(); sensor_idx++)
@@ -66,7 +66,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
                 {
 
                     if (detection.has_intensity())
-                        write_data_to_CSV(file_path_detections,
+                        write_data_to_csv(file_path_detections,
                                           timestamp,
                                           detection_idx,
                                           detection.position().azimuth() * 180 / M_PI,
@@ -74,7 +74,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
                                           detection.position().distance(),
                                           detection.intensity());
                     else if (detection.has_echo_pulse_width())
-                        write_data_to_CSV(file_path_detections + "\\Detections.csv",
+                        write_data_to_csv(file_path_detections + "\\Detections.csv",
                                           timestamp,
                                           detection_idx,
                                           detection.position().azimuth() * 180 / M_PI,
@@ -91,7 +91,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
         if (first_call && (sensor_data.feature_data().radar_sensor(0).detection().size() > 0))
         {
 #include <csvoutputdetections/set_csv_file_path_detections.cpp>
-            write_first_line_to_CSV(file_path_detections, 2);
+            write_first_line_to_csv(file_path_detections, 2);
             first_call = false;
         }
         for (int sensor_idx = 0; sensor_idx < sensor_data.sensor_view(0).radar_sensor_view_size(); sensor_idx++)
@@ -102,7 +102,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
                 size_t detection_idx = 0;
                 for (const auto& detection : sensor_data.feature_data().radar_sensor(sensor_idx).detection())
                 {
-                    write_data_to_CSV(file_path_detections,
+                    write_data_to_csv(file_path_detections,
                                       timestamp,
                                       detection_idx,
                                       detection.position().azimuth() * 180 / M_PI,
@@ -125,7 +125,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
     }
 }
 
-void CsvOutputDetections::write_first_line_to_CSV(const std::string& path, const size_t& epw_intensity_rcs_flag)
+void CsvOutputDetections::write_first_line_to_csv(const std::string& path, const size_t& epw_intensity_rcs_flag)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);
@@ -146,7 +146,7 @@ void CsvOutputDetections::write_first_line_to_CSV(const std::string& path, const
     my_file.close();
 }
 
-void CsvOutputDetections::write_data_to_CSV(const std::string& path,
+void CsvOutputDetections::write_data_to_csv(const std::string& path,
                                             double timestamp,
                                             size_t detection_idx,
                                             double azimuth_in_deg,

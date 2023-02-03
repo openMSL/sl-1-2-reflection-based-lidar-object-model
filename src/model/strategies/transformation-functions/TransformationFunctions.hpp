@@ -26,7 +26,7 @@ class TF
         MountingPosition sensor_mounting_parameters;
         Identifier ego_vehicle_id;
         MovingObject::VehicleAttributes ego_vehicle_attributes;
-        int ego_vehicle_no;
+        int ego_vehicle_no = 0;
     };
 
     static Orientation3d calc_relative_orientation_to_local(const Orientation3d& object_orientation, const Orientation3d& ego_orientation);

@@ -22,12 +22,12 @@ class CsvOutputGTObjects : public Strategy
 
     void apply(SensorData&) override;
 
-    std::string file_path_gtobjects;
+    std::string file_path_gtobjects = "";
     bool first_call = true;
 
   public:
   private:
-    struct GT_object
+    struct GTObject
     {
         size_t id = 0;
         float x = 0.0;
@@ -42,8 +42,8 @@ class CsvOutputGTObjects : public Strategy
         bool is_moving = false;
     };
 
-    static void write_first_line_to_CSV(const std::string& path);
-    static void write_data_to_CSV(const std::string& path,
+    static void write_first_line_to_csv(const std::string& path);
+    static void write_data_to_csv(const std::string& path,
                                   double timestamp,
                                   size_t object_idx,
                                   float x,

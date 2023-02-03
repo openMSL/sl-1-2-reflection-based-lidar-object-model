@@ -96,9 +96,9 @@ void DetectionSensing::apply(SensorData& sensor_data)
             continue;
         }
 
-        /// Lidar cuboid as vector of Structs of type LidarCuboidCell_mW {size_t beam_idx; size_t dist_cell_idx; float
+        /// Lidar cuboid as vector of Structs of type LidarCuboidCellmW {size_t beam_idx; size_t dist_cell_idx; float
         /// signal_strength_in_mW;}
-        std::vector<LidarCuboidCell_mW> lidar_cuboid;
+        std::vector<LidarCuboidCellmW> lidar_cuboid;
         /// Reserve memory for the lidar cuboid to prevent re-allocations at every emplace_back for better performance
         lidar_cuboid.reserve(no_of_reflections);
 
@@ -106,7 +106,7 @@ void DetectionSensing::apply(SensorData& sensor_data)
         size_t reflection_idx = 0;
         for (auto& rendering_result : lidar_sensor_view.rendering_result())
         {
-            LidarCuboidCell_mW acual_lidar_cuboid_cell;
+            LidarCuboidCellmW acual_lidar_cuboid_cell;
             if (rendering_result.emitted_signal_idx() < 0)
             {
                 alert("rendering_result(" + std::to_string(reflection_idx) + ").emitted_signal_idx() < 0: " + std::to_string(rendering_result.emitted_signal_idx()));
@@ -130,20 +130,20 @@ void DetectionSensing::apply(SensorData& sensor_data)
         }
 
         /// Sort lidar cuboid by beam index
-        std::sort(lidar_cuboid.begin(), lidar_cuboid.end(), [](const DetectionSensing::LidarCuboidCell_mW& a, const DetectionSensing::LidarCuboidCell_mW& b) {
+        std::sort(lidar_cuboid.begin(), lidar_cuboid.end(), [](const DetectionSensing::LidarCuboidCellmW& a, const DetectionSensing::LidarCuboidCellmW& b) {
             return a.beam_idx < b.beam_idx;
         });
 
         /// Run through sorted lidar cuboid cells and find the peaks per beam to calculate detections
         auto beam_idx = lidar_cuboid[0].beam_idx;
-        std::vector<LidarBeamCell_mW> lidar_cuboid_cells_of_beam;
+        std::vector<LidarBeamCellmW> lidar_cuboid_cells_of_beam;
         lidar_cuboid_cells_of_beam.reserve(rays_per_beam);
         for (auto lidar_cuboid_cell : lidar_cuboid)
         {
             /// Collect cells from sorted lidar cuboid that have the same beam
             if (lidar_cuboid_cell.beam_idx == beam_idx)
             {
-                LidarBeamCell_mW next_lidar_beam_cell;
+                LidarBeamCellmW next_lidar_beam_cell;
                 next_lidar_beam_cell.dist_cell_idx = lidar_cuboid_cell.dist_cell_idx;
                 next_lidar_beam_cell.signal_strength_in_mW = lidar_cuboid_cell.signal_strength_in_mW;
                 lidar_cuboid_cells_of_beam.emplace_back(next_lidar_beam_cell);
@@ -156,7 +156,7 @@ void DetectionSensing::apply(SensorData& sensor_data)
                 /// Start next beam from empty lidar_cuboid_cells_of_beam with actual lidar_cuboid_cell as first entry
                 beam_idx = lidar_cuboid_cell.beam_idx;
                 lidar_cuboid_cells_of_beam.clear();
-                LidarBeamCell_mW first_lidar_beam_cell;
+                LidarBeamCellmW first_lidar_beam_cell;
                 first_lidar_beam_cell.dist_cell_idx = lidar_cuboid_cell.dist_cell_idx;
                 first_lidar_beam_cell.signal_strength_in_mW = lidar_cuboid_cell.signal_strength_in_mW;
                 lidar_cuboid_cells_of_beam.emplace_back(first_lidar_beam_cell);
@@ -171,7 +171,7 @@ void DetectionSensing::apply(SensorData& sensor_data)
 }
 
 void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_sensor,
-                                                    std::vector<LidarBeamCell_mW>* lidar_cuboid_cells_of_beam_ptr,
+                                                    std::vector<LidarBeamCellmW>* lidar_cuboid_cells_of_beam_ptr,
                                                     size_t rays_per_beam,
                                                     int lidar_frontend_idx,
                                                     int beam_idx)
@@ -179,13 +179,13 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
 
     /// Sort cells of actual beam per distance
     auto lidar_cuboid_cells_of_beam = *lidar_cuboid_cells_of_beam_ptr;
-    std::sort(lidar_cuboid_cells_of_beam.begin(), lidar_cuboid_cells_of_beam.end(), [](const DetectionSensing::LidarBeamCell_mW& a, const DetectionSensing::LidarBeamCell_mW& b) {
+    std::sort(lidar_cuboid_cells_of_beam.begin(), lidar_cuboid_cells_of_beam.end(), [](const DetectionSensing::LidarBeamCellmW& a, const DetectionSensing::LidarBeamCellmW& b) {
         return a.dist_cell_idx < b.dist_cell_idx;
     });
 
     /// sum up and threshold the signal strength within same dist_cells
-    LidarBeamCell_mW summed_dist_cell_of_beam;
-    std::vector<LidarBeamCell_dBm> thresholded_summed_dist_cells;
+    LidarBeamCellmW summed_dist_cell_of_beam;
+    std::vector<LidarBeamCelldBm> thresholded_summed_dist_cells;
     thresholded_summed_dist_cells.reserve(rays_per_beam);
     summed_dist_cell_of_beam.dist_cell_idx = lidar_cuboid_cells_of_beam[0].dist_cell_idx;
     summed_dist_cell_of_beam.signal_strength_in_mW = 0.0;
@@ -374,7 +374,7 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
     }
 }
 
-void DetectionSensing::threshold_summed_beam_cell(LidarBeamCell_mW* summed_dist_cell_of_beam_ptr, std::vector<LidarBeamCell_dBm>* thresholded_summed_dist_cells_ptr)
+void DetectionSensing::threshold_summed_beam_cell(LidarBeamCellmW* summed_dist_cell_of_beam_ptr, std::vector<LidarBeamCelldBm>* thresholded_summed_dist_cells_ptr)
 {
     auto summed_signal_strength_in_dBm = 10 * std::log10(summed_dist_cell_of_beam_ptr->signal_strength_in_mW);
     double threshold = profile.detection_sensing_parameters.signal_strength_threshold_in_dBm;
@@ -391,7 +391,7 @@ void DetectionSensing::threshold_summed_beam_cell(LidarBeamCell_mW* summed_dist_
 
     if (summed_signal_strength_in_dBm >= threshold)
     {
-        LidarBeamCell_dBm thresholded_summed_dist_cell_dBm;
+        LidarBeamCelldBm thresholded_summed_dist_cell_dBm;
         thresholded_summed_dist_cell_dBm.dist_cell_idx = summed_dist_cell_of_beam_ptr->dist_cell_idx;
         thresholded_summed_dist_cell_dBm.signal_strength_in_dBm = summed_signal_strength_in_dBm;
         thresholded_summed_dist_cells_ptr->emplace_back(thresholded_summed_dist_cell_dBm);

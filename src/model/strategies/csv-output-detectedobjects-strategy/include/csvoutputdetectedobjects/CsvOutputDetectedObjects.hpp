@@ -22,13 +22,13 @@ class CsvOutputDetectedObjects : public Strategy
 
     void apply(SensorData&) override;
 
-    std::string file_path_detectedobjects;
+    std::string file_path_detectedobjects = "";
     bool first_call = true;
 
   public:
   private:
-    static void write_first_line_to_CSV(const std::string& path);
-    static void write_data_to_CSV(const std::string& path,
+    static void write_first_line_to_csv(const std::string& path);
+    static void write_data_to_csv(const std::string& path,
                                   double timestamp,
                                   size_t tracking_id,
                                   double x,

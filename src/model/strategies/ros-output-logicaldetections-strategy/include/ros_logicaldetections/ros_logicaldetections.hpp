@@ -37,10 +37,10 @@ class WorkerPCL final
 
 namespace model
 {
-class ros_logicaldetections : public Strategy
+class RosLogicaldetections : public Strategy
 {
   public:
-    ros_logicaldetections(const Profile& profile, const Log& log, const Alert& alert);
+    RosLogicaldetections(const Profile& profile, const Log& log, const Alert& alert);
     using Strategy::Strategy;
 
     void apply(SensorData&) override;

@@ -22,8 +22,8 @@ class WorkerPCL final
 {
   public:
     WorkerPCL(const std::string& topic, std::string frame_id);
-    void injectLidar(SensorData& sensor_data, int sensor_no, const Log& log);
-    void injectRadar(SensorData& sensor_data, int sensor_no, const Log& log);
+    void inject_lidar(SensorData& sensor_data, int sensor_no, const Log& log);
+    void inject_radar(SensorData& sensor_data, int sensor_no, const Log& log);
 
   private:
     const std::string frame_id;
@@ -34,10 +34,10 @@ class WorkerPCL final
 
 namespace model
 {
-class ros_detections : public Strategy
+class RosDetections : public Strategy
 {
   public:
-    ros_detections(const Profile& profile, const Log& log, const Alert& alert);
+    RosDetections(const Profile& profile, const Log& log, const Alert& alert);
     using Strategy::Strategy;
 
     void apply(SensorData&) override;

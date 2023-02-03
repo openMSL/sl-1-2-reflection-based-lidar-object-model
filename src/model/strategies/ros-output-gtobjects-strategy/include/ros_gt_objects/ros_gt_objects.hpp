@@ -45,10 +45,10 @@ class WorkerMarker final
 
 namespace model
 {
-class ros_gt_objects : public Strategy
+class RosGtObjects : public Strategy
 {
   public:
-    ros_gt_objects(const Profile& profile, const Log& log, const Alert& alert);
+    RosGtObjects(const Profile& profile, const Log& log, const Alert& alert);
     using Strategy::Strategy;
 
     void apply(SensorData&) override;

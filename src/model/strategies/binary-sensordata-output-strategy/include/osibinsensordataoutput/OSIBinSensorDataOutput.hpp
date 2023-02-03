@@ -22,7 +22,7 @@ class OSIBinSensorDataOutput : public Strategy
 
     void apply(SensorData&) override;
 
-    std::string file_path_tracefile;
+    std::string file_path_tracefile = "";
     bool first_call = true;
 
   public:

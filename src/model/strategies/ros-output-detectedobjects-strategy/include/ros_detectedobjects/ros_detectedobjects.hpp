@@ -24,7 +24,7 @@ class WorkerMarker final
   public:
     WorkerMarker(const std::string& topic, std::string frame_id);
 
-    void inject(SensorData& in, const Log& log);
+    void inject(SensorData& sensor_data, const Log& log);
 
   private:
     const std::string frame_id;
@@ -44,10 +44,10 @@ class WorkerMarker final
 
 namespace model
 {
-class ros_detectedobjects : public Strategy
+class ROSDetectedobjects : public Strategy
 {
   public:
-    ros_detectedobjects(const Profile& profile, const Log& log, const Alert& alert);
+    ROSDetectedobjects(const Profile& profile, const Log& log, const Alert& alert);
     using Strategy::Strategy;
 
     void apply(SensorData&) override;

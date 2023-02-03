@@ -83,11 +83,11 @@ void model::PcdOutputLogicalDetections::apply(SensorData& sensor_data)
 #else
     std::string path = path_string + "/" + filename;
 #endif
-    writePcdHeader(path, sensor_data);
+    write_pcd_header(path, sensor_data);
 
     for (const auto& logical_detection : sensor_data.logical_detection_data().logical_detection())
     {
-        write2Pcd(path,
+        write_2_pcd(path,
                   float(logical_detection.position().x()),
                   float(logical_detection.position().y()),
                   float(logical_detection.position().z()),
@@ -95,7 +95,7 @@ void model::PcdOutputLogicalDetections::apply(SensorData& sensor_data)
     }
 }
 
-void PcdOutputLogicalDetections::writePcdHeader(const std::string& path, const SensorData& sensor_data)
+void PcdOutputLogicalDetections::write_pcd_header(const std::string& path, const SensorData& sensor_data)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);
@@ -121,7 +121,7 @@ void PcdOutputLogicalDetections::writePcdHeader(const std::string& path, const S
     my_file.close();
 }
 
-void PcdOutputLogicalDetections::write2Pcd(const std::string& path, float x, float y, float z, float intensity)
+void PcdOutputLogicalDetections::write_2_pcd(const std::string& path, float x, float y, float z, float intensity)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);

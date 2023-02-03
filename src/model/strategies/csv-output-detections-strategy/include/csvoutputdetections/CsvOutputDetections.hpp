@@ -22,14 +22,14 @@ class CsvOutputDetections : public Strategy
 
     void apply(SensorData&) override;
 
-    std::string file_path_detections;
+    std::string file_path_detections = "";
     bool first_call = true;
 
   public:
   private:
-    void write_first_line_to_CSV(const std::string& path, const size_t& epw_intensity_rcs_flag);
+    void write_first_line_to_csv(const std::string& path, const size_t& epw_intensity_rcs_flag);
     static void
-    write_data_to_CSV(const std::string& path, double timestamp, size_t detection_idx, double azimuth_in_deg, double elevation_in_deg, double distance, double intensity);
+    write_data_to_csv(const std::string& path, double timestamp, size_t detection_idx, double azimuth_in_deg, double elevation_in_deg, double distance, double intensity);
 };
 
 }  // namespace model

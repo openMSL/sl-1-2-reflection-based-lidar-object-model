@@ -24,7 +24,7 @@
 using namespace model;
 using namespace osi3;
 
-void ros_detections::apply(SensorData& sensor_data)
+void RosDetections::apply(SensorData& sensor_data)
 {
     log("Starting ROS output for detections");
 
@@ -47,7 +47,7 @@ void ros_detections::apply(SensorData& sensor_data)
         for (int sensor_no = 0; sensor_no < sensor_data.feature_data().radar_sensor_size(); sensor_no++)
         {
             worker_pcl = std::make_unique<detections::WorkerPCL>("detections_" + std::to_string(sensor_no), "sensor_" + std::to_string(sensor_no));
-            worker_pcl->injectRadar(sensor_data, sensor_no, log);
+            worker_pcl->inject_radar(sensor_data, sensor_no, log);
         }
     }
     else if (sensor_data.feature_data().lidar_sensor().size() > 0)
@@ -55,7 +55,7 @@ void ros_detections::apply(SensorData& sensor_data)
         for (int sensor_no = 0; sensor_no < sensor_data.feature_data().lidar_sensor_size(); sensor_no++)
         {
             worker_pcl = std::make_unique<detections::WorkerPCL>("detections_" + std::to_string(sensor_no), "sensor_" + std::to_string(sensor_no));
-            worker_pcl->injectLidar(sensor_data, sensor_no, log);
+            worker_pcl->inject_lidar(sensor_data, sensor_no, log);
         }
     }
     else
@@ -64,7 +64,7 @@ void ros_detections::apply(SensorData& sensor_data)
     }
 }
 
-ros_detections::ros_detections(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
+RosDetections::RosDetections(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
 {
     auto remapping = std::map<std::string, std::string>();
     remapping.emplace("__master", "http://localhost:11311");
@@ -76,7 +76,7 @@ detections::WorkerPCL::WorkerPCL(const std::string& topic, std::string frame_id)
 {
 }
 
-void detections::WorkerPCL::injectLidar(SensorData& sensor_data, int sensor_no, const Log& log)
+void detections::WorkerPCL::inject_lidar(SensorData& sensor_data, int sensor_no, const Log& log)
 {
     const auto& lidar_sensor = sensor_data.feature_data().lidar_sensor(sensor_no);
 
@@ -118,7 +118,7 @@ void detections::WorkerPCL::injectLidar(SensorData& sensor_data, int sensor_no, 
     publisher.publish(cloud);
 }
 
-void detections::WorkerPCL::injectRadar(SensorData& sensor_data, int sensor_no, const Log& log)
+void detections::WorkerPCL::inject_radar(SensorData& sensor_data, int sensor_no, const Log& log)
 {
     const auto& radar_sensor = sensor_data.feature_data().radar_sensor(sensor_no);
 

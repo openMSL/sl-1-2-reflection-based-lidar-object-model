@@ -54,13 +54,13 @@ void model::CsvOutputDetectedObjects::apply(SensorData& sensor_data)
         if (first_call)
         {
 #include <csvoutputdetectedobjects/set_csv_file_path_detectedobjects.cpp>
-            write_first_line_to_CSV(file_path_detectedobjects);
+            write_first_line_to_csv(file_path_detectedobjects);
             first_call = false;
         }
 
         for (const auto& moving_object : sensor_data.moving_object())
         {
-            write_data_to_CSV(file_path_detectedobjects,
+            write_data_to_csv(file_path_detectedobjects,
                               timestamp,
                               moving_object.header().tracking_id().value(),
                               std::round(moving_object.base().position().x() * 1000) / 1000,
@@ -77,7 +77,7 @@ void model::CsvOutputDetectedObjects::apply(SensorData& sensor_data)
         }
         for (const auto& stationary_object : sensor_data.stationary_object())
         {
-            write_data_to_CSV(file_path_detectedobjects,
+            write_data_to_csv(file_path_detectedobjects,
                               timestamp,
                               stationary_object.header().tracking_id().value(),
                               std::round(stationary_object.base().position().x() * 1000) / 1000,
@@ -100,7 +100,7 @@ void model::CsvOutputDetectedObjects::apply(SensorData& sensor_data)
     }
 }
 
-void CsvOutputDetectedObjects::write_first_line_to_CSV(const std::string& path)
+void CsvOutputDetectedObjects::write_first_line_to_csv(const std::string& path)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);
@@ -110,7 +110,7 @@ void CsvOutputDetectedObjects::write_first_line_to_CSV(const std::string& path)
     my_file.close();
 }
 
-void CsvOutputDetectedObjects::write_data_to_CSV(const std::string& path,
+void CsvOutputDetectedObjects::write_data_to_csv(const std::string& path,
                                                  double timestamp,
                                                  size_t tracking_id,
                                                  double x,

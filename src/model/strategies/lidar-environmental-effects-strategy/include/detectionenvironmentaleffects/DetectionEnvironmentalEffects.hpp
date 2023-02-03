@@ -30,20 +30,20 @@ class DetectionEnvironmentalEffects : public Strategy
     struct SprayCluster
     {
         osi3::Vector3d position_global;
-        float radius;
-        float age_in_s;
-        float time_constant;
-        double object_velocity_in_m_s;
+        float radius = 0.0;
+        float age_in_s = 0.0;
+        float time_constant = 0.0;
+        double object_velocity_in_m_s = 0.0;
         osi3::Vector3d velocity_in_m_s;
-        double min_azimuth_rad;
-        double max_azimuth_rad;
-        double dist_to_sensor;
-        double drag_factor;
-        bool sensor_in_spray_volume;
+        double min_azimuth_rad = 0.0;
+        double max_azimuth_rad = 0.0;
+        double dist_to_sensor = 0.0;
+        double drag_factor = 0.0;
+        bool sensor_in_spray_volume = false;
     };
 
   private:
-    std::vector<SprayCluster> spray_cluster_global;
+    std::vector<SprayCluster> spray_cluster_global = {};
 
     void add_hydrometeor_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data);
     void add_spray_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data);
@@ -73,6 +73,14 @@ class DetectionEnvironmentalEffects : public Strategy
     static LidarDetectionData get_beam_indices(SensorData& sensor_data, std::vector<int>& existing_detection_idx);
 
     std::vector<int> update_spray_cluster(SensorData& sensor_data, const TF::EgoData& ego_data, MountingPosition& mounting_pose);
+
+    int is_pavement = 0;
+
+    bool is_fog = false;
+    bool is_rain = false;
+    bool is_snow = false;
+    bool is_sun = false;
+    std::vector<float> weather_sequence = {};
 };
 }  // namespace model
 

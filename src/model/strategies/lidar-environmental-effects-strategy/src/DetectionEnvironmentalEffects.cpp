@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MPL-2.0
 //
 
-#ifndef Speed_of_Light
-#define Speed_of_Light 299792458
-#endif
+
+
+
 
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
@@ -23,6 +23,8 @@
 #include <fstream>
 #include <iostream>
 
+constexpr float speed_of_light = 299792458.0;
+
 #endif
 // experimental structs
 struct Sun
@@ -35,24 +37,12 @@ struct Sun
 
 struct SprayProfile
 {
-    // float mean_dissolve_time_s = 1.7;  //mean time clusters stay in the atmosphere
-    float std_time_constant = 0.2;
-    // float num_clusters_std = 0.0;
-    float object_velocity_threshold_in_m_s = 40 / 3.6;
-    // float start_tx_rx_overlap = 0.9;    //Distance to the start of the overlap of sender and receiver beam in m
-    // float end_tx_rx_overlap = 1.0;    //Distance to the point, where sender and receiver beams fully overlap
+    const float std_time_constant = 0.2;
+    const float object_velocity_threshold_in_m_s = 40 / 3.6;
 } spray_profile;
-
-bool is_fog = false;
-bool is_rain = false;
-bool is_snow = false;
-bool is_sun = false;
-std::vector<float> weatherSequence;
 
 using namespace model;
 using namespace osi3;
-
-int isPavement = 0;
 
 void DetectionEnvironmentalEffects::apply(SensorData& sensor_data)
 {
@@ -88,13 +78,13 @@ void DetectionEnvironmentalEffects::apply(SensorData& sensor_data)
 void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data)
 {
     float weather_intensity = 0;
-    if (!weatherSequence.empty())
+    if (!weather_sequence.empty())
     {
         double update_cycle_time_s =
             ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
         double current_time = (double)sensor_data.sensor_view(0).timestamp().seconds() + sensor_data.sensor_view(0).timestamp().nanos() * pow(10, -9);
         int current_time_step = int(current_time / update_cycle_time_s);
-        weather_intensity = weatherSequence.at(current_time_step);
+        weather_intensity = weather_sequence.at(current_time_step);
     }
     else if (sensor_data.sensor_view(0).global_ground_truth().has_environmental_conditions() &&
              sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().has_precipitation() &&
@@ -243,7 +233,7 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
         {
             existing_detection.CopyFrom(existing_detections.detection(existing_detection_idx.at(emitted_signal_idx)));
             simulate_wet_pavement(sensor_data, ego_data, existing_detection, sensor_idx, water_film_height);
-            isPavement = 1;
+            is_pavement = 1;
         }
         else
         {
@@ -651,7 +641,7 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
             ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
         double current_time = (double)sensor_data.sensor_view(0).timestamp().seconds() + sensor_data.sensor_view(0).timestamp().nanos() * pow(10, -9);
         int current_time_step = int(current_time / update_cycle_time_s);
-        sun.intensity = weatherSequence.at(current_time_step);
+        sun.intensity = weather_sequence.at(current_time_step);
     }
 
     if (sun.intensity > 0.0)
@@ -855,10 +845,10 @@ long search_closest(const std::vector<float>& sorted_array, double x)
         return 0;
     }
 
-    double a = *(iter_geq - 1);
-    double b = *(iter_geq);
+    double first = *(iter_geq - 1);
+    double second = *(iter_geq);
 
-    if (fabs(x - a) < fabs(x - b))
+    if (fabs(x - first) < fabs(x - second))
     {
         return iter_geq - sorted_array.begin() - 1;
     }

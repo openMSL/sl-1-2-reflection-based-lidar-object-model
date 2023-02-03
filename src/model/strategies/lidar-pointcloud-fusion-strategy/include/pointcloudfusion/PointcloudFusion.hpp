@@ -21,7 +21,7 @@ class PointcloudFusion : public Strategy
 
   public:
   private:
-    static void calculate_fused_pointcloud_for_given_sensors(SensorData& in, const Profile& profile, const Log& log);
+    static void calculate_fused_pointcloud_for_given_sensors(SensorData& sensor_data, const Profile& profile, const Log& log);
 };
 }  // namespace model
 

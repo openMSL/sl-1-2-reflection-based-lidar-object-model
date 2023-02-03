@@ -7,9 +7,6 @@
 #define _USE_MATH_DEFINES
 #endif
 
-#define PREV_INDEX(itr, total_num) ((itr - 1 + total_num) % total_num)
-#define NEXT_INDEX(itr, total_num) ((itr + 1) % total_num)
-
 #include "model/strategies/transformation-functions/TransformationFunctions.hpp"
 
 #ifdef _WIN32
@@ -212,33 +209,6 @@ Spherical3d TF::transform_cartesian_to_spherical(const Vector3d& input_relative_
     spherical_coordinate.set_azimuth(azimuth);
     spherical_coordinate.set_elevation(elevation);
     return spherical_coordinate;
-}
-
-double TF::projection_to_spherical_surface(std::vector<Spherical3d>& spherical_coordinates, double distance)
-{
-    // the input is in spherical coordinate system
-    if (spherical_coordinates.size() < 3)
-        return 0;
-    double processed_prev, processed_next, ready_to_add;
-    double sum_of_spherical_angle = 0.0;
-    double elevation_a, azimuth_a, elevation_b, azimuth_b, elevation_c, azimuth_c;
-    auto points_number = spherical_coordinates.size();
-    for (size_t itr = 0; itr != points_number; ++itr)
-    {
-        azimuth_c = spherical_coordinates.at(NEXT_INDEX(itr, points_number)).azimuth();
-        elevation_c = spherical_coordinates.at(NEXT_INDEX(itr, points_number)).elevation();
-        azimuth_b = spherical_coordinates.at(itr).azimuth();
-        elevation_b = spherical_coordinates.at(itr).elevation();
-        azimuth_a = spherical_coordinates.at(PREV_INDEX(itr, points_number)).azimuth();
-        elevation_a = spherical_coordinates.at(PREV_INDEX(itr, points_number)).elevation();
-        processed_prev =
-            atan2((sin(elevation_a - elevation_b) * cos(azimuth_a)), (sin(azimuth_a) * cos(azimuth_b) - cos(azimuth_a) * sin(azimuth_b) * cos(elevation_a - elevation_b)));
-        processed_next =
-            atan2((sin(elevation_c - elevation_b) * cos(azimuth_c)), (sin(azimuth_c) * cos(azimuth_b) - cos(azimuth_c) * sin(azimuth_b) * cos(elevation_c - elevation_b)));
-        processed_prev < processed_next ? ready_to_add = (processed_prev - processed_next) + 2 * M_PI : ready_to_add = (processed_prev - processed_next);
-        sum_of_spherical_angle += ready_to_add;
-    }
-    return (sum_of_spherical_angle - double(points_number - 2) * M_PI) * distance * distance;
 }
 
 void TF::transform_spherical_to_cartesian(const Spherical3d& input_spherical_coordinate, Vector3d& vector_xyz)

@@ -13,7 +13,7 @@
 using namespace model;
 using namespace osi3;
 
-void ros_detectedobjects::apply(SensorData& sensor_data)
+void ROSDetectedobjects::apply(SensorData& sensor_data)
 {
     log("Starting ROS output for detected objects");
 
@@ -45,7 +45,7 @@ void ros_detectedobjects::apply(SensorData& sensor_data)
     worker->inject(sensor_data, log);
 }
 
-ros_detectedobjects::ros_detectedobjects(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
+ROSDetectedobjects::ROSDetectedobjects(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
 {
 
     auto remapping = std::map<std::string, std::string>();

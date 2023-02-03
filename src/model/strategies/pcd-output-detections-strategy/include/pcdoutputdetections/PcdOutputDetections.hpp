@@ -22,13 +22,13 @@ class PcdOutputDetections : public Strategy
 
     void apply(SensorData&) override;
 
-    std::string path_string;
+    std::string path_string = "";
     bool first_call = true;
 
   public:
   private:
-    static void writePcdHeader(const std::string& path, const SensorData& sensor_data, const size_t& no_of_sensors);
-    static void write2Pcd(const std::string& path, double x, double y, double z, double intensity);
+    static void write_pcd_header(const std::string& path, const SensorData& sensor_data, const size_t& no_of_sensors);
+    static void write_2_pcd(const std::string& path, double x, double y, double z, double intensity);
 };
 
 }  // namespace model

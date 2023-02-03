@@ -14,7 +14,7 @@
 using namespace model;
 using namespace osi3;
 
-void ros_gt_objects::apply(SensorData& sensor_data)
+void RosGtObjects::apply(SensorData& sensor_data)
 {
     log("Starting ROS output for GT objects");
 
@@ -45,7 +45,7 @@ void ros_gt_objects::apply(SensorData& sensor_data)
     worker_gt->inject(sensor_data, profile, log, alert);
 }
 
-ros_gt_objects::ros_gt_objects(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
+RosGtObjects::RosGtObjects(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
 {
     auto remapping = std::map<std::string, std::string>();
     remapping.emplace("__master", "http://localhost:11311");

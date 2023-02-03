@@ -16,7 +16,7 @@
 using namespace model;
 using namespace osi3;
 
-void ros_logicaldetections::apply(SensorData& sensor_data)
+void RosLogicaldetections::apply(SensorData& sensor_data)
 {
     log("Starting ROS output for logical detections");
 
@@ -43,7 +43,7 @@ void ros_logicaldetections::apply(SensorData& sensor_data)
     worker_pcl->inject(sensor_data, log);
 }
 
-ros_logicaldetections::ros_logicaldetections(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
+RosLogicaldetections::RosLogicaldetections(const Profile& profile, const Log& log, const Alert& alert) : model::Strategy(profile, log, alert)
 {
 
     auto remapping = std::map<std::string, std::string>();
