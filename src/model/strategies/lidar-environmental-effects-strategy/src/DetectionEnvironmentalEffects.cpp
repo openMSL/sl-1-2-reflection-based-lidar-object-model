@@ -199,7 +199,10 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
 {
     double water_film_height = sensor_data.sensor_view(0).global_ground_truth().lane(0).classification().road_condition().surface_water_film();
     if (water_film_height <= 0.0)
+    {
         return;
+    }
+        
     auto current_lidar_sensor_view_config = profile.beam_center_config.lidar_sensor_view_configuration(0);  // todo:consider multiple front-ends
     osi3::MountingPosition mounting_pose = sensor_data.sensor_view(0).lidar_sensor_view(0).view_configuration().mounting_position();
 
@@ -342,7 +345,7 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
         sensor_height_over_ground = profile.sensor_view_configuration.lidar_sensor_view_configuration(0).mounting_position().position().z() + rear_axle_over_ground;
     }
     double detection_z_coord = sin(existing_detection.position().elevation()) * existing_detection.position().distance();
-    double pavement_z_tolerance = 0.2;
+    const double pavement_z_tolerance = 0.2;
 
     double detection_y_ccord = sin(existing_detection.position().azimuth()) * existing_detection.position().distance();
 
@@ -351,11 +354,11 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
     {
         if (detection_y_ccord > 2.0 && detection_y_ccord < 7.0)
         {
-            double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;
-            double n_air = 1.0003;
-            double n_w = 1.33;
-            double pavementDepth_m = 0.0005;
-            double range = existing_detection.position().distance();
+            const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;
+            const double n_air = 1.0003;
+            const double n_w = 1.33;
+            const double pavementDepth_m = 0.0005;
+            const double range = existing_detection.position().distance();
 
             double a_in = atan(range / sensor_height_over_ground);
 
@@ -729,6 +732,7 @@ bool DetectionEnvironmentalEffects::is_detection_above_ground(osi3::SensorData& 
                                                               const TF::EgoData& ego_data,
                                                               int sensor_idx)
 {
+    bool detection_above_ground = true;
     double sensor_height_over_ground;
     if (sensor_data.sensor_view(sensor_idx).lidar_sensor_view_size() > 0 && sensor_data.sensor_view(sensor_idx).lidar_sensor_view(0).view_configuration().has_mounting_position())
     {
@@ -743,12 +747,9 @@ bool DetectionEnvironmentalEffects::is_detection_above_ground(osi3::SensorData& 
     double z_coord_of_environmental_detection = sin(position_sensor_coord.elevation()) * position_sensor_coord.distance();
     if (z_coord_of_environmental_detection < -sensor_height_over_ground)
     {
-        return false;
+        detection_above_ground = false;
     }
-    else
-    {
-        return true;
-    }
+    return detection_above_ground;
 }
 
 void DetectionEnvironmentalEffects::add_attenuated_existing_detection(std::vector<double>& detection_intensities,
@@ -813,14 +814,14 @@ void DetectionEnvironmentalEffects::add_max_detection(std::vector<double>& detec
         {
             power_equivalent.emplace_back(detection_intensities.at(detection_idx) / pow(detection_distances.at(detection_idx), 2));
         }
-        size_t maxElementIndex = std::max_element(power_equivalent.begin(), power_equivalent.end()) - power_equivalent.begin();
-        if (detection_distances.at(maxElementIndex) < profile.max_range)
+        size_t max_element_index = std::max_element(power_equivalent.begin(), power_equivalent.end()) - power_equivalent.begin();
+        if (detection_distances.at(max_element_index) < profile.max_range)
         {
             osi3::Spherical3d spray_detection_sensor_sph;
-            spray_detection_sensor_sph.set_distance(detection_distances.at(maxElementIndex));
+            spray_detection_sensor_sph.set_distance(detection_distances.at(max_element_index));
             spray_detection_sensor_sph.set_azimuth(current_beam.horizontal_angle());
             spray_detection_sensor_sph.set_elevation(current_beam.vertical_angle());
-            add_new_detection(current_sensor, spray_detection_sensor_sph, detection_intensities.at(maxElementIndex));
+            add_new_detection(current_sensor, spray_detection_sensor_sph, detection_intensities.at(max_element_index));
         }
     }
 }
