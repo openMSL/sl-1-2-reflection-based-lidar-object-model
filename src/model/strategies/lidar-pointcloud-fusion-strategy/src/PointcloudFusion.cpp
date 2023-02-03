@@ -35,7 +35,8 @@ void PointcloudFusion::apply(SensorData& sensor_data)
     }
     else
     {
-        auto timestamp = (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds() + (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos() / 1000000000;
+        auto timestamp = (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds() +
+                         (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos() / 1000000000;
         log("No feature data available for timestamp " + std::to_string(timestamp));
     }
 }
@@ -76,8 +77,8 @@ void PointcloudFusion::calculate_fused_pointcloud_for_given_sensors(SensorData& 
             else if (sensor_data.feature_data().lidar_sensor(sensor_idx).detection(detection_no).has_echo_pulse_width())
             {
                 current_logical_detection->set_echo_pulse_width(
-                    sensor_data.feature_data().lidar_sensor(sensor_idx).detection(detection_no).echo_pulse_width());  // TODO: Field for echo pulse width within logical detections not
-                                                                                                             // existing, yet
+                    sensor_data.feature_data().lidar_sensor(sensor_idx).detection(detection_no).echo_pulse_width());  // TODO: Field for echo pulse width within logical detections
+                                                                                                                      // not existing, yet
             }
         }
     }

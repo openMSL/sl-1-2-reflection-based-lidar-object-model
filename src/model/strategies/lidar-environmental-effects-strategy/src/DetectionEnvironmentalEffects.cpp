@@ -3,10 +3,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //
 
-
-
-
-
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
@@ -202,7 +198,7 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
     {
         return;
     }
-        
+
     auto current_lidar_sensor_view_config = profile.beam_center_config.lidar_sensor_view_configuration(0);  // todo:consider multiple front-ends
     osi3::MountingPosition mounting_pose = sensor_data.sensor_view(0).lidar_sensor_view(0).view_configuration().mounting_position();
 

@@ -88,10 +88,10 @@ void model::PcdOutputLogicalDetections::apply(SensorData& sensor_data)
     for (const auto& logical_detection : sensor_data.logical_detection_data().logical_detection())
     {
         write_2_pcd(path,
-                  float(logical_detection.position().x()),
-                  float(logical_detection.position().y()),
-                  float(logical_detection.position().z()),
-                  (epw_intensity_rcs_flag != 0) ? float(logical_detection.intensity()) : float(logical_detection.echo_pulse_width()));
+                    float(logical_detection.position().x()),
+                    float(logical_detection.position().y()),
+                    float(logical_detection.position().z()),
+                    (epw_intensity_rcs_flag != 0) ? float(logical_detection.intensity()) : float(logical_detection.echo_pulse_width()));
     }
 }
 
