@@ -8,19 +8,52 @@ jobs:
   cpp-linter:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: cpp-linter/cpp-linter-action@v2
-        id: linter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          style: file
-          tidy-checks: ''
-          files-changed-only: false
-          thread-comments: true
+    - name: Checkout Model
+      uses: actions/checkout@v3
+      with:
+        submodules: true
 
-      - name: Fail fast?!
-        if: steps.linter.outputs.checks-failed > 0
-        run: echo "Some files failed the linting checks!"
-        # for actual deployment
-        # run: exit 1
+    - name: Cache Dependencies
+      id: cache-depends
+      uses: actions/cache@v2
+      with:
+        path: protobuf-3.15.8
+        key: ${{ runner.os }}-v1-depends
+
+    - name: Download ProtoBuf
+      if: steps.cache-depends.outputs.cache-hit != 'true'
+      run: curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protobuf-all-3.15.8.tar.gz && tar xzvf protobuf-all-3.15.8.tar.gz
+
+    - name: Build ProtoBuf
+      if: steps.cache-depends.outputs.cache-hit != 'true'
+      working-directory: protobuf-3.15.8
+      run: ./configure DIST_LANG=cpp --prefix=/usr && make
+
+    - name: Install ProtoBuf
+      working-directory: protobuf-3.15.8
+      run: sudo make install && sudo ldconfig
+
+    - name: Prepare C++ Build
+      run: mkdir build
+
+    - name: Configure CMake
+      working-directory: build
+      run: cmake -DCMAKE_PREFIX_PATH:PATH=${DEPS_DIR}/protobuf/install ..
+
+    - name: Lint CPP
+      uses: cpp-linter/cpp-linter-action@v2
+      id: linter
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        style: file
+        tidy-checks: ''
+        files-changed-only: false
+        thread-comments: true
+        database: build/
+        
+    - name: Fail fast?!
+      if: steps.linter.outputs.checks-failed > 0
+      run: echo "Some files failed the linting checks!"
+      # for actual deployment
+      # run: exit 1
