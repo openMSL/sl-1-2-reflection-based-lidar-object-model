@@ -52,7 +52,8 @@ jobs:
         tidy-checks: ''
         files-changed-only: false
         thread-comments: true
-        database: build/
+        database: 'build/'
+        ignore: 'build | protobuf-3.15.8 | .github'
         
     - name: Fail fast?!
       if: steps.linter.outputs.checks-failed > 0
