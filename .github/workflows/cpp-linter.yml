@@ -54,8 +54,8 @@ jobs:
         files-changed-only: false
         thread-comments: true
         database: 'build/'
-        ignore: 'protobuf-3.15.8 | .github'
-        extra-args: '-I./build/lib/open-simulation-interface'
+        ignore: 'build | protobuf-3.15.8 | .github'
+        extra-args: '-I ./build/lib/open-simulation-interface'
         
     - name: Fail fast?!
       if: steps.linter.outputs.checks-failed > 0
