@@ -50,11 +50,12 @@ jobs:
       with:
         style: file
         tidy-checks: ''
-        version: '15'
+        version: '14'
         files-changed-only: false
         thread-comments: true
         database: 'build/'
         ignore: 'build | protobuf-3.15.8 | .github'
+        extra-args: '-Ibuild/lib/open-simulation-interface'
         
     - name: Fail fast?!
       if: steps.linter.outputs.checks-failed > 0
