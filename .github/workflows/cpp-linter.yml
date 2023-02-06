@@ -50,6 +50,7 @@ jobs:
       with:
         style: file
         tidy-checks: ''
+        version: '14'
         files-changed-only: false
         thread-comments: true
         database: 'build/'
