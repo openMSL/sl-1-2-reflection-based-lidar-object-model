@@ -353,7 +353,7 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
             const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;
             const double n_air = 1.0003;
             const double n_w = 1.33;
-            const double pavementDepth_m = 0.0005;
+            const double pavement_depth_m = 0.0005;
             const double range = existing_detection.position().distance();
 
             double a_in = atan(range / sensor_height_over_ground);
@@ -380,7 +380,7 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
 
             // double t_s = t_as*Gamma*t_ws/(1-Gamma*r_ws);   //eq. 16
             double t_p = t_ap * Gamma * t_wp / (1 - Gamma * r_wp);
-            double gamma = fmin(fmax(water_film_height / pavementDepth_m, 0), 1);  // eq. 19
+            double gamma = fmin(fmax(water_film_height / pavement_depth_m, 0), 1);  // eq. 19
             double attenuated_intensity = ((1 - gamma) * Gamma + gamma * t_p) * 100.0 * 100.0 / 255.0;
             attenuated_intensity = attenuated_intensity * 0.3;
 

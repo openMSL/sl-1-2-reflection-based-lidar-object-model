@@ -44,32 +44,32 @@ Orientation3d TF::calc_relative_orientation_from_local(const Orientation3d& obje
 
 Eigen::Matrix3d TF::calc_rotation_matrix_from_euler_angles(const Orientation3d& orientation)
 {
-    Eigen::Matrix3d R;
-    R(0, 0) = cos(orientation.pitch()) * cos(orientation.yaw());
-    R(0, 1) = cos(orientation.pitch()) * sin(orientation.yaw());
-    R(0, 2) = -sin(orientation.pitch());
-    R(1, 0) = sin(orientation.roll()) * sin(orientation.pitch()) * cos(orientation.yaw()) - cos(orientation.roll()) * sin(orientation.yaw());
-    R(1, 1) = sin(orientation.roll()) * sin(orientation.pitch()) * sin(orientation.yaw()) + cos(orientation.roll()) * cos(orientation.yaw());
-    R(1, 2) = sin(orientation.roll()) * cos(orientation.pitch());
-    R(2, 0) = cos(orientation.roll()) * sin(orientation.pitch()) * cos(orientation.yaw()) + sin(orientation.yaw()) * sin(orientation.roll());
-    R(2, 1) = cos(orientation.roll()) * sin(orientation.pitch()) * sin(orientation.yaw()) - sin(orientation.roll()) * cos(orientation.yaw());
-    R(2, 2) = cos(orientation.roll()) * cos(orientation.pitch());
-    return R;
+    Eigen::Matrix3d rot_mat;
+    rot_mat(0, 0) = cos(orientation.pitch()) * cos(orientation.yaw());
+    rot_mat(0, 1) = cos(orientation.pitch()) * sin(orientation.yaw());
+    rot_mat(0, 2) = -sin(orientation.pitch());
+    rot_mat(1, 0) = sin(orientation.roll()) * sin(orientation.pitch()) * cos(orientation.yaw()) - cos(orientation.roll()) * sin(orientation.yaw());
+    rot_mat(1, 1) = sin(orientation.roll()) * sin(orientation.pitch()) * sin(orientation.yaw()) + cos(orientation.roll()) * cos(orientation.yaw());
+    rot_mat(1, 2) = sin(orientation.roll()) * cos(orientation.pitch());
+    rot_mat(2, 0) = cos(orientation.roll()) * sin(orientation.pitch()) * cos(orientation.yaw()) + sin(orientation.yaw()) * sin(orientation.roll());
+    rot_mat(2, 1) = cos(orientation.roll()) * sin(orientation.pitch()) * sin(orientation.yaw()) - sin(orientation.roll()) * cos(orientation.yaw());
+    rot_mat(2, 2) = cos(orientation.roll()) * cos(orientation.pitch());
+    return rot_mat;
 }
 
-Orientation3d TF::calc_euler_angles_from_rotation_matrix(Eigen::Matrix3d R)
+Orientation3d TF::calc_euler_angles_from_rotation_matrix(Eigen::Matrix3d rot_mat)
 {
     Orientation3d orientation;
-    orientation.set_pitch(-asin(R(0, 2)));
+    orientation.set_pitch(-asin(rot_mat(0, 2)));
     if (cos(orientation.pitch()) != 0)
     {
-        orientation.set_yaw(atan2(R(0, 1) / cos(orientation.pitch()), R(0, 0) / cos(orientation.pitch())));
-        orientation.set_roll(atan2(R(1, 2) / cos(orientation.pitch()), R(2, 2) / cos(orientation.pitch())));
+        orientation.set_yaw(atan2(rot_mat(0, 1) / cos(orientation.pitch()), rot_mat(0, 0) / cos(orientation.pitch())));
+        orientation.set_roll(atan2(rot_mat(1, 2) / cos(orientation.pitch()), rot_mat(2, 2) / cos(orientation.pitch())));
     }
     else
     {
         orientation.set_yaw(0);
-        orientation.set_roll(atan2(R(1, 0), R(1, 1)));
+        orientation.set_roll(atan2(rot_mat(1, 0), rot_mat(1, 1)));
     }
     return orientation;
 }
@@ -80,10 +80,10 @@ Vector3d TF::transform_to_local_coordinates(const Vector3d& input_coordinates, c
     double delta_y = input_coordinates.y() - new_origin_translation.y();
     double delta_z = input_coordinates.z() - new_origin_translation.z();
 
-    Eigen::Matrix3d R = calc_rotation_matrix_from_euler_angles(new_origin_rotation);
-    double x_rel = delta_x * R(0, 0) + delta_y * R(0, 1) + delta_z * R(0, 2);
-    double y_rel = delta_x * R(1, 0) + delta_y * R(1, 1) + delta_z * R(1, 2);
-    double z_rel = delta_x * R(2, 0) + delta_y * R(2, 1) + delta_z * R(2, 2);
+    Eigen::Matrix3d rot_mat = calc_rotation_matrix_from_euler_angles(new_origin_rotation);
+    double x_rel = delta_x * rot_mat(0, 0) + delta_y * rot_mat(0, 1) + delta_z * rot_mat(0, 2);
+    double y_rel = delta_x * rot_mat(1, 0) + delta_y * rot_mat(1, 1) + delta_z * rot_mat(1, 2);
+    double z_rel = delta_x * rot_mat(2, 0) + delta_y * rot_mat(2, 1) + delta_z * rot_mat(2, 2);
 
     Vector3d coordinates_new_origin;
     coordinates_new_origin.set_x(x_rel);
@@ -96,10 +96,10 @@ Vector3d TF::transform_to_local_coordinates(const Vector3d& input_coordinates, c
 Vector3d TF::transform_from_local_coordinates(const Vector3d& input_coordinates, const Orientation3d& new_origin_rotation, const Vector3d& new_origin_translation)
 {
 
-    Eigen::Matrix3d R = calc_rotation_matrix_from_euler_angles(new_origin_rotation);
-    double x_rel = input_coordinates.x() * R.transpose()(0, 0) + input_coordinates.y() * R.transpose()(0, 1) + input_coordinates.z() * R.transpose()(0, 2);
-    double y_rel = input_coordinates.x() * R.transpose()(1, 0) + input_coordinates.y() * R.transpose()(1, 1) + input_coordinates.z() * R.transpose()(1, 2);
-    double z_rel = input_coordinates.x() * R.transpose()(2, 0) + input_coordinates.y() * R.transpose()(2, 1) + input_coordinates.z() * R.transpose()(2, 2);
+    Eigen::Matrix3d rot_mat = calc_rotation_matrix_from_euler_angles(new_origin_rotation);
+    double x_rel = input_coordinates.x() * rot_mat.transpose()(0, 0) + input_coordinates.y() * rot_mat.transpose()(0, 1) + input_coordinates.z() * rot_mat.transpose()(0, 2);
+    double y_rel = input_coordinates.x() * rot_mat.transpose()(1, 0) + input_coordinates.y() * rot_mat.transpose()(1, 1) + input_coordinates.z() * rot_mat.transpose()(1, 2);
+    double z_rel = input_coordinates.x() * rot_mat.transpose()(2, 0) + input_coordinates.y() * rot_mat.transpose()(2, 1) + input_coordinates.z() * rot_mat.transpose()(2, 2);
 
     double delta_x = x_rel + new_origin_translation.x();
     double delta_y = y_rel + new_origin_translation.y();
