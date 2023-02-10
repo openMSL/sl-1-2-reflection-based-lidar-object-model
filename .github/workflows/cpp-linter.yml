@@ -19,7 +19,7 @@ jobs:
       id: cache-depends
       uses: actions/cache@v2
       with:
-        path: protobuf-3.21.12
+        path: protobuf-21.12
         key: ${{ runner.os }}-v1-depends
 
     - name: Download ProtoBuf
@@ -28,11 +28,11 @@ jobs:
 
     - name: Build ProtoBuf
       if: steps.cache-depends.outputs.cache-hit != 'true'
-      working-directory: protobuf-3.21.12
+      working-directory: protobuf-21.12
       run: ./configure DIST_LANG=cpp --prefix=/usr && make
 
     - name: Install ProtoBuf
-      working-directory: protobuf-3.21.12
+      working-directory: protobuf-21.12
       run: sudo make install && sudo ldconfig
 
     - name: Prepare C++ Build
