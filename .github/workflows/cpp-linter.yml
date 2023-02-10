@@ -24,7 +24,7 @@ jobs:
 
     - name: Download ProtoBuf
       if: steps.cache-depends.outputs.cache-hit != 'true'
-      run: curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protobuf-all-3.21.12.tar.gz && tar xzvf protobuf-all-3.21.12.tar.gz
+      run: curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protobuf-all-21.12.tar.gz && tar xzvf protobuf-all-21.12.tar.gz
 
     - name: Build ProtoBuf
       if: steps.cache-depends.outputs.cache-hit != 'true'
