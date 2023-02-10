@@ -41,6 +41,10 @@ jobs:
     - name: Configure CMake
       working-directory: build
       run: cmake -DCMAKE_PREFIX_PATH:PATH=${DEPS_DIR}/protobuf/install -DCMAKE_EXPORT_COMPILE_COMMANDS=on ..
+      
+    - name: Build C++
+      working-directory: build
+      run: cmake --build .
 
     - name: Lint CPP
       uses: cpp-linter/cpp-linter-action@v2
