@@ -405,7 +405,7 @@ std::vector<int> DetectionEnvironmentalEffects::update_spray_cluster(const TF::E
 {
     double wind_direction_deg = 208.0;  // wind direction clock wise from north
     double wind_speed = 2.0;            // absolute wind speed in m/s
-    std::array<double,3> wind_direction = {sin(wind_direction_deg * M_PI / 180.0), cos(wind_direction_deg * M_PI / 180.0), 0.0};
+    std::array<double, 3> wind_direction = {sin(wind_direction_deg * M_PI / 180.0), cos(wind_direction_deg * M_PI / 180.0), 0.0};
     double update_cycle_time_s =
         ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
 

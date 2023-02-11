@@ -370,13 +370,14 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
 
                 auto signal_strength_to_epw = profile.detection_sensing_parameters.signal_strength_to_epw;
                 size_t count = 1;
-                while ((count < signal_strength_to_epw.size() - 1) && (std::round(current_peak.signal_strength_in_dBm * 1000) >= std::round(signal_strength_to_epw[count][0] * 1000)))
+                while ((count < signal_strength_to_epw.size() - 1) &&
+                       (std::round(current_peak.signal_strength_in_dBm * 1000) >= std::round(signal_strength_to_epw[count][0] * 1000)))
                 {
                     count = count + 1;
                 }
                 auto echo_pulse_width_by_intensity = (signal_strength_to_epw[count - 1][1] + (signal_strength_to_epw[count][1] - signal_strength_to_epw[count - 1][1]) /
-                                                                                             (signal_strength_to_epw[count][0] - signal_strength_to_epw[count - 1][0]) *
-                                                                                             (current_peak.signal_strength_in_dBm - signal_strength_to_epw[count - 1][0]));
+                                                                                                 (signal_strength_to_epw[count][0] - signal_strength_to_epw[count - 1][0]) *
+                                                                                                 (current_peak.signal_strength_in_dBm - signal_strength_to_epw[count - 1][0]));
 
                 auto peak_epw = echo_pulse_width_by_pulse + echo_pulse_width_by_geometry + echo_pulse_width_by_intensity;
                 peak_epw = std::round(peak_epw / profile.detection_sensing_parameters.epw_resolution) * profile.detection_sensing_parameters.epw_resolution;

@@ -39,7 +39,8 @@ void model::Segmentation::apply(SensorData& sensor_data)
     }
     else
     {
-        auto timestamp = (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds() + (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos() / 1000000000;
+        auto timestamp = (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds() +
+                         (double)sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos() / 1000000000;
         log("No logical detection data available for timestamp " + std::to_string(timestamp));
     }
 }
