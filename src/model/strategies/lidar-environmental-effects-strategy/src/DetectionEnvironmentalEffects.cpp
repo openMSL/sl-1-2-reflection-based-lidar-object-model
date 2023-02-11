@@ -227,7 +227,6 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
         {
             existing_detection.CopyFrom(existing_detections.detection(existing_detection_idx.at(emitted_signal_idx)));
             simulate_wet_pavement(sensor_data, ego_data, existing_detection, sensor_idx, water_film_height);
-            is_pavement = 1;
         }
         else
         {
@@ -443,7 +442,9 @@ std::vector<int> DetectionEnvironmentalEffects::update_spray_cluster(const TF::E
     }
 
     // sort clusters by distance
-    sort(spray_cluster_global.begin(), spray_cluster_global.end(), [](const SprayCluster& a, const SprayCluster& b) { return a.dist_to_sensor < b.dist_to_sensor; });
+    sort(spray_cluster_global.begin(), spray_cluster_global.end(), [](const SprayCluster& first, const SprayCluster& second) {
+        return first.dist_to_sensor < second.dist_to_sensor;
+    });
 
     // determine clusters to erase
     std::vector<int> cluster_to_erase;
@@ -754,7 +755,7 @@ void DetectionEnvironmentalEffects::add_attenuated_existing_detection(std::vecto
         {
             double attenuation_factor = exp(-2.0 * attenuation * attenuation_distance);
             float receiver_aperture_area = M_PI * pow(profile.receiver_aperture_diameter_m, 2) / 4.0;
-            float emitted_signal_strength_mW = pow(10.0, profile.max_emitted_signal_strength_in_dBm / 10.0);
+            double emitted_signal_strength_mW = pow(10.0, profile.max_emitted_signal_strength_in_dBm / 10.0);
             double range = existing_detection.position().distance();
             double attenuated_power_mW =
                 attenuation_factor * receiver_aperture_area * emitted_signal_strength_mW * existing_detection.intensity() / 100.0 * 255.0 / 100.0 / M_PI / pow(range, 2);

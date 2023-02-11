@@ -49,11 +49,7 @@ class DetectionSensing : public Strategy
     using Strategy::Strategy;
     void apply(SensorData&) override;
 
-    void process_collected_beam_cells(LidarDetectionData* current_sensor,
-                                      std::vector<LidarBeamCellmW>* lidar_cuboid_cells_of_beam_ptr,
-                                      size_t rays_per_beam,
-                                      int lidar_frontend_idx,
-                                      int beam_idx);
+    void process_collected_beam_cells(LidarDetectionData* first, std::vector<LidarBeamCellmW>* second, size_t rays_per_beam, int lidar_frontend_idx, int beam_idx);
     void threshold_summed_beam_cell(LidarBeamCellmW* summed_dist_cell_of_beam, std::vector<LidarBeamCelldBm>* thresholded_summed_dist_cells);
 };
 }  // namespace model

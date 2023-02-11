@@ -133,8 +133,8 @@ void DetectionSensing::apply(SensorData& sensor_data)
         }
 
         /// Sort lidar cuboid by beam index
-        std::sort(lidar_cuboid.begin(), lidar_cuboid.end(), [](const DetectionSensing::LidarCuboidCellmW& a, const DetectionSensing::LidarCuboidCellmW& b) {
-            return a.beam_idx < b.beam_idx;
+        std::sort(lidar_cuboid.begin(), lidar_cuboid.end(), [](const DetectionSensing::LidarCuboidCellmW& first, const DetectionSensing::LidarCuboidCellmW& second) {
+            return first.beam_idx < second.beam_idx;
         });
 
         /// Run through sorted lidar cuboid cells and find the peaks per beam to calculate detections
@@ -182,9 +182,9 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
 
     /// Sort cells of actual beam per distance
     auto lidar_cuboid_cells_of_beam = *lidar_cuboid_cells_of_beam_ptr;
-    std::sort(lidar_cuboid_cells_of_beam.begin(), lidar_cuboid_cells_of_beam.end(), [](const DetectionSensing::LidarBeamCellmW& a, const DetectionSensing::LidarBeamCellmW& b) {
-        return a.dist_cell_idx < b.dist_cell_idx;
-    });
+    std::sort(lidar_cuboid_cells_of_beam.begin(),
+              lidar_cuboid_cells_of_beam.end(),
+              [](const DetectionSensing::LidarBeamCellmW& first, const DetectionSensing::LidarBeamCellmW& second) { return first.dist_cell_idx < second.dist_cell_idx; });
 
     /// sum up and threshold the signal strength within same dist_cells
     LidarBeamCellmW summed_dist_cell_of_beam;
@@ -326,7 +326,7 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
                     double signal_strength_in_mW = pow(10, current_peak.signal_strength_in_dBm / 10);
                     double signal_strength_in_mW_range_compensated = signal_strength_in_mW * (pow(detection->position().distance(), 2));
                     float receiver_aperture_area = M_PI * pow(profile.receiver_aperture_diameter_m, 2) / 4.0;
-                    float emitted_signal_strength_mW = pow(10.0, profile.max_emitted_signal_strength_in_dBm / 10.0);
+                    double emitted_signal_strength_mW = pow(10.0, profile.max_emitted_signal_strength_in_dBm / 10.0);
                     // simulate Velodyne intensity output, calibrated to target reflectivity
                     int output_intensity = static_cast<int>(round(signal_strength_in_mW_range_compensated / receiver_aperture_area / emitted_signal_strength_mW * M_PI * 100.0));
 
