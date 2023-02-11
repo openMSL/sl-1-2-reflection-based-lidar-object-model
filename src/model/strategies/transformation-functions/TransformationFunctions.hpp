@@ -33,7 +33,7 @@ class TF
     static Orientation3d calc_relative_orientation_from_local(const Orientation3d& object_orientation, const Orientation3d& ego_orientation);
 
     static Eigen::Matrix3d calc_rotation_matrix_from_euler_angles(const Orientation3d& orientation);
-    static Orientation3d calc_euler_angles_from_rotation_matrix(Eigen::Matrix3d R);
+    static Orientation3d calc_euler_angles_from_rotation_matrix(Eigen::Matrix3d rot_mat);
 
     static Vector3d transform_to_local_coordinates(const Vector3d& input_coordinates, const Orientation3d& new_origin_rotation, const Vector3d& new_origin_translation);
     static Vector3d transform_from_local_coordinates(const Vector3d& input_coordinates, const Orientation3d& new_origin_rotation, const Vector3d& new_origin_translation);

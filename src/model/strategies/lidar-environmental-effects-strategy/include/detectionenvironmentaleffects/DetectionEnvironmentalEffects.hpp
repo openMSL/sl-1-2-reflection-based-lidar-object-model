@@ -78,7 +78,7 @@ class DetectionEnvironmentalEffects : public Strategy
 
     static LidarDetectionData get_beam_indices(SensorData& sensor_data, std::vector<int>& existing_detection_idx);
 
-    std::vector<int> update_spray_cluster(const TF::EgoData& first, osi3::MountingPosition& second);
+    std::vector<int> update_spray_cluster(const TF::EgoData& ego_data, osi3::MountingPosition& mounting_pose);
 
     int is_pavement = 0;
 
