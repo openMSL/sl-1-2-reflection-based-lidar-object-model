@@ -55,7 +55,7 @@ jobs:
         style: file
         tidy-checks: ''
         version: '14'
-        files-changed-only: false
+        files-changed-only: true
         thread-comments: true
         database: 'build/'
         ignore: 'build | protobuf-21.12 | .github | src/osmp'
