@@ -21,12 +21,12 @@ class Segmentation : public Strategy
 {
 
     using Strategy::Strategy;
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
   public:
   private:
     static std::vector<Vector3d> get_bounding_box_corners(const MovingObject& current_moving_object);
-    static size_t calculate_segment_of_point_cloud(SensorData& in,
+    static size_t calculate_segment_of_point_cloud(SensorData& sensor_data,
                                                    int object_no_in,
                                                    const std::vector<Vector3d>& bounding_box_corners,
                                                    const TF::EgoData& ego_data,

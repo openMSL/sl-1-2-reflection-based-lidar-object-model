@@ -49,19 +49,11 @@ class Tracking : public Strategy
                                                       DetectedMovingObject* current_moving_object,
                                                       bool object_contained_in_history) const;
 
-    void set_object_dimension_with_tracking(const Dimension3d& current_dimension,
-                                            Dimension3d* new_dimension,
-                                            bool object_contained_in_history,
-                                            int historical_object_no,
-                                            const Vector3d& current_pcl_segment_position_in_object,
-                                            Vector3d* new_pcl_segment_position_in_object) const;
+    void set_object_dimension_with_tracking(const Dimension3d& current_dimension, Dimension3d* new_dimension, bool object_contained_in_history, int historical_object_no) const;
 
     static void transform_gt_object_to_ego_coordinate_system(const MovingObject& current_gt_object, DetectedMovingObject* current_moving_object, const TF::EgoData& ego_data);
 
-    static void get_pcl_segment_of_current_object(const LogicalDetectionData& logical_detection_data,
-                                                  Tracking::Data& data_of_current_time_step,
-                                                  size_t gt_object_id,
-                                                  const TF::EgoData& ego_data);
+    static void get_pcl_segment_of_current_object(const LogicalDetectionData& logical_detection_data, Tracking::Data& data_of_current_time_step, size_t gt_object_id);
 
     static void calculate_object_dimension_and_position_in_object_from_pcl_segment(Tracking::Data& data_of_current_time_step,
                                                                                    const MovingObject& current_gt_object,
@@ -116,11 +108,7 @@ class Tracking : public Strategy
 
     void calculate_dimension_and_position_from_history(Data& data_of_current_time_step, DetectedMovingObject* current_moving_object, int historical_object_no);
 
-    void calculate_velocity_from_pcl(SensorData& sensor_data,
-                                     Data& data_of_current_time_step,
-                                     DetectedMovingObject* current_moving_object,
-                                     bool object_contained_in_history,
-                                     int historical_object_no);
+    void calculate_velocity_from_pcl(Data& data_of_current_time_step, DetectedMovingObject* current_moving_object, bool object_contained_in_history, int historical_object_no);
 
     void calculate_orientation_from_history(Tracking::Data& data_of_current_time_step, DetectedMovingObject* current_moving_object, int historical_object_no);
 

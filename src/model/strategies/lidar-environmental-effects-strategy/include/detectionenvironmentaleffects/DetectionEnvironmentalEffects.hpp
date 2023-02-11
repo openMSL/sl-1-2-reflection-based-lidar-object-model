@@ -42,6 +42,12 @@ class DetectionEnvironmentalEffects : public Strategy
         bool sensor_in_spray_volume = false;
     };
 
+    struct SprayProfile
+    {
+        const float std_time_constant = 0.2;
+        const float object_velocity_threshold_in_m_s = 40 / 3.6;
+    } spray_profile;
+
   private:
     std::vector<SprayCluster> spray_cluster_global = {};
 
@@ -72,7 +78,7 @@ class DetectionEnvironmentalEffects : public Strategy
 
     static LidarDetectionData get_beam_indices(SensorData& sensor_data, std::vector<int>& existing_detection_idx);
 
-    std::vector<int> update_spray_cluster(SensorData& sensor_data, const TF::EgoData& ego_data, MountingPosition& mounting_pose);
+    std::vector<int> update_spray_cluster(const TF::EgoData& ego_data, osi3::MountingPosition& mounting_pose);
 
     int is_pavement = 0;
 

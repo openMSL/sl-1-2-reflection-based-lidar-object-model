@@ -28,7 +28,7 @@ void PointcloudFusion::apply(SensorData& sensor_data)
 
     auto no_of_lidar_sensors = sensor_data.feature_data().lidar_sensor_size();
 
-    if (sensor_data.has_feature_data() & (no_of_lidar_sensors > 0))
+    if (sensor_data.has_feature_data() && (no_of_lidar_sensors > 0))
     {
         calculate_fused_pointcloud_for_given_sensors(sensor_data, profile, log);
         log("Size of logical detections after point cloud fusion: " + std::to_string(sensor_data.logical_detection_data().logical_detection_size()));
@@ -68,7 +68,7 @@ void PointcloudFusion::calculate_fused_pointcloud_for_given_sensors(SensorData& 
                                                      sensor_data.feature_data().lidar_sensor(sensor_idx).header().mounting_position().orientation(),
                                                      sensor_data.feature_data().lidar_sensor(sensor_idx).header().mounting_position().position());
 
-            auto current_logical_detection = sensor_data.mutable_logical_detection_data()->add_logical_detection();
+            auto *current_logical_detection = sensor_data.mutable_logical_detection_data()->add_logical_detection();
             current_logical_detection->mutable_position()->CopyFrom(point_cartesian_in_ego_coordinates);
             if (sensor_data.feature_data().lidar_sensor(sensor_idx).detection(detection_no).has_intensity())
             {

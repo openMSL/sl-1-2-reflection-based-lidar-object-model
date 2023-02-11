@@ -16,7 +16,6 @@
 #include <math.h>
 #else
 #include <cmath>
-#include <fstream>
 #include <iostream>
 
 constexpr float speed_of_light = 299792458.0;
@@ -30,12 +29,6 @@ struct Sun
     double elevation = 0;  // Solar elevation angle, 0=x/y plane, PI/2=zenith. Unit: rad; Range: [-PI..PI].
     double intensity = 0;  // Illuminance of the sun, direct sunlight is around 100,00 lx. Unit: lux; Range: [0..inf[.
 };
-
-struct SprayProfile
-{
-    const float std_time_constant = 0.2;
-    const float object_velocity_threshold_in_m_s = 40 / 3.6;
-} spray_profile;
 
 using namespace model;
 using namespace osi3;
@@ -57,7 +50,9 @@ void DetectionEnvironmentalEffects::apply(SensorData& sensor_data)
 
             TF::EgoData ego_data;
             if (!TF::get_ego_info(ego_data, sensor_data.sensor_view(sensor_idx)))
+            {
                 alert("Ego vehicle has no base, no id, or is not contained in GT moving objects.");
+            }
 
             /// Precipitation Detections
             add_hydrometeor_detections(sensor_data, current_sensor, sensor_idx, ego_data);
@@ -119,7 +114,7 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
             atm_detection_probability = static_cast<float>(profile.det_envir_effects.fog_det_prob_factor * weather_intensity);
         }
 
-        for (auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
+        for (const auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
         {
             auto current_lidar_sensor_view_config = profile.beam_center_config.lidar_sensor_view_configuration(lidar_frontend_idx);
             std::vector<int> existing_detection_idx(current_lidar_sensor_view_config.emitted_signal_size(), -1);
@@ -214,7 +209,7 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
     object_max_dimension_in_sensor_coord.set_y(ego_data.ego_base.dimension().width() / 2.0 - ego_data.ego_vehicle_attributes.bbcenter_to_rear().y() - mounting_pose.position().y());
 
     append_spray_cluster(sensor_data, ego_data, mounting_pose);
-    std::vector<int> cluster_to_erase = update_spray_cluster(sensor_data, ego_data, mounting_pose);
+    std::vector<int> cluster_to_erase = update_spray_cluster(ego_data, mounting_pose);
 
     std::vector<int> existing_detection_idx(current_lidar_sensor_view_config.emitted_signal_size(), -1);
     osi3::LidarDetectionData existing_detections = get_beam_indices(sensor_data, existing_detection_idx);
@@ -406,11 +401,11 @@ osi3::LidarDetectionData DetectionEnvironmentalEffects::get_beam_indices(osi3::S
     return existing_detections;
 }
 
-std::vector<int> DetectionEnvironmentalEffects::update_spray_cluster(osi3::SensorData& sensor_data, const TF::EgoData& ego_data, osi3::MountingPosition& mounting_pose)
+std::vector<int> DetectionEnvironmentalEffects::update_spray_cluster(const TF::EgoData& ego_data, osi3::MountingPosition& mounting_pose)
 {
     double wind_direction_deg = 208.0;  // wind direction clock wise from north
     double wind_speed = 2.0;            // absolute wind speed in m/s
-    double wind_direction[] = {sin(wind_direction_deg * M_PI / 180.0), cos(wind_direction_deg * M_PI / 180.0), 0.0};
+    std::array<double,3> wind_direction = {sin(wind_direction_deg * M_PI / 180.0), cos(wind_direction_deg * M_PI / 180.0), 0.0};
     double update_cycle_time_s =
         ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
 
@@ -479,11 +474,7 @@ std::vector<double> DetectionEnvironmentalEffects::intersection_with_sphere(cons
     double b = 2.0 * TF::dot_product(origin_to_cluster_center, direction);
     double c = TF::dot_product(origin_to_cluster_center, origin_to_cluster_center) - radius * radius;
     double discriminant = b * b - 4 * a * c;
-    if (discriminant < 0.0)
-    {
-        return output;
-    }
-    else
+    if (discriminant >= 0.0)
     {
         double numerator = -b - sqrt(discriminant);
         if (numerator > 0.0)
@@ -496,9 +487,8 @@ std::vector<double> DetectionEnvironmentalEffects::intersection_with_sphere(cons
         {
             output.push_back(numerator / (2.0 * a));
         }
-
-        return output;
     }
+    return output;
 }
 
 void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data, const TF::EgoData& ego_data, MountingPosition& mounting_pose)
@@ -511,7 +501,7 @@ void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data
         ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
     for (auto& current_spray_volume : spray_volumes)
     {
-        auto& current_object = *current_spray_volume.corresponding_object;
+        const auto& current_object = *current_spray_volume.corresponding_object;
         // todo: get lane id of current object
         auto water_film_height = (float)sensor_data.sensor_view(0).global_ground_truth().lane(0).classification().road_condition().surface_water_film();
         double object_velocity =
@@ -523,7 +513,7 @@ void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data
             double mean_num_clusters = (0.20 * water_film_height + 0.1) * (object_velocity * 3.6 - 50.0);  // todo: put in profile
             // std::normal_distribution<double> distribution_num_clusters(mean_num_clusters,
             // spray_profile.num_clusters_std);
-            int num_spray_cluster = round(std::max(0.0, mean_num_clusters));
+            int num_spray_cluster = (int)round(std::max(0.0, mean_num_clusters));
             for (int cluster_idx = 0; cluster_idx < num_spray_cluster; cluster_idx++)
             {
                 osi3::Vector3d current_spray_cluster_vol_coord;
@@ -561,7 +551,7 @@ std::vector<DetectionEnvironmentalEffects::SprayVolume> DetectionEnvironmentalEf
                                                                                                             osi3::MountingPosition& mounting_pose)
 {
     std::vector<SprayVolume> spray_volumes;
-    for (auto& current_moving_object : sensor_data.sensor_view(0).global_ground_truth().moving_object())
+    for (const auto& current_moving_object : sensor_data.sensor_view(0).global_ground_truth().moving_object())
     {
         double abs_velocity = TF::get_vector_abs(current_moving_object.base().velocity());
 
@@ -649,7 +639,7 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
         std::uniform_real_distribution<> uniform_distrib(0, 1);
 
         int lidar_frontend_idx = 0;
-        for (auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
+        for (const auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
         {
             osi3::MountingPosition mounting_pose = lidar_sensor_view.view_configuration().mounting_position();
             Orientation3d orientation_world_coord = TF::calc_relative_orientation_from_local(mounting_pose.orientation(), ego_data.ego_base.orientation());
@@ -659,7 +649,9 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
             sun_sensor_coord.elevation = cos(orientation_world_coord.roll()) * (sun.elevation + orientation_world_coord.pitch()) +
                                          sin(orientation_world_coord.roll()) * (sun.azimuth - orientation_world_coord.pitch());
             if (sun_sensor_coord.azimuth > M_PI)
+            {
                 sun_sensor_coord.azimuth -= M_PI;
+            }
             double blinding_angle_region = 6.0;
             double min_azimuth = sun_sensor_coord.azimuth - blinding_angle_region / 180 * M_PI;
             double max_azimuth = sun_sensor_coord.azimuth + blinding_angle_region / 180 * M_PI;
@@ -824,7 +816,7 @@ void DetectionEnvironmentalEffects::add_max_detection(std::vector<double>& detec
 
 void DetectionEnvironmentalEffects::add_new_detection(osi3::LidarDetectionData* current_sensor, const osi3::Spherical3d& position_sensor_coord, double intensity)
 {
-    auto detection = current_sensor->add_detection();
+    auto* detection = current_sensor->add_detection();
     detection->set_intensity(intensity);
     detection->mutable_position()->set_distance(position_sensor_coord.distance());
     detection->mutable_position()->set_azimuth(position_sensor_coord.azimuth());

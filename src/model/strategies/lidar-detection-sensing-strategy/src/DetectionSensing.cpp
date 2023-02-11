@@ -9,7 +9,6 @@
 
 #include "detectionsensing/DetectionSensing.hpp"
 
-#include <iostream>
 #include <random>
 #include <string>
 #include <vector>
@@ -41,18 +40,22 @@ void DetectionSensing::apply(SensorData& sensor_data)
     log("GT time stamp: " + std::to_string(timestamp));
 
     if (timestamp == 0)
+    {
         return;
+    }
 
     auto no_of_lidar_frontends = sensor_data.sensor_view(0).lidar_sensor_view_size();
     log("Number of simulated lidar sensor front-ends: " + std::to_string(no_of_lidar_frontends));
 
     if (profile.sensor_view_configuration.lidar_sensor_view_configuration_size() != no_of_lidar_frontends)
+    {
         alert("Number of LidarSensorViews different to profile/SensorViewConfiguration!");
+    }
 
     size_t total_no_of_rays_for_frontend = 0;
     size_t total_no_of_reflections = 0;
     int lidar_sensor_view_idx = 0;
-    for (auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
+    for (const auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
     {
         total_no_of_rays_for_frontend += profile.sensor_view_configuration.lidar_sensor_view_configuration(lidar_sensor_view_idx).emitted_signal_size();
         total_no_of_reflections += lidar_sensor_view.rendering_result_size();
@@ -63,7 +66,7 @@ void DetectionSensing::apply(SensorData& sensor_data)
 
     /// Loop over all received lidar sensor front-ends per sensor view
     int lidar_frontend_idx = 0;
-    for (auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
+    for (const auto& lidar_sensor_view : sensor_data.sensor_view(0).lidar_sensor_view())
     {
         /// Start new set of detections
         sensor_data.mutable_feature_data()->add_lidar_sensor();
@@ -104,7 +107,7 @@ void DetectionSensing::apply(SensorData& sensor_data)
 
         /// Run through all rendering results and append them to the lidar cuboid
         size_t reflection_idx = 0;
-        for (auto& rendering_result : lidar_sensor_view.rendering_result())
+        for (const auto& rendering_result : lidar_sensor_view.rendering_result())
         {
             LidarCuboidCellmW acual_lidar_cuboid_cell;
             if (rendering_result.emitted_signal_idx() < 0)
@@ -231,7 +234,9 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
                 no_of_peaks_in_beam++;
                 /// End looking for peaks, if already found enough
                 if (no_of_peaks_in_beam > profile.detection_sensing_parameters.max_echos_per_beam)
+                {
                     break;
+                }
 
                 /// Otherwise, start a new peak
                 no_of_dist_cells_in_peak = 1;
@@ -268,9 +273,13 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
             /// {"start" (default), "peak"}
             float distance;
             if (profile.detection_sensing_parameters.echo_determination_mode == "peak")
+            {
                 distance = current_peak.distance_in_m;
+            }
             else
+            {
                 distance = current_peak.echo_pulse_start_in_m;
+            }
 
             /// Get angles of current beam from profile
             auto azimuth = profile.beam_center_config.lidar_sensor_view_configuration(lidar_frontend_idx).emitted_signal(beam_idx).horizontal_angle();
@@ -279,13 +288,17 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
             {
                 if (profile.vertical_angle_clamping == "max_abs")
                 {
-                    int sign_elevation = (elevation > 0) - (elevation < 0);
+                    int sign_elevation = static_cast<int>(elevation > 0) - static_cast<int>(elevation < 0);
                     elevation = sign_elevation * (abs(elevation) + profile.beam_step_elevation * M_PI / 180 / 2);
                 }
                 else if (profile.vertical_angle_clamping == "top")
+                {
                     elevation = elevation + profile.beam_step_elevation * M_PI / 180 / 2;
+                }
                 else if (profile.vertical_angle_clamping == "bottom")
+                {
                     elevation = elevation - profile.beam_step_elevation * M_PI / 180 / 2;
+                }
             }
 
             /// Noise on distance and distance resolution
@@ -299,7 +312,7 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
             distance = std::round(distance / profile.detection_sensing_parameters.distance_resolution) * profile.detection_sensing_parameters.distance_resolution;
 
             /// Add new detection and fill it
-            auto detection = current_sensor->add_detection();
+            auto* detection = current_sensor->add_detection();
             detection->mutable_position()->set_distance(distance);
             detection->mutable_position()->set_azimuth(azimuth);
             detection->mutable_position()->set_elevation(elevation);
@@ -315,7 +328,7 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
                     float receiver_aperture_area = M_PI * pow(profile.receiver_aperture_diameter_m, 2) / 4.0;
                     float emitted_signal_strength_mW = pow(10.0, profile.max_emitted_signal_strength_in_dBm / 10.0);
                     // simulate Velodyne intensity output, calibrated to target reflectivity
-                    int output_intensity = round(signal_strength_in_mW_range_compensated / receiver_aperture_area / emitted_signal_strength_mW * M_PI * 100.0);
+                    int output_intensity = static_cast<int>(round(signal_strength_in_mW_range_compensated / receiver_aperture_area / emitted_signal_strength_mW * M_PI * 100.0));
 
                     peak_intensity = output_intensity / 255.0 * 100.0;  // velodyne output is scaled [0 255]
                 }
@@ -356,14 +369,14 @@ void DetectionSensing::process_collected_beam_cells(LidarDetectionData* current_
                 auto echo_pulse_width_by_geometry = current_peak.epw_in_m;
 
                 auto signal_strength_to_epw = profile.detection_sensing_parameters.signal_strength_to_epw;
-                size_t k = 1;
-                while ((k < signal_strength_to_epw.size() - 1) && (std::round(current_peak.signal_strength_in_dBm * 1000) >= std::round(signal_strength_to_epw[k][0] * 1000)))
+                size_t count = 1;
+                while ((count < signal_strength_to_epw.size() - 1) && (std::round(current_peak.signal_strength_in_dBm * 1000) >= std::round(signal_strength_to_epw[count][0] * 1000)))
                 {
-                    k = k + 1;
+                    count = count + 1;
                 }
-                auto echo_pulse_width_by_intensity = (signal_strength_to_epw[k - 1][1] + (signal_strength_to_epw[k][1] - signal_strength_to_epw[k - 1][1]) /
-                                                                                             (signal_strength_to_epw[k][0] - signal_strength_to_epw[k - 1][0]) *
-                                                                                             (current_peak.signal_strength_in_dBm - signal_strength_to_epw[k - 1][0]));
+                auto echo_pulse_width_by_intensity = (signal_strength_to_epw[count - 1][1] + (signal_strength_to_epw[count][1] - signal_strength_to_epw[count - 1][1]) /
+                                                                                             (signal_strength_to_epw[count][0] - signal_strength_to_epw[count - 1][0]) *
+                                                                                             (current_peak.signal_strength_in_dBm - signal_strength_to_epw[count - 1][0]));
 
                 auto peak_epw = echo_pulse_width_by_pulse + echo_pulse_width_by_geometry + echo_pulse_width_by_intensity;
                 peak_epw = std::round(peak_epw / profile.detection_sensing_parameters.epw_resolution) * profile.detection_sensing_parameters.epw_resolution;

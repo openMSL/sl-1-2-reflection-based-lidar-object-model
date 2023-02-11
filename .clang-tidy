@@ -257,8 +257,10 @@ CheckOptions:
     value:           ''
   - key:             readability-identifier-naming.VirtualMethodSuffix
     value:           ''
+  - key:             readability-identifier-naming.VariableIgnoredRegexp
+    value:           'Alpha|Beta|Gamma|Delta|Theta'
   - key:             readability-identifier-length.IgnoredVariableNames
-    value:           'x|y|z|id'
+    value:           'x|y|z|id|mu|a|b|c'
   - key:             readability-identifier-length.IgnoredParameterNames
     value:           'x|y|z|id'
 ...
