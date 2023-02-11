@@ -43,7 +43,7 @@ class RosLogicaldetections : public Strategy
     RosLogicaldetections(const Profile& profile, const Log& log, const Alert& alert);
     using Strategy::Strategy;
 
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
   private:
     std::unique_ptr<logicaldetections::WorkerPCL> worker_pcl = nullptr;

@@ -42,7 +42,7 @@ void model::PcdOutputLogicalDetections::apply(SensorData& sensor_data)
 
     size_t epw_intensity_rcs_flag;
 
-    if ((sensor_data.sensor_view(0).lidar_sensor_view().size() > 0) && (sensor_data.feature_data().lidar_sensor(0).detection_size() > 0))
+    if ((!sensor_data.sensor_view(0).lidar_sensor_view().empty()) && (sensor_data.feature_data().lidar_sensor(0).detection_size() > 0))
     {
         if (sensor_data.feature_data().lidar_sensor(0).detection(0).has_echo_pulse_width())
         {
@@ -53,7 +53,7 @@ void model::PcdOutputLogicalDetections::apply(SensorData& sensor_data)
             epw_intensity_rcs_flag = 1;
         }
     }
-    else if (sensor_data.sensor_view(0).radar_sensor_view().size() > 0)
+    else if (!sensor_data.sensor_view(0).radar_sensor_view().empty())
     {
         epw_intensity_rcs_flag = 2;
     }

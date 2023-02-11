@@ -26,8 +26,6 @@
 using namespace model;
 using namespace osi3;
 
-static bool first_call = true;
-
 void model::CsvOutputDetections::apply(SensorData& sensor_data)
 {
     log("Starting .csv output for detections");
@@ -48,17 +46,17 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
     auto time_seconds = sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds();
     double timestamp = (double)time_seconds + time_nanos / 1000000000.0;
 
-    if (sensor_data.sensor_view(0).lidar_sensor_view().size() > 0)
+    if (!sensor_data.sensor_view(0).lidar_sensor_view().empty())
     {
-        if (first_call && (sensor_data.feature_data().lidar_sensor(0).detection().size() > 0))
+        if (first_call && (!sensor_data.feature_data().lidar_sensor(0).detection().empty()))
         {
 #include <csvoutputdetections/set_csv_file_path_detections.cpp>
-            write_first_line_to_csv(file_path_detections, sensor_data.feature_data().lidar_sensor(0).detection(0).has_intensity());
+            write_first_line_to_csv(file_path_detections, static_cast<const size_t>(sensor_data.feature_data().lidar_sensor(0).detection(0).has_intensity()));
             first_call = false;
         }
         for (int sensor_idx = 0; sensor_idx < sensor_data.sensor_view(0).lidar_sensor_view_size(); sensor_idx++)
         {
-            if (sensor_data.feature_data().lidar_sensor(sensor_idx).detection().size() > 0)
+            if (!sensor_data.feature_data().lidar_sensor(sensor_idx).detection().empty())
             {
                 /// Run through all detections
                 size_t detection_idx = 0;
@@ -66,6 +64,7 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
                 {
 
                     if (detection.has_intensity())
+                    {
                         write_data_to_csv(file_path_detections,
                                           timestamp,
                                           detection_idx,
@@ -73,7 +72,9 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
                                           detection.position().elevation() * 180 / M_PI,
                                           detection.position().distance(),
                                           detection.intensity());
+                    }
                     else if (detection.has_echo_pulse_width())
+                    {
                         write_data_to_csv(file_path_detections + "\\Detections.csv",
                                           timestamp,
                                           detection_idx,
@@ -81,22 +82,23 @@ void model::CsvOutputDetections::apply(SensorData& sensor_data)
                                           detection.position().elevation() * 180 / M_PI,
                                           detection.position().distance(),
                                           detection.echo_pulse_width());
+                    }
                     detection_idx++;
                 }
             }
         }
     }
-    else if (sensor_data.sensor_view(0).radar_sensor_view().size() > 0)
+    else if (!sensor_data.sensor_view(0).radar_sensor_view().empty())
     {
-        if (first_call && (sensor_data.feature_data().radar_sensor(0).detection().size() > 0))
+        if (first_call && (!sensor_data.feature_data().radar_sensor(0).detection().empty()))
         {
-#include <csvoutputdetections/set_csv_file_path_detections.cpp>
+            #include <csvoutputdetections/set_csv_file_path_detections.cpp>
             write_first_line_to_csv(file_path_detections, 2);
             first_call = false;
         }
         for (int sensor_idx = 0; sensor_idx < sensor_data.sensor_view(0).radar_sensor_view_size(); sensor_idx++)
         {
-            if (sensor_data.feature_data().radar_sensor(sensor_idx).detection().size() > 0)
+            if (!sensor_data.feature_data().radar_sensor(sensor_idx).detection().empty())
             {
                 /// Run through all detections
                 size_t detection_idx = 0;
@@ -142,7 +144,9 @@ void CsvOutputDetections::write_first_line_to_csv(const std::string& path, const
         my_file << "timestamp_in_s, detection_id, azimuth_in_deg, elevation_in_deg, distance_in_m, rcs_in_dbm²" << std::endl;
     }
     else
+    {
         alert("Flag for intensity, RCS, or echo pulse width output not set correctly!");
+    }
     my_file.close();
 }
 

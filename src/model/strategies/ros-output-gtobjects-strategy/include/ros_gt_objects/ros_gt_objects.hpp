@@ -51,7 +51,7 @@ class RosGtObjects : public Strategy
     RosGtObjects(const Profile& profile, const Log& log, const Alert& alert);
     using Strategy::Strategy;
 
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
   private:
     std::unique_ptr<ground_truth::WorkerMarker> worker_gt = nullptr;

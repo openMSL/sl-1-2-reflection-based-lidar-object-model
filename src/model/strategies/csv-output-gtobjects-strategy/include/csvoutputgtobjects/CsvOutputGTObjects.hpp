@@ -20,9 +20,9 @@ class CsvOutputGTObjects : public Strategy
 
     using Strategy::Strategy;
 
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
-    std::string file_path_gtobjects = "";
+    std::string file_path_gtobjects;
     bool first_call = true;
 
   public:

@@ -17,7 +17,7 @@ class PointcloudFusion : public Strategy
 {
 
     using Strategy::Strategy;
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
   public:
   private:

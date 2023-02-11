@@ -20,9 +20,9 @@ class PcdOutputLogicalDetections : public Strategy
 
     using Strategy::Strategy;
 
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
-    std::string path_string = "";
+    std::string path_string;
     bool first_call = true;
 
   public:

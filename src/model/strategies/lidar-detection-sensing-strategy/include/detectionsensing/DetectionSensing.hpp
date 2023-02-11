@@ -47,7 +47,7 @@ class DetectionSensing : public Strategy
   public:
     //// Main Functions
     using Strategy::Strategy;
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
     void process_collected_beam_cells(LidarDetectionData* current_sensor,
                                       std::vector<LidarBeamCellmW>* lidar_cuboid_cells_of_beam_ptr,

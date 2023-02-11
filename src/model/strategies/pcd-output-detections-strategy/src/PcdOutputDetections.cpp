@@ -25,19 +25,23 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
 {
     log("Starting .pcd output for detections");
 
-    if (sensor_data.sensor_view().size() == 0)
+    if (sensor_data.sensor_view().empty())
+    {
         return;
+    }
 
     auto time_nanos = sensor_data.sensor_view(0).global_ground_truth().timestamp().nanos();
     auto time_seconds = sensor_data.sensor_view(0).global_ground_truth().timestamp().seconds();
     double timestamp = (double)time_seconds + (double)time_nanos / 1000000000;
 
     if (!sensor_data.has_feature_data())
+    {
         return;
+    }
 
     size_t no_of_detections = 0;
     size_t no_of_sensors = 0;
-    if (sensor_data.sensor_view(0).lidar_sensor_view().size() > 0)
+    if (!sensor_data.sensor_view(0).lidar_sensor_view().empty())
     {
         for (int sensor_idx = 0; sensor_idx < sensor_data.feature_data().lidar_sensor_size(); sensor_idx++)
         {
@@ -45,7 +49,7 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
             no_of_sensors = sensor_data.feature_data().lidar_sensor_size();
         }
     }
-    else if (sensor_data.sensor_view(0).radar_sensor_view().size() > 0)
+    else if (!sensor_data.sensor_view(0).radar_sensor_view().empty())
     {
         for (int sensor_idx = 0; sensor_idx < sensor_data.feature_data().radar_sensor_size(); sensor_idx++)
         {
@@ -79,7 +83,7 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
     for (int sensor_idx = 0; sensor_idx < no_of_sensors; sensor_idx++)
     {
         /// Run through all detections
-        if (sensor_data.sensor_view(0).lidar_sensor_view().size() > 0)
+        if (!sensor_data.sensor_view(0).lidar_sensor_view().empty())
         {
             for (const auto& detection : sensor_data.feature_data().lidar_sensor(sensor_idx).detection())
             {
@@ -91,7 +95,7 @@ void model::PcdOutputDetections::apply(SensorData& sensor_data)
                 write_2_pcd(path, point_cartesian_sensor.x(), point_cartesian_sensor.y(), point_cartesian_sensor.z(), intensity);
             }
         }
-        else if (sensor_data.sensor_view(0).radar_sensor_view().size() > 0)
+        else if (!sensor_data.sensor_view(0).radar_sensor_view().empty())
         {
             for (const auto& detection : sensor_data.feature_data().radar_sensor(sensor_idx).detection())
             {
@@ -111,10 +115,14 @@ void PcdOutputDetections::write_pcd_header(const std::string& path, const Sensor
     size_t no_of_points = 0;
     for (int sensor_idx = 0; sensor_idx < no_of_sensors; sensor_idx++)
     {
-        if (sensor_data.sensor_view(0).lidar_sensor_view().size() > 0)
+        if (!sensor_data.sensor_view(0).lidar_sensor_view().empty())
+        {
             no_of_points += sensor_data.feature_data().lidar_sensor(sensor_idx).detection().size();
-        else if (sensor_data.sensor_view(0).radar_sensor_view().size() > 0)
+        }
+        else if (!sensor_data.sensor_view(0).radar_sensor_view().empty())
+        {
             no_of_points += sensor_data.feature_data().radar_sensor(sensor_idx).detection().size();
+        }
     }
 
     std::fstream my_file;

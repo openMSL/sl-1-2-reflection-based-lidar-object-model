@@ -43,7 +43,7 @@ class Tracking : public Strategy
 
   public:
     using Strategy::Strategy;
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
     void calculate_velocity_as_derivation_of_position(Tracking::Data& data_of_current_time_step,
                                                       DetectedMovingObject* current_moving_object,

@@ -20,7 +20,7 @@ class DetectionEnvironmentalEffects : public Strategy
   public:
     //// Main Functions
     using Strategy::Strategy;
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
     struct SprayVolume
     {
         BaseMoving volume;
@@ -46,7 +46,7 @@ class DetectionEnvironmentalEffects : public Strategy
     {
         const float std_time_constant = 0.2;
         const float object_velocity_threshold_in_m_s = 40 / 3.6;
-    } spray_profile;
+    };
 
   private:
     std::vector<SprayCluster> spray_cluster_global = {};
@@ -87,6 +87,7 @@ class DetectionEnvironmentalEffects : public Strategy
     bool is_snow = false;
     bool is_sun = false;
     std::vector<float> weather_sequence = {};
+    SprayProfile spray_profile;
 };
 }  // namespace model
 

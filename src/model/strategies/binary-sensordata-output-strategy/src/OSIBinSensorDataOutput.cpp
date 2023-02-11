@@ -12,17 +12,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include <vector>
-
-#ifdef _WIN32
-#include <math.h>
-
-#include <direct.h>
-#else
-#include <cmath>
-
 #include <sys/stat.h>
-#endif
 
 using namespace model;
 using namespace osi3;
@@ -51,22 +41,22 @@ void model::OSIBinSensorDataOutput::apply(SensorData& sensor_data)
 
 void OSIBinSensorDataOutput::write_data_to_bin(const std::string& path, const SensorData& sensor_data)
 {
-    typedef unsigned int message_size_t;
+    typedef unsigned int MessageSizeT;
     std::ofstream bin_file(path, std::ios::binary | std::ios_base::app);
 
-    std::string osiMsgStringOnly = sensor_data.SerializeAsString();
-    message_size_t message_size = osiMsgStringOnly.size();
-    unsigned char ch[4];
-    memcpy(ch, (char*)&message_size, sizeof(message_size_t));
+    std::string osi_msg_string_only = sensor_data.SerializeAsString();
+    MessageSizeT message_size = osi_msg_string_only.size();
+    char character[4];
+    memcpy(character, (char*)&message_size, sizeof(MessageSizeT));
 
-    std::string osiMsgString;
-    osiMsgString += ch[0];
-    osiMsgString += ch[1];
-    osiMsgString += ch[2];
-    osiMsgString += ch[3];
-    osiMsgString += osiMsgStringOnly;
+    std::string osi_msg_string;
+    osi_msg_string += character[0];
+    osi_msg_string += character[1];
+    osi_msg_string += character[2];
+    osi_msg_string += character[3];
+    osi_msg_string += osi_msg_string_only;
 
-    bin_file.write(osiMsgString.c_str(), osiMsgString.length());
+    bin_file.write(osi_msg_string.c_str(), osi_msg_string.length());
     bin_file.close();
-    osiMsgString.clear();
+    osi_msg_string.clear();
 }

@@ -20,9 +20,9 @@ class OSIBinSensorViewOutput : public Strategy
 
     using Strategy::Strategy;
 
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
-    std::string file_path_tracefile = "";
+    std::string file_path_tracefile;
     bool first_call = true;
 
   public:

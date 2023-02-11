@@ -20,9 +20,9 @@ class CsvOutputDetections : public Strategy
 
     using Strategy::Strategy;
 
-    void apply(SensorData&) override;
+    void apply(SensorData& sensor_data) override;
 
-    std::string file_path_detections = "";
+    std::string file_path_detections;
     bool first_call = true;
 
   public:

@@ -57,7 +57,7 @@ void model::CsvOutputLogicalDetections::apply(SensorData& sensor_data)
         }
         else if (sensor_data.sensor_view(0).lidar_sensor_view_size() > 0)
         {
-            write_first_line_to_csv(file_path_logicaldetections, sensor_data.logical_detection_data().logical_detection(0).has_intensity());
+            write_first_line_to_csv(file_path_logicaldetections, static_cast<const size_t>(sensor_data.logical_detection_data().logical_detection(0).has_intensity()));
             first_call = false;
         }
         else
@@ -80,11 +80,11 @@ void model::CsvOutputLogicalDetections::apply(SensorData& sensor_data)
     }
 }
 
-void CsvOutputLogicalDetections::write_first_line_to_csv(const std::string& path, const size_t& has_intensity)
+void CsvOutputLogicalDetections::write_first_line_to_csv(const std::string& path, const size_t& intensity_or_epw_or_rcs)
 {
     std::fstream my_file;
     my_file.open(path, std::ios::app);
-    my_file << "timestamp_in_s, detection_id, x_in_m, y_in_m, z_in_m, " << (has_intensity ? "intensity_in_%" : "epw_in_m") << std::endl;
+    my_file << "timestamp_in_s, detection_id, x_in_m, y_in_m, z_in_m, " << (intensity_or_epw_or_rcs != 0U ? "intensity_in_%" : "epw_in_m") << std::endl;
     my_file.close();
 }
 
