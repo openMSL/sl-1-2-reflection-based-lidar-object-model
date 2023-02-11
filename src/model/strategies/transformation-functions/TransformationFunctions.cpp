@@ -198,7 +198,7 @@ Vector3d TF::transform_position_from_object_to_world_coordinates(const Vector3d&
 Spherical3d TF::transform_cartesian_to_spherical(const Vector3d& input_relative_position)
 {
     double distance = sqrt(input_relative_position.x() * input_relative_position.x() + input_relative_position.y() * input_relative_position.y() +
-                    input_relative_position.z() * input_relative_position.z());
+                           input_relative_position.z() * input_relative_position.z());
     double azimuth = atan2(input_relative_position.y(), input_relative_position.x());
     double elevation = asin(input_relative_position.z() / distance);
     Spherical3d spherical_coordinate;
