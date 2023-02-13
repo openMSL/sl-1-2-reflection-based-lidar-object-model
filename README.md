@@ -1,4 +1,4 @@
-# Reflection Based Lidar Object Model
+# SL 1-2 Reflection Based Lidar Object Model
 
 ![Build workflow](https://github.com/openMSL/reflection_based_lidar_object_model/actions/workflows/build.yml/badge.svg)
 ![SPDX workflow](https://github.com/openMSL/reflection_based_lidar_object_model/actions/workflows/spdx.yml/badge.svg)
