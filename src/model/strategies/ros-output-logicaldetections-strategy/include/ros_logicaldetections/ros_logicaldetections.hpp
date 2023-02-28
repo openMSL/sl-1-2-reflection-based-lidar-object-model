@@ -6,46 +6,50 @@
 #ifndef ROS_LOGICALDETECTIONS_HPP
 #define ROS_LOGICALDETECTIONS_HPP
 
+#include <memory>
+#include <string>
+
+#include <model/include/strategy.hpp>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
-#include <model/include/strategy.hpp>
-#include <string>
-#include <memory>
 #include <visualization_msgs/Marker.h>
 
 using namespace model;
 using namespace osi3;
 
-namespace logicaldetections {
-    class WorkerPCL final {
-    public:
-        WorkerPCL(const std::string &topic, std::string frame_id);
-        void inject(SensorData &sensor_data, const Log &log);
+namespace logicaldetections
+{
+class WorkerPCL final
+{
+  public:
+    WorkerPCL(const std::string& topic, std::string frame_id);
+    void inject(SensorData& sensor_data, const Log& log);
 
-    private:
-        const std::string frame_id;
-        ros::NodeHandle node;
-        ros::Publisher publisher;
-        tf::TransformListener listener;
-        tf::TransformBroadcaster transform_broadcaster;
-    };
-}
+  private:
+    const std::string frame_id;
+    ros::NodeHandle node;
+    ros::Publisher publisher;
+    tf::TransformListener listener;
+    tf::TransformBroadcaster transform_broadcaster;
+};
+}  // namespace logicaldetections
 
+namespace model
+{
+class RosLogicaldetections : public Strategy
+{
+  public:
+    RosLogicaldetections(const Profile& profile, const Log& log, const Alert& alert);
+    using Strategy::Strategy;
 
-namespace model {
-    class ros_logicaldetections : public Strategy {
-    public:
-        ros_logicaldetections(const Profile &profile, const Log &log, const Alert &alert);
-        using Strategy::Strategy;
+    void apply(SensorData& sensor_data) override;
 
-        void apply(SensorData &) override;
-
-    private:
-        std::unique_ptr<logicaldetections::WorkerPCL> worker_pcl = nullptr;
-    };
-}
+  private:
+    std::unique_ptr<logicaldetections::WorkerPCL> worker_pcl = nullptr;
+};
+}  // namespace model
 
 std_msgs::ColorRGBA set_color(float r, float g, float b, float a);
 
-#endif //ROS_LOGICALDETECTIONS_HPP
+#endif  // ROS_LOGICALDETECTIONS_HPP

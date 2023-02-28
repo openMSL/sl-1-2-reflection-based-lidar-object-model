@@ -7,35 +7,37 @@
 #define SENSOR_MODEL_FMU_STRATEGY_HPP
 
 #include <functional>
+
 #include <model/profiles/profile.hpp>
 
-namespace model {
+namespace model
+{
 
-    typedef std::function<void(const std::string &)> Log;
+typedef std::function<void(const std::string&)> Log;
 
-    typedef std::function<void(const std::string &)> Alert;
+typedef std::function<void(const std::string&)> Alert;
 
-    using profile::Profile;
+using profile::Profile;
 
-    class Strategy {
-    public:
-        Strategy(const Profile &profile, const Log &log, const Alert &alert) : profile(profile), log(log), alert(alert) {
-        }
+class Strategy
+{
+  public:
+    Strategy(const Profile& profile, const Log& log, const Alert& alert) : profile(profile), log(log), alert(alert) {}
 
-        virtual ~Strategy() = default;
+    virtual ~Strategy() = default;
 
-        Strategy(const Strategy &) = delete;
+    Strategy(const Strategy&) = delete;
 
-        Strategy &operator=(const Strategy &) = delete;
+    Strategy& operator=(const Strategy&) = delete;
 
-        virtual void apply(osi3::SensorData &) = 0;
+    virtual void apply(osi3::SensorData&) = 0;
 
-    protected:
-        const Profile &profile;
-        const Log &log;
-        const Alert &alert;
-    };
+  protected:
+    const Profile& profile;
+    const Log& log;
+    const Alert& alert;
+};
 
-}
+}  // namespace model
 
-#endif //SENSOR_MODEL_FMU_STRATEGY_HPP
+#endif  // SENSOR_MODEL_FMU_STRATEGY_HPP

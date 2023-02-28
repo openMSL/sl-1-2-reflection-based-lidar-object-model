@@ -6,29 +6,31 @@
 #ifndef PCD_OUTPUT_DETECTIOONS_STRATEGY_HPP
 #define PCD_OUTPUT_DETECTIOONS_STRATEGY_HPP
 
-#include <model/include/strategy.hpp>
 #include <string>
+
+#include <model/include/strategy.hpp>
 
 using namespace osi3;
 
-namespace model {
+namespace model
+{
 
-	class PcdOutputDetections : public Strategy {
+class PcdOutputDetections : public Strategy
+{
 
-        using Strategy::Strategy;
+    using Strategy::Strategy;
 
-        void apply(SensorData &) override;
+    void apply(SensorData& sensor_data) override;
 
-        std::string path_string;
-        bool first_call = true;
+    std::string path_string;
+    bool first_call = true;
 
-    public:
+  public:
+  private:
+    static void write_pcd_header(const std::string& path, const SensorData& sensor_data, const size_t& no_of_sensors);
+    static void write_2_pcd(const std::string& path, double x, double y, double z, double intensity);
+};
 
-    private:
-	    static void writePcdHeader(const std::string& path, const SensorData& sensor_data, const size_t& no_of_sensors);
-        static void write2Pcd(const std::string& path, double x, double y, double z, double intensity);
-    };
+}  // namespace model
 
-}
-
-#endif //PCD_OUTPUT_DETECTIOONS_STRATEGY_HPP
+#endif  // PCD_OUTPUT_DETECTIOONS_STRATEGY_HPP

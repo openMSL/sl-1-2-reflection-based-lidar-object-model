@@ -1,4 +1,4 @@
-name: Build
+name: C++ Linter
 
 on:
   push:
@@ -7,10 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Build FMU
+  cpp-linter:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout Model
       uses: actions/checkout@v3
@@ -42,9 +40,29 @@ jobs:
 
     - name: Configure CMake
       working-directory: build
-      run: cmake -DCMAKE_PREFIX_PATH:PATH=${DEPS_DIR}/protobuf/install ..
-
+      run: cmake -DCMAKE_PREFIX_PATH:PATH=${DEPS_DIR}/protobuf/install -DCMAKE_EXPORT_COMPILE_COMMANDS=on ..
+      
     - name: Build C++
       working-directory: build
       run: cmake --build .
 
+    - name: Lint CPP
+      uses: cpp-linter/cpp-linter-action@v2
+      id: linter
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        style: file
+        tidy-checks: ''
+        version: '14'
+        files-changed-only: true
+        thread-comments: true
+        database: 'build/'
+        ignore: 'build | protobuf-21.12 | .github | src/osmp'
+        extra-args: '-I ./build/lib/open-simulation-interface'
+        
+    - name: Fail fast?!
+      if: steps.linter.outputs.checks-failed > 0
+      run: echo "Some files failed the linting checks!"
+      # for actual deployment
+      # run: exit 1
