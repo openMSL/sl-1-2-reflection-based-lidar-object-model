@@ -1,6 +1,6 @@
 # ROS Bridge LogicalDetections Strategy
 
-This strategy outputs osi3::LogicalDetectionData as ROS PointCloud2 messages. 
+This strategy outputs osi3::LogicalDetectionData as ROS PointCloud2 messages.
 Using the ROS tool rviz is a convenient way to visualize OSI sensor view input and sensor data output.
 
 ## Usage

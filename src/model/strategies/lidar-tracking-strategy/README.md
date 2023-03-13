@@ -4,4 +4,3 @@ This strategy simulates tracking behavior of active perception sensor systems ba
 
 NOTE:
 This strategy needs transformation-functions from ../transformation-functions!
-

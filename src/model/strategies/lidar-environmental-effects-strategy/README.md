@@ -5,8 +5,9 @@ This strategy adds environmental effects due to fog, rain, sunlight and road spr
 ## Fog, Rain, Snow, Sun Light
 
 In the "Lidar-Environmental-Effects-Strategy", several weather influences are added to the simulated point cloud.
-The influences are parameterizable via the sensor profiles and calibrated for certain sensors based on measurements published by Linnhoff et al.[[2](#Linnhoff2022)</sup>]
+The influences are parameterizable via the sensor profiles and calibrated for certain sensors based on measurements published by Linnhoff et al.
 The stochastically modeled weather conditions include
+
 - Direct Sunlight
 - Fog
 - Rain

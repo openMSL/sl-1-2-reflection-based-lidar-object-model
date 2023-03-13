@@ -3,7 +3,9 @@
 [![Credibility Assessment Level 0](../../actions/workflows/cl0.yml/badge.svg)](https://github.com/openMSL/sl-1-5-sensor-model-testing/blob/main/doc/test_architecture.md#cl-0-license-check)
 [![Credibility Assessment Level 1](../../actions/workflows/cl1.yml/badge.svg)](https://github.com/openMSL/sl-1-5-sensor-model-testing/blob/main/doc/test_architecture.md#cl-1-code-verification)
 
-:warning: **Current version not compliant with official ASAM OSI**: The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project. It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
+:warning: **Current version not compliant with official ASAM OSI**:
+The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project.
+It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
 
 <img align="right" src="doc/img/fzd_logo.jpg" width="100" />
 
@@ -58,13 +60,16 @@ If an object is no longer detected over a defined number of cycles, it is delete
 Consideration of the class uncertainties is provided by the model architecture, as well.
 The output of the tracking module is a list of tracked objects.
 
-<a name="Rosenberger2020">1</a>: P. Rosenberger, M. F. Holder, N. Cianciaruso, P. Aust, J. F. Tamm-Morschel, C. Linnhoff, and H. Winner, “Sequential lidar sensor system simulation: A modular approach for simulation-based safety validation of automated driving”, In Automotive and Engine Technology, vol. 5, no. 3-4, pp. 187–197, Dec. 2020.
+<a name="Rosenberger2020">1</a>: P. Rosenberger, M. F. Holder, N. Cianciaruso, P. Aust, J. F. Tamm-Morschel, C. Linnhoff, and H. Winner,
+“Sequential lidar sensor system simulation: A modular approach for simulation-based safety validation of automated driving”,
+In Automotive and Engine Technology, vol. 5, no. 3-4, pp. 187–197, Dec. 2020.
 
 ### Modeling of Weather Influence on Lidar Point Cloud
 
 In the "Lidar-Environmental-Effects-Strategy", several weather influences are added to the simulated point cloud.
 The influences are parameterizable via the sensor profiles and calibrated for certain sensors based on measurements published by Linnhoff et al.[[2](#Linnhoff2022)</sup>]
 The stochastically modeled weather conditions include
+
 - Direct Sunlight
 - Fog
 - Rain
@@ -103,10 +108,10 @@ If you would like to have a different one or if your simulation master does not 
 | sensor_view_configuration*        | Update cycle, range, field of view, physical mounting position w.r.t. center of rear axle                                         |
 | lidar_sensor_view_configuration** | Field of view horizontal / vertical, number of rays horizontal / vertical, emitter's mounting position w.r.t. center of rear axle |
 | min_range                         | Minimum range of every simulated lidar sensor                                                                                     |
-<dl>
-  <dd>*sensor_view_configuration is defined for every physical sensor system mounted on the ego car</dd>
-  <dd>**lidar_sensor_view_configuration is defined for every emitter located within every sensor system</dd>
-</dl>
+
+*sensor_view_configuration is defined for every physical sensor system mounted on the ego car<br>
+**lidar_sensor_view_configuration is defined for every emitter located within every sensor system
+
 
 ### Detection Sensing Parameters
 
@@ -264,14 +269,14 @@ Currently, all information on model input is passed to the output.
 ### Install Dependencies in Ubuntu 18.04 / 20.04
 
 1. Install cmake 3.12
-  - as told in [these install instructions](doc/build-instructions/install_cmake_ubuntu_3-12.md)
+   - as told in [these install instructions](doc/build-instructions/install_cmake_ubuntu_3-12.md)
 2. Install protobuf 3.0.0:
-  - Check your version via `protoc --version`. It should output: `libprotoc 3.0.0`
-  - If needed, you can install it via `sudo apt-get install libprotobuf-dev protobuf-compiler`
-  - or from source:
-    - Download it from https://github.com/protocolbuffers/protobuf/releases/tag/v3.0.0 and extract the archive.
-    - Try to run `./autogen.sh`, if it fails, download the gmock-1.7.0.zip from https://pkgs.fedoraproject.org/repo/pkgs/gmock/gmock-1.7.0.zip/073b984d8798ea1594f5e44d85b20d66/gmock-1.7.0.zip, extract it into the protobuf folder and rename the gmock-1.7.0 folter to gmock.
-    - Proceed with the installation with
+   - Check your version via `protoc --version`. It should output: `libprotoc 3.0.0`
+   - If needed, you can install it via `sudo apt-get install libprotobuf-dev protobuf-compiler`
+   - or from source:
+     - Download it from https://github.com/protocolbuffers/protobuf/releases/tag/v3.0.0 and extract the archive.
+     - Try to run `./autogen.sh`, if it fails, download the gmock-1.7.0.zip from https://pkgs.fedoraproject.org/repo/pkgs/gmock/gmock-1.7.0.zip/073b984d8798ea1594f5e44d85b20d66/gmock-1.7.0.zip, extract it into the protobuf folder and rename the gmock-1.7.0 folter to gmock.
+     - Proceed with the installation with
 
      ```bash
      make
@@ -286,6 +291,7 @@ Currently, all information on model input is passed to the output.
     ```bash
     git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
     ```
+
 2. Build the model by executing in the extracted project root directory:
 
     ```bash
@@ -295,18 +301,18 @@ Currently, all information on model input is passed to the output.
     cmake -DCMAKE_BUILD_TYPE=Release -DFMU_INSTALL_DIR:PATH=/tmp ..
     make -j N_JOBS
     ```
+
 3. Take FMU from `FMU_INSTALL_DIR`
 
 (Please note that sources are not packed into the FMU at the moment.)
 
 ## Credits
 
-This work received funding from the research project 
+This work received funding from the research project
 "[SET Level](https://setlevel.de/)" of the [PEGASUS](https://pegasus-family.de) project family, promoted by the German Federal Ministry for Economic Affairs and Energy based on a decision of the German Bundestag.
 | SET Level                                                                                                | PEGASUS Family                                                                                                       | BMWi                                                                                                                                                                                 |
 |----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | <a href="https://setlevel.de"><img src="https://setlevel.de/assets/logo-setlevel.svg" width="100" /></a> | <a href="https://pegasus-family.de"><img src="https://setlevel.de/assets/logo-pegasus-family.svg" width="100" /></a> | <a href="https://www.bmwi.de/Redaktion/DE/Textsammlungen/Technologie/fahrzeug-und-systemtechnologien.html"><img src="https://setlevel.de/assets/logo-bmwi-en.svg" width="100" /></a> |
-
 
 Thanks to all contributors of the following libraries:
 
