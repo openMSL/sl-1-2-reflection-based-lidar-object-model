@@ -112,7 +112,6 @@ If you would like to have a different one or if your simulation master does not 
 *sensor_view_configuration is defined for every physical sensor system mounted on the ego car<br>
 **lidar_sensor_view_configuration is defined for every emitter located within every sensor system
 
-
 ### Detection Sensing Parameters
 
 | Parameter                      | Description                                                                                               |
@@ -274,8 +273,8 @@ Currently, all information on model input is passed to the output.
    - Check your version via `protoc --version`. It should output: `libprotoc 3.0.0`
    - If needed, you can install it via `sudo apt-get install libprotobuf-dev protobuf-compiler`
    - or from source:
-     - Download it from https://github.com/protocolbuffers/protobuf/releases/tag/v3.0.0 and extract the archive.
-     - Try to run `./autogen.sh`, if it fails, download the gmock-1.7.0.zip from https://pkgs.fedoraproject.org/repo/pkgs/gmock/gmock-1.7.0.zip/073b984d8798ea1594f5e44d85b20d66/gmock-1.7.0.zip, extract it into the protobuf folder and rename the gmock-1.7.0 folter to gmock.
+     - Download [source](https://github.com/protocolbuffers/protobuf/releases/tag/v3.0.0) and extract the archive.
+     - Try to run `./autogen.sh`, if it fails, download the [gmock-1.7.0.zip](https://pkgs.fedoraproject.org/repo/pkgs/gmock/gmock-1.7.0.zip/073b984d8798ea1594f5e44d85b20d66/gmock-1.7.0.zip), extract it into the protobuf folder and rename the gmock-1.7.0 folter to gmock.
      - Proceed with the installation with
 
      ```bash
