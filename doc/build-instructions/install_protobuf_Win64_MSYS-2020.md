@@ -1,6 +1,7 @@
 # Install protobuf for Win64 and MSYS-2020
 
 Create and run Shell-Script with **MSYS-2020**:
+
 ```bash
 #!/bin/bash
 # Protobuf 3.3.0

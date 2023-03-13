@@ -1,6 +1,7 @@
 # Install model for Win64 and MSYS-2020
 
 Build the model by running the following bash script in MSYS-2020:
+
    ```bash
    #!/bin/bash
    export CC="gcc -std=c++17 -s -static-libgcc -static-libstdc++ -static"

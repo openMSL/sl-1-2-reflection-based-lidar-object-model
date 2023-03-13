@@ -1,6 +1,7 @@
 # Install model for Win64 and Visual Studio 2017
 
 1. Create and run Shell-Script (e.g. with cmd.exe):
+
     ```bash
     #!/bin/bash
     mkdir -p build-VS2017 && cd build-VS2017 && rm -r *
@@ -25,6 +26,7 @@
         -DProtobuf_PROTOC_LIBRARY_RELEASE=C:/protobuf-3.14/lib/libprotoc.lib \
         ..
     ```
-3. Open ReflectionBasedLidarModel.sln located in build-dir from above with **Visual Studio 2017**
-4. Build Solution for *Release* AND for *Debug*
-5. Build INSTALL for *Release* AND for *Debug*
+
+2. Open ReflectionBasedLidarModel.sln located in build-dir from above with **Visual Studio 2017**
+3. Build Solution for *Release* AND for *Debug*
+4. Build INSTALL for *Release* AND for *Debug*
