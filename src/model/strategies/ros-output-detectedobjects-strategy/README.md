@@ -11,4 +11,4 @@ In order for the strategy to be called during simulation, the FMI parameter *swi
 
 ## ROS Distributions
 
-This strategy needs a full install of either ROS noetic or ROS melodic. The ROS distribution needs to be located in /opt/ros/.
+This strategy needs a full installation of either ROS noetic or ROS melodic. The ROS distribution needs to be located in /opt/ros/.

@@ -1,0 +1,20 @@
+name: Credibility Assessment Level 1
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_model:
+    name: Build Model
+    uses: openMSL/sl-1-2-reflection-based-lidar-object-model/.github/workflows/build.yml@credibility_assessment_levels
+
+  cpp-linter:
+    name: C++ Linter
+    uses: openMSL/sl-1-2-reflection-based-lidar-object-model/.github/workflows/cpp-linter.yml@credibility_assessment_levels
+
+  markdown-linter:
+    name: Markdown Linter
+    uses: openMSL/sl-1-2-reflection-based-lidar-object-model/.github/workflows/markdown.yml@credibility_assessment_levels

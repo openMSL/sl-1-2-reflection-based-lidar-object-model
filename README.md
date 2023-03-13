@@ -1,18 +1,18 @@
 # SL 1-2 Reflection Based Lidar Object Model
 
-![SPDX workflow](https://github.com/openMSL/sl-1-2-reflection-based-lidar-object-model/actions/workflows/spdx.yml/badge.svg)
-![CPP Linter workflow](https://github.com/openMSL/sl-1-2-reflection-based-lidar-object-model/actions/workflows/cpp-linter.yml/badge.svg)
-![Build workflow](https://github.com/openMSL/sl-1-2-reflection-based-lidar-object-model/actions/workflows/build.yml/badge.svg)
+[![Credibility Assessment Level 0](../../actions/workflows/cl0.yml/badge.svg)](https://github.com/openMSL/sl-1-5-sensor-model-testing/blob/main/doc/test_architecture.md#cl-0-license-check)
+[![Credibility Assessment Level 1](../../actions/workflows/cl1.yml/badge.svg)](https://github.com/openMSL/sl-1-5-sensor-model-testing/blob/main/doc/test_architecture.md#cl-1-code-verification)
 
-:warning: **Current version not compliant with official ASAM OSI**: The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project. It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
-
+:warning: **Current version not compliant with official ASAM OSI**:
+The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project.
+It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
 
 <img align="right" src="doc/img/fzd_logo.jpg" width="100" />
 
 This is the FZD Reflection Based Lidar Model based on the FZD OSI Sensor Model Packaging Framework.
 It is a highly parameterizable sensor system model including detection calculation and object tracking simulation.
 The model gets lidar reflection calculated in a simulation tool beforehand e.g. with ray tracing.
-The model outputs are lidar detections and detected moving objects.<br><br>
+The model outputs are lidar detections and detected moving objects.<br>
 
 <img src="doc/img/model_video.gif" width="800" />
 
@@ -23,7 +23,7 @@ The model outputs are lidar detections and detected moving objects.<br><br>
 The outer layer of the model is the [Modular OSMP Framework](https://gitlab.com/tuda-fzd/perception-sensor-modeling/modular-osmp-framework) by FZD.
 It specifies ways in which models using the [Open Simulation Interface (OSI)](https://github.com/OpenSimulationInterface/open-simulation-interface) are to be packaged for their use in simulation environments using [FMI 2.0](https://fmi-standard.org).
 
-The actual logic of the model is packed in so called strategies.
+The actual logic of the model is packed in so-called strategies.
 This is where the magic happens.
 The `apply()` function of the strategy is called by the `do_calc()` function of the Framework.
 There are four subsequent strategies as shown in the image below.
@@ -39,11 +39,13 @@ During that process, a threshold is applied to the reflections, as visualized by
 In this figure, the noise floor is depicted in blue.
 It is not explicitly modeled, but indirectly covered by the threshold.
 Finally, the echo pulse width in m, depicted in the same figure as the widths [A, B] and [C, D], and the intensity for each echo are calculated based on the correctly summarized signal strengths from the corresponding reflections.
-Consequently, compared to single-ray-per-beam ray tracing, in partly occlusion scenarios, where the diverging lidar beam hits an object in front and another one behind, two detections can be derived, as it would be the case with a real lidar sensor.<br><br>
+Consequently, compared to single-ray-per-beam ray tracing, in partly occlusion scenarios, where the diverging lidar beam hits an object in front and another one behind, two detections can be derived, as it would be the case with a real lidar sensor.<br>
 
 <img src="doc/img/over_sampling.png" width="800" />
 
-The image depicts the super-sampling of a lidar sensor beam and the detection calculation within the reflection-based lidar sensor simulation from [[1](#Rosenberger2020)</sup>, p. 192]. The intervals A-B and C-D mark the resulting echoes at the edge-shaped object (left) and in the signal (right). The ⊗ visualizes the center of a beam that one would get by single-ray-per-beam ray tracing without multi-echo capability.<br><br>
+The image depicts the super-sampling of a lidar sensor beam and the detection calculation within the reflection-based lidar sensor simulation from [[1](#Rosenberger2020)</sup>, p. 192].
+The intervals A-B and C-D mark the resulting echoes at the edge-shaped object (left) and in the signal (right).
+The ⊗ visualizes the center of a beam that one would get by single-ray-per-beam ray tracing without multi-echo capability.<br>
 
 After transformation of the detections from the sensor's spherical coordinates to the vehicle's Cartesian coordinates, they are available as osi3::LogicalDetections.
 Subsequently, the tracking-strategy is applied on the calculated logical detections.
@@ -58,14 +60,17 @@ If an object is no longer detected over a defined number of cycles, it is delete
 Consideration of the class uncertainties is provided by the model architecture, as well.
 The output of the tracking module is a list of tracked objects.
 
-<a name="Rosenberger2020">1</a>: P. Rosenberger, M. F. Holder, N. Cianciaruso, P. Aust, J. F. Tamm-Morschel, C. Linnhoff, and H. Winner, “Sequential lidar sensor system simulation: A modular approach for simulation-based safety validation of automated driving”, In Automotive and Engine Technology, vol. 5, no. 3-4, pp. 187–197, Dec. 2020.
+<a name="Rosenberger2020">1</a>: P. Rosenberger, M. F. Holder, N. Cianciaruso, P. Aust, J. F. Tamm-Morschel, C. Linnhoff, and H. Winner,
+“Sequential lidar sensor system simulation: A modular approach for simulation-based safety validation of automated driving”,
+In Automotive and Engine Technology, vol. 5, no. 3-4, pp. 187–197, Dec. 2020.
 
 ### Modeling of Weather Influence on Lidar Point Cloud
 
 In the "Lidar-Environmental-Effects-Strategy", several weather influences are added to the simulated point cloud.
 The influences are parameterizable via the sensor profiles and calibrated for certain sensors based on measurements published by Linnhoff et al.[[2](#Linnhoff2022)</sup>]
 The stochastically modeled weather conditions include
-- Direct Sun Light
+
+- Direct Sunlight
 - Fog
 - Rain
 - Snow
@@ -73,7 +78,6 @@ The stochastically modeled weather conditions include
 <img src="doc/img/rain.gif" width="800" />
 
 <a name="Linnhoff2022">2</a>: C. Linnhoff, K. Hofrichter, L. Elster, P. Rosenberger, H. Winner, "Measuring the Influence of Environmental Conditions on Automotive Lidar Sensors,” in MDPI Sensors Journal, vol. 22, no. 14, July 2022.
-
 
 ### Modeling of Road Spray in Lidar Point Cloud
 
@@ -87,7 +91,6 @@ More detail can be found shortly in an upcoming publication, currently under rev
 
 <a name="Linnhoff2022-2">3</a>: Under review: C. Linnhoff, D. Scheuble, M. Bijelic, L. Elster, P. Rosenberger, W. Ritter, D. Dai and H. Winner, "Simulating Road Spray Effects in Automotive Lidar Sensor Models,” submitted to IEEE Sensors Journal, 2022.
 
-
 ## Parameterization
 
 The profiles are parameterized in the files `profile_*.hpp.in`.
@@ -98,7 +101,6 @@ The profile to be loaded for simulation is set via a model parameter defined in 
 The first name in `src/model/profiles/profile_list.conf` is taken as default.
 If you would like to have a different one or if your simulation master does not support the configuration of model parameters, you have to adapt the *start* value of the parameter `profile` in `src/osmp/modelDescription.in.xml`.
 
-
 ### Sensor Parameters
 
 | Parameter                         | Description                                                                                                                       |
@@ -106,10 +108,9 @@ If you would like to have a different one or if your simulation master does not 
 | sensor_view_configuration*        | Update cycle, range, field of view, physical mounting position w.r.t. center of rear axle                                         |
 | lidar_sensor_view_configuration** | Field of view horizontal / vertical, number of rays horizontal / vertical, emitter's mounting position w.r.t. center of rear axle |
 | min_range                         | Minimum range of every simulated lidar sensor                                                                                     |
-<dl>
-  <dd>*sensor_view_configuration is defined for every physical sensor system mounted on the ego car</dd>
-  <dd>**lidar_sensor_view_configuration is defined for every emitter located within every sensor system</dd>
-</dl>
+
+*sensor_view_configuration is defined for every physical sensor system mounted on the ego car<br>
+**lidar_sensor_view_configuration is defined for every emitter located within every sensor system
 
 ### Detection Sensing Parameters
 
@@ -192,6 +193,7 @@ Possible values are "flat" or "structured".
   - sensor_view_configuration.lidar_sensor_view_configuration.number_of_rays_vertical
 
 ### Required Fields in OSI3 Sensor_View Filled at the Input by the Simulation Tool
+
 - Ground Truth object list
   - sensor_view.mounting_position
   - sensor_view.global_ground_truth.timestamp
@@ -218,13 +220,7 @@ Possible values are "flat" or "structured".
 
 ### Additionally Filled Fields in OSI3 Sensor_Data by the Sensor Model
 
----
-
-**NOTE**
-
 Currently, all information on model input is passed to the output.
-
----
 
 - sensor_data.timestamp
 - sensor_data.moving_object_header.measurement_time
@@ -251,68 +247,71 @@ Currently, all information on model input is passed to the output.
 
 ### Install Dependencies in Windows 10
 
-1. Install cmake from https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3-windows-x86_64.msi
+1. Install [cmake](https://github.com/Kitware/CMake/releases/download/v3.20.3/cmake-3.20.3-windows-x86_64.msi)
 2. Install protobuf for [MSYS-2020](doc/build-instructions/install_protobuf_Win64_MSYS-2020.md) or [Visual Studio 2017](doc/build-instructions/install_protobuf_Win64_VS2017.md)
 
 ### Clone with Submodules, Build, and Install in Windows 10
 
-1. Clone this repository <ins>with submodules</ins>:
+1. Clone this repository *with submodules*:
+
    ```bash
-   $ git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
+   git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
    ```
+
 2. Build the model in [MSYS-2020](doc/build-instructions/install_model_Win64_MSYS-2020.md) or [Visual Studio 2017](doc/build-instructions/install_model_Win64_VS2017.md)
 3. Take FMU from `FMU_INSTALL_DIR`
 
-    (Please note that sources are not packed into the FMU at the moment.)
+(Please note that sources are not packed into the FMU at the moment.)
 
 ## Build Instructions in Ubuntu 18.04 / 20.04
 
 ### Install Dependencies in Ubuntu 18.04 / 20.04
 
 1. Install cmake 3.12
-   * as told in [these install instructions](doc/build-instructions/install_cmake_ubuntu_3-12.md)
+   - as told in [these install instructions](doc/build-instructions/install_cmake_ubuntu_3-12.md)
 2. Install protobuf 3.0.0:
-   * Check your version via `protoc --version`. It should output: `libprotoc 3.0.0`
-   * If needed, you can install it via `sudo apt-get install libprotobuf-dev protobuf-compiler`
-   * or from source:
-     * Download it from https://github.com/protocolbuffers/protobuf/releases/tag/v3.0.0 and extract the archive.
-     * Try to run `./autogen.sh`, if it failes, download the gmock-1.7.0.zip from https://pkgs.fedoraproject.org/repo/pkgs/gmock/gmock-1.7.0.zip/073b984d8798ea1594f5e44d85b20d66/gmock-1.7.0.zip, extract it into the protobuf folder and rename the gmock-1.7.0 folter to gmock.
-     * Proceed with the install with
+   - Check your version via `protoc --version`. It should output: `libprotoc 3.0.0`
+   - If needed, you can install it via `sudo apt-get install libprotobuf-dev protobuf-compiler`
+   - or from source:
+     - Download [source](https://github.com/protocolbuffers/protobuf/releases/tag/v3.0.0) and extract the archive.
+     - Try to run `./autogen.sh`, if it fails, download the [gmock-1.7.0.zip](https://pkgs.fedoraproject.org/repo/pkgs/gmock/gmock-1.7.0.zip/073b984d8798ea1594f5e44d85b20d66/gmock-1.7.0.zip), extract it into the protobuf folder and rename the gmock-1.7.0 folter to gmock.
+     - Proceed with the installation with
+
      ```bash
-     $ make
-     $ sudo make install
-     $ sudo ldconfig # refresh shared library cache.
+     make
+     sudo make install
+     sudo ldconfig # refresh shared library cache.
      ```
 
 ### Clone with Submodules, Build, and Install in Ubuntu 18.04 / 20.04
 
-1. Clone this repository <ins>with submodules</ins>:
+1. Clone this repository *with submodules*:
+
     ```bash
-    $ git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
+    git clone https://github.com/openMSL/reflection_based_lidar_object_model.git --recurse-submodules
     ```
+
 2. Build the model by executing in the extracted project root directory:
+
     ```bash
-    $ mkdir cmake-build
-    $ cd cmake-build
+    mkdir cmake-build
+    cd cmake-build
     # If FMU_INSTALL_DIR is not set, CMAKE_BINARY_DIR is used
-    $ cmake -DCMAKE_BUILD_TYPE=Release -DFMU_INSTALL_DIR:PATH=/tmp ..
-    $ make -j N_JOBS
+    cmake -DCMAKE_BUILD_TYPE=Release -DFMU_INSTALL_DIR:PATH=/tmp ..
+    make -j N_JOBS
     ```
+
 3. Take FMU from `FMU_INSTALL_DIR`
 
-    (Please note that sources are not packed into the FMU at the moment.)
-
-## Licensing
-
-**Please read file [COPYING](COPYING), which is located in the project root, carefully.**
+(Please note that sources are not packed into the FMU at the moment.)
 
 ## Credits
-This work received funding from the research project 
-"[SET Level](https://setlevel.de/)" of the [PEGASUS ](https://pegasus-family.de) project family, promoted by the German Federal Ministry for Economic Affairs and Energy based on a decision of the German Bundestag.
+
+This work received funding from the research project
+"[SET Level](https://setlevel.de/)" of the [PEGASUS](https://pegasus-family.de) project family, promoted by the German Federal Ministry for Economic Affairs and Energy based on a decision of the German Bundestag.
 | SET Level                                                                                                | PEGASUS Family                                                                                                       | BMWi                                                                                                                                                                                 |
 |----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | <a href="https://setlevel.de"><img src="https://setlevel.de/assets/logo-setlevel.svg" width="100" /></a> | <a href="https://pegasus-family.de"><img src="https://setlevel.de/assets/logo-pegasus-family.svg" width="100" /></a> | <a href="https://www.bmwi.de/Redaktion/DE/Textsammlungen/Technologie/fahrzeug-und-systemtechnologien.html"><img src="https://setlevel.de/assets/logo-bmwi-en.svg" width="100" /></a> |
-
 
 Thanks to all contributors of the following libraries:
 

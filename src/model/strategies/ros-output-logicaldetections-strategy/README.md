@@ -1,6 +1,6 @@
 # ROS Bridge LogicalDetections Strategy
 
-This strategy outputs osi3::LogicalDetectionData as ROS PointCloud2 messages. 
+This strategy outputs osi3::LogicalDetectionData as ROS PointCloud2 messages.
 Using the ROS tool rviz is a convenient way to visualize OSI sensor view input and sensor data output.
 
 ## Usage
@@ -11,4 +11,4 @@ In order for the strategy to be called during simulation, the FMI parameter *swi
 
 ## ROS Distributions
 
-This strategy needs a full install of either ROS noetic or ROS melodic. The ROS distribution needs to be located in /opt/ros/.
+This strategy needs a full installation of either ROS noetic or ROS melodic. The ROS distribution needs to be located in /opt/ros/.

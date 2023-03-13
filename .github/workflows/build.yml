@@ -1,10 +1,7 @@
 name: Build
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_call:
 
 jobs:
   build:
@@ -19,7 +16,7 @@ jobs:
 
     - name: Cache Dependencies
       id: cache-depends
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: protobuf-21.12
         key: ${{ runner.os }}-v1-depends
@@ -31,7 +28,7 @@ jobs:
     - name: Build ProtoBuf
       if: steps.cache-depends.outputs.cache-hit != 'true'
       working-directory: protobuf-21.12
-      run: ./configure DIST_LANG=cpp --prefix=/usr && make
+      run: ./configure DIST_LANG=cpp --disable-shared CXXFLAGS="-fPIC" && make
 
     - name: Install ProtoBuf
       working-directory: protobuf-21.12
@@ -48,3 +45,17 @@ jobs:
       working-directory: build
       run: cmake --build .
 
+    - name: Create FMU Directory
+      working-directory: build
+      run: mkdir /tmp/model_fmu
+
+    - name: Copy Model FMU
+      working-directory: build
+      run: cp ReflectionBasedLidarModel.fmu /tmp/model_fmu/ReflectionBasedLidarModel.fmu
+
+    - name: Cache Model FMU
+      id: cache-model-fmu
+      uses: actions/cache@v3
+      with:
+        path: /tmp/model_fmu
+        key: ${{ runner.os }}-model-fmu

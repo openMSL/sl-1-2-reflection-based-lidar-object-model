@@ -1,7 +1,8 @@
 # Install protobuf for Win64 and Visual Studio 2017
 
 1. Create and run Shell-Script (e.g. with cmd.exe):
-    ```bash
+
+   ```bash
     #!/bin/bash
     # Protobuf 3.14.0
     cd C:/tmp
@@ -21,6 +22,7 @@
         -Dprotobuf_BUILD_TESTS:BOOL=OFF \
         ..
     ```
+
 2. Run extract_includes.bat located in build-dir from above
 3. Open protobuf.sln located in build-dir from above with **Visual Studio 2017**
 4. Change Properties->C/C++->Code Generation of **all** solutions for Configuration *Release* AND *Debug*<br>
