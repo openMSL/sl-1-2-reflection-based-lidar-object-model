@@ -1,10 +1,7 @@
 name: C++ Linter
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_call:
 
 jobs:
   cpp-linter:
@@ -58,7 +55,7 @@ jobs:
         files-changed-only: true
         thread-comments: true
         database: 'build/'
-        ignore: 'build | protobuf-21.12 | .github | src/osmp'
+        ignore: 'build | protobuf-21.12 | .github | src/osmp '
         extra-args: '-I ./build/lib/open-simulation-interface'
         
     - name: Fail fast?!

@@ -1,8 +1,7 @@
 # SL 1-2 Reflection Based Lidar Object Model
 
-![SPDX workflow](https://github.com/openMSL/sl-1-2-reflection-based-lidar-object-model/actions/workflows/spdx.yml/badge.svg)
-![CPP Linter workflow](https://github.com/openMSL/sl-1-2-reflection-based-lidar-object-model/actions/workflows/cpp-linter.yml/badge.svg)
-![Build workflow](https://github.com/openMSL/sl-1-2-reflection-based-lidar-object-model/actions/workflows/build.yml/badge.svg)
+[![Credibility Assessment Level 0](../../actions/workflows/cl0.yml/badge.svg)](https://github.com/openMSL/sl-1-5-sensor-model-testing/blob/main/doc/test_architecture.md#cl-0-license-check)
+[![Credibility Assessment Level 1](../../actions/workflows/cl1.yml/badge.svg)](https://github.com/openMSL/sl-1-5-sensor-model-testing/blob/main/doc/test_architecture.md#cl-1-code-verification)
 
 :warning: **Current version not compliant with official ASAM OSI**: The current version of the model is build on the enhancements to the Open Simulation Interface from the publicly funded SETLevel project. It is therefore dependent on the non-standard [SL OSI](https://gitlab.setlevel.de/open/osi) and not [ASAM OSI](https://github.com/OpenSimulationInterface/open-simulation-interface).
 

@@ -1,0 +1,18 @@
+name: Credibility Assessment Level 0
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-spdx-headers:
+    name: SPDX License Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+    - uses: Persival-GmbH/spdx@master
+      with:
+        licenses: Apache-2.0 BSD-3-Clause BSD-2-Clause BSL-1.0 GPL-2.0 GPL-3.0 LGPL-2.0 LGPL-2.1 LGPL-3.0 MIT MPL-2.0 CDDL-1.0 EPL-2.0
