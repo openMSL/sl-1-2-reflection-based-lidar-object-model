@@ -12,7 +12,8 @@
         "allowed_elements": [
             "a",
             "br",
-            "img"
+            "img",
+            "sup"
         ]
     }
 }

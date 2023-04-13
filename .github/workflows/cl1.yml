@@ -11,6 +11,11 @@ jobs:
     name: Build Model
     uses: ./.github/workflows/build.yml
 
+  fmu-artifact:
+    needs: build_model
+    name: FMU Artifact
+    uses: ./.github/workflows/fmu_artifact.yml
+
   cpp-linter:
     name: C++ Linter
     uses: ./.github/workflows/cpp-linter.yml
@@ -18,3 +23,11 @@ jobs:
   markdown-linter:
     name: Markdown Linter
     uses: ./.github/workflows/markdown.yml
+
+  srmd-validator:
+    name: SRMD Validator
+    uses: ./.github/workflows/srmd-validator.yml
+
+  unit-tests:
+    name: Unit Tests
+    uses: ./.github/workflows/unit-tests.yml

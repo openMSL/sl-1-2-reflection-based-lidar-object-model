@@ -1,16 +1,22 @@
-name: C++ Linter
+name: Unit Tests
 
 on:
   workflow_call:
 
 jobs:
-  cpp-linter:
+  unit-tests:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Model
       uses: actions/checkout@v3
       with:
         submodules: true
+
+    - name: Check unit tests exist
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: "test/unit"
 
     - name: Cache Protobuf
       id: cache-protobuf
@@ -20,46 +26,33 @@ jobs:
         key: ${{ runner.os }}-protobuf
 
     - name: Download ProtoBuf
-      if: steps.cache-protobuf.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true' && steps.check_files.outputs.files_exists == 'true'
       run: curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protobuf-all-21.12.tar.gz && tar xzvf protobuf-all-21.12.tar.gz
 
     - name: Build ProtoBuf
-      if: steps.cache-protobuf.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true' && steps.check_files.outputs.files_exists == 'true'
       working-directory: protobuf-21.12
       run: ./configure DIST_LANG=cpp --prefix=/usr && make
 
     - name: Install ProtoBuf
+      if: steps.check_files.outputs.files_exists == 'true'
       working-directory: protobuf-21.12
       run: sudo make install && sudo ldconfig
 
     - name: Prepare C++ Build
+      if: steps.check_files.outputs.files_exists == 'true'
       run: mkdir build
 
     - name: Configure CMake
+      if: steps.check_files.outputs.files_exists == 'true'
       working-directory: build
       run: cmake -DCMAKE_PREFIX_PATH:PATH=${DEPS_DIR}/protobuf/install -DCMAKE_EXPORT_COMPILE_COMMANDS=on ..
       
     - name: Build C++
+      if: steps.check_files.outputs.files_exists == 'true'
       working-directory: build
       run: cmake --build .
 
-    - name: Lint CPP
-      uses: cpp-linter/cpp-linter-action@v2
-      id: linter
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        style: file
-        tidy-checks: ''
-        version: '14'
-        files-changed-only: true
-        thread-comments: true
-        database: 'build/'
-        ignore: 'build | protobuf-21.12 | .github | test'
-        extra-args: '-I ./build/lib/open-simulation-interface'
-        
-    - name: Fail fast?!
-      if: steps.linter.outputs.checks-failed > 0
-      run: echo "Some files failed the linting checks!"
-      # for actual deployment
-      # run: exit 1
+    - name: Run Unit Tests
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: build/test/unit/Google_Tests_run

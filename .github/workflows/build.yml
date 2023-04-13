@@ -14,19 +14,19 @@ jobs:
       with:
         submodules: true
 
-    - name: Cache Dependencies
-      id: cache-depends
+    - name: Cache Protobuf
+      id: cache-protobuf
       uses: actions/cache@v3
       with:
         path: protobuf-21.12
-        key: ${{ runner.os }}-v1-depends
+        key: ${{ runner.os }}-protobuf
 
     - name: Download ProtoBuf
-      if: steps.cache-depends.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
       run: curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v21.12/protobuf-all-21.12.tar.gz && tar xzvf protobuf-all-21.12.tar.gz
 
     - name: Build ProtoBuf
-      if: steps.cache-depends.outputs.cache-hit != 'true'
+      if: steps.cache-protobuf.outputs.cache-hit != 'true'
       working-directory: protobuf-21.12
       run: ./configure DIST_LANG=cpp --disable-shared CXXFLAGS="-fPIC" && make
 
@@ -51,7 +51,7 @@ jobs:
 
     - name: Copy Model FMU
       working-directory: build
-      run: cp ReflectionBasedLidarModel.fmu /tmp/model_fmu/ReflectionBasedLidarModel.fmu
+      run: cp ${{ github.event.repository.name }}.fmu /tmp/model_fmu/${{ github.event.repository.name }}.fmu
 
     - name: Cache Model FMU
       id: cache-model-fmu
