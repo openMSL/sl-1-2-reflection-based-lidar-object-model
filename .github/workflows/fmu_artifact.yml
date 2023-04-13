@@ -1,0 +1,23 @@
+name: Archive built FMU as artifact
+
+on:
+  workflow_call:
+
+jobs:
+  fmu-artifact:
+    name: Output FMU as artifact
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Cache Model FMU
+      id: cache-model-fmu
+      uses: actions/cache@v3
+      with:
+        path: /tmp/model_fmu
+        key: ${{ runner.os }}-model-fmu
+
+    - name: Archive built FMU
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.event.repository.name }}
+        path: /tmp/model_fmu/${{ github.event.repository.name }}.fmu

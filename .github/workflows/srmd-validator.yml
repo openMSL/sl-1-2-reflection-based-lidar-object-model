@@ -1,0 +1,25 @@
+name: SRMD Validator
+
+on:
+  workflow_call:
+
+jobs:
+  srmd-validator:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Get Sensor Model Testing
+      run: git clone https://github.com/openMSL/sl-1-5-sensor-model-testing.git
+
+    - name: Init Submodules
+      working-directory: sl-1-5-sensor-model-testing
+      run: git submodule update --init --recursive
+
+    - name: Install Dependencies
+      run: pip3 install xmlschema
+
+    - name: Validate SRMD
+      working-directory: sl-1-5-sensor-model-testing/src/srmd-validator
+      run: python3 srmd-validator.py
