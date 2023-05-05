@@ -660,14 +660,14 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
                     double azimuth_distance = sun_sensor_coord.azimuth - current_beam.horizontal_angle();
                     double elevation_distance = sun_sensor_coord.elevation - current_beam.vertical_angle();
                     double angle_distance = sqrt(pow(azimuth_distance, 2) + pow(elevation_distance, 2));
-                    // double detection_probability = -32.82 * pow(angle_distance,2) + 4.26 * angle_distance - 0.09663;
-                    // //from fit to measurement
+                    //todo: The following values are calibrated to a Velodyne VLP16 lidar. They need to be adjusted for other lidar types.
+                    // But since the intensity calibration is rather complex, this cannot be set by a parameter in the profile.
                     double brightness_factor = 1.0;
                     if (sun.intensity < 30000)
                     {
-                        brightness_factor = 0.0000333 * sun.intensity;  // todo: put in profile
+                        brightness_factor = 0.0000333 * sun.intensity;
                     }
-                    double detection_probability = brightness_factor * (-598.28 * pow(angle_distance - 0.05298, 2) + 0.281);  // from fit to measurement //todo: put in profile
+                    double detection_probability = brightness_factor * (-598.28 * pow(angle_distance - 0.05298, 2) + 0.281);  //function fit from measurement
 
                     auto random_var = (float)uniform_distrib(generator);
                     if (random_var > (1 - detection_probability))
@@ -750,25 +750,22 @@ void DetectionEnvironmentalEffects::add_attenuated_existing_detection(std::vecto
                 attenuation_factor * receiver_aperture_area * emitted_signal_strength_mW * existing_detection.intensity() / 100.0 * 255.0 / 100.0 / M_PI / pow(range, 2);
             double new_intensity = existing_detection.intensity() * attenuation_factor;
             std::random_device generator;
-            // std::normal_distribution<double> noise_distribution(attenuated_power_mW, (30.0*pow(10,-9)));
-            std::normal_distribution<double> noise_distribution(attenuated_power_mW, (0.285 * pow(10, -6)));  // todo: put to profile
+            std::normal_distribution<double> noise_distribution(attenuated_power_mW, profile.det_envir_effects.std_attenuation_in_cluster);
             double attenuated_power_noise_mW = noise_distribution(generator);
             double attenuated_power_dBm = 10 * log10(attenuated_power_noise_mW);
 
             double threshold = profile.detection_sensing_parameters.signal_strength_threshold_in_dBm;
-            double thres_distance_m = 30.0;  // todo: put to profile
             if (profile.detection_sensing_parameters.range_comp_threshold)
             {
-                if (range > thres_distance_m)
+                if (range > profile.detection_sensing_parameters.thres_distance_m)
                 {
-                    double threshold_mW = pow(10.0, threshold / 10.0) * pow(thres_distance_m, 2) / pow(range, 2);
+                    double threshold_mW = pow(10.0, threshold / 10.0) * pow(profile.detection_sensing_parameters.thres_distance_m, 2) / pow(range, 2);
                     threshold = 10 * std::log10(threshold_mW);
                 }
             }
             if (attenuated_power_dBm > threshold)
             {
-                // detection_intensities.emplace_back(existing_detection.intensity());
-                detection_intensities.emplace_back(new_intensity);  // todo:set flag in profile if intensity should be reduced
+                detection_intensities.emplace_back(new_intensity);
                 detection_distances.emplace_back(existing_detection.position().distance());
             }
         }

@@ -19,3 +19,4 @@
         VLP16.detection_sensing_parameters.echo_determination_mode = "start";           // Determines what part of the echo pulse is taken for distance. Options: {"start" (default), "peak"}
         VLP16.detection_sensing_parameters.intensity_or_epw = 0;                        // 0: Detections with intensity in %, 1: Detections with echo pulse width (epw) in m
         VLP16.detection_sensing_parameters.range_compensate_intensity = true;           // Compensate intensity by range with a factor of range^4
+        VLP16.detection_sensing_parameters.thres_distance_m = 30.0;                     // Intensity range compensation starts at this distance

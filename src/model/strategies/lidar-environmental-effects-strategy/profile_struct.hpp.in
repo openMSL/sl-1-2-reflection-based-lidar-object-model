@@ -29,6 +29,7 @@
         float distance_distr_in_cluster_mu;     // log mean value for distance distribution of detections in a spray cluster
         float distance_distr_in_cluster_sigma;  // log standard deviation for distance distribution of detections in a spray cluster
         float mean_attenuation_in_cluster;      // mean attenuation in spray cluster used for attenuation_factor = exp(-2.0 * mean_attenuation_in_cluster * distance_in_spray_cluster);
+        float std_attenuation_in_cluster;       // standard deviation for attenuation of existing detections due to spray
         double num_clusters_wfh_factor;         // mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
         double num_clusters_wfh_offset;         // mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
         double num_clusters_velocity_offset_kmh;// mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);

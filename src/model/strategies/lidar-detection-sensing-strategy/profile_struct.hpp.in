@@ -19,6 +19,7 @@
         float intensity_resolution;             // Specified intensity resolution of the sensor output in %
         float intensity_stddev;                 // Specified intensity standard deviation in %
         bool range_compensate_intensity;        // Compensate intensity by range with a factor of range^4
+        float thres_distance_m;                 // Intensity range compensation starts at this distance
         std::vector<std::vector<float>> signal_strength_to_epw; // Lookup table for linear interpolation of epw part that correlates with signal strength in dBm
 
     } detection_sensing_parameters;

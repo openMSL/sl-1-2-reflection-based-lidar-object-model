@@ -28,6 +28,7 @@
         VLP32.det_envir_effects.distance_distr_in_cluster_mu = -2.3;    // log mean value for distance distribution of detections in a spray cluster
         VLP32.det_envir_effects.distance_distr_in_cluster_sigma = 1.1;  // log standard deviation for distance distribution of detections in a spray cluster
         VLP32.det_envir_effects.mean_attenuation_in_cluster = 0.02;     // mean attenuation in spray cluster used for attenuation_factor = exp(-2.0 * mean_attenuation_in_cluster * distance_in_spray_cluster);
+        VLP32.det_envir_effects.std_attenuation_in_cluster = (0.285 * pow(10, -6));     // standard deviation for attenuation of existing detections due to spray
         VLP32.det_envir_effects.num_clusters_wfh_factor = 0.2;          // mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
         VLP32.det_envir_effects.num_clusters_wfh_offset = 0.1;          // mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
         VLP32.det_envir_effects.num_clusters_velocity_offset_kmh = 50.0;// mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
