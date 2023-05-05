@@ -70,6 +70,7 @@ add_custom_command(TARGET ${MODEL_NAME}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/buildfmu"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/binaries/${FMI_BINARIES_PLATFORM}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/extra/net.pmsf.ssp.srmd"
     COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_BINARY_DIR}/modelDescription.xml" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu"
     ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/../../sl-1-2-reflection-based-lidar-object-model.srmd" "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/extra/net.pmsf.ssp.srmd/resourceMetaData.srmd"
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${MODEL_NAME}> $<$<BOOL:${MSVC}>:$<$<CONFIG:Debug>:$<TARGET_PDB_FILE:${MODEL_NAME}>>> "${CMAKE_CURRENT_BINARY_DIR}/buildfmu/binaries/${FMI_BINARIES_PLATFORM}"
