@@ -1,10 +1,7 @@
 name: Credibility Assessment Level 1
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_call:
 
 jobs:
   build_model:
@@ -15,6 +12,11 @@ jobs:
     needs: build_model
     name: FMU Artifact
     uses: ./.github/workflows/fmu_artifact.yml
+
+  fmu-checker:
+    needs: build_model
+    name: FMU Compliance Checker
+    uses: ./.github/workflows/fmu_checker.yml
 
   cpp-linter:
     name: C++ Linter

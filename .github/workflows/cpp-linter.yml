@@ -5,6 +5,7 @@ on:
 
 jobs:
   cpp-linter:
+    name: C++ Linter
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Model

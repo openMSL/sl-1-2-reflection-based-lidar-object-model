@@ -5,7 +5,7 @@ on:
 
 jobs:
   fmu-artifact:
-    name: Output FMU as artifact
+    name: FMU Artifact
     runs-on: ubuntu-latest
 
     steps:

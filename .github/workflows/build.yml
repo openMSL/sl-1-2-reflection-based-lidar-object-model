@@ -59,3 +59,8 @@ jobs:
       with:
         path: /tmp/model_fmu
         key: ${{ runner.os }}-model-fmu
+
+    - name: Commit ID
+      run: |
+        echo "Commit ID: "
+        echo $(git rev-parse --short HEAD)

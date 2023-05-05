@@ -1,0 +1,16 @@
+name: Credibility Assessment
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  cl0:
+    name: CL 0
+    uses: ./.github/workflows/cl0.yml
+
+  cl1:
+    name: CL 1
+    uses: ./.github/workflows/cl1.yml

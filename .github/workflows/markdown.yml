@@ -5,6 +5,7 @@ on:
 
 jobs:
   markdown-lint:
+    name: Markdown Linter
     runs-on: ubuntu-latest
     steps:
     - name: checkout

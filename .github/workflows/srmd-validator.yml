@@ -5,6 +5,7 @@ on:
 
 jobs:
   srmd-validator:
+    name: SRMD Validator
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -23,3 +24,9 @@ jobs:
     - name: Validate SRMD
       working-directory: sl-1-5-sensor-model-testing/src/srmd-validator
       run: python3 srmd-validator.py
+
+    - name: Commit ID
+      working-directory: sl-1-5-sensor-model-testing
+      run: |
+        echo "Commit ID: "
+        echo $(git rev-parse --short HEAD)
