@@ -17,10 +17,8 @@
 #else
 #include <cmath>
 #include <iostream>
-
-constexpr float speed_of_light = 299792458.0;
-
 #endif
+
 // Sun struct only used until the data is part of OSI
 struct Sun  //todo: remove when switching to new OSI version
 {
@@ -130,11 +128,11 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
                 int layer_idx = (int)search_closest(profile.beam_center_elevation, current_beam.vertical_angle() / M_PI * 180.0);
                 // decide by chance if detection from raindrop exists
                 auto random_var = (float)uniform_distrib(generator);
-                if (random_var > (1 - (atm_detection_probability * profile.det_envir_effects.layer_comp_factors.at(layer_idx))))
+                if (is_rain && (random_var > (1 - (atm_detection_probability * profile.det_envir_effects.layer_comp_factors.at(layer_idx)))))
                 {
                     // decide by statistics at what range
-                    double distance_distr_mu = 1.362;   //todo: put to profile
-                    double distance_distr_sigma = 0.784;    //todo: put to profile
+                    double distance_distr_mu = profile.det_envir_effects.rain_detection_dist_distr_mu;
+                    double distance_distr_sigma = profile.det_envir_effects.rain_detection_dist_distr_sigma;
                     std::lognormal_distribution<double> distribution_distance(distance_distr_mu, distance_distr_sigma);
                     double rain_detection_distance = std::abs(distribution_distance(generator));
                     rain_detection_distance =
@@ -160,7 +158,7 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
                 }
                 else if (is_rain)
                 {
-                    attenuation = weather_intensity * 7.677 * pow(10, -5);  // todo: put to profile
+                    attenuation = weather_intensity * profile.det_envir_effects.rain_attenuation_factor * pow(10, -5);
                 }
                 add_attenuated_existing_detection(environmental_detection_intensities,
                                                   environmental_detection_distances,
@@ -256,8 +254,8 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
                 {
                     double length_beam_in_cluster = dist_to_intersect.at(1) - dist_to_intersect.at(0);
                     distance_in_spray_cluster += length_beam_in_cluster;
-                    auto mu = float(-2.3);    // todo: put in profile
-                    auto sigma = float(1.1);  // todo: put to profile
+                    auto mu = profile.det_envir_effects.distance_distr_in_cluster_mu;
+                    auto sigma = profile.det_envir_effects.distance_distr_in_cluster_sigma;
                     auto detection_distribution = std::lognormal_distribution(mu, sigma);
                     float existence_probability = std::min(float(1.0), detection_distribution(generator));
                     existence_probability *= std::min(float(1.0), std::exp(-current_spray_cluster.age_in_s / current_spray_cluster.time_constant));
@@ -269,7 +267,7 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
                         std::normal_distribution<double> distribution_dist_in_cluster(cluster_center_range, length_beam_in_cluster / 6.0);
                         double current_distance_to_spray_detection = distribution_dist_in_cluster(generator);
                         double current_intensity = normal_distrib_0_5(generator) / 255.0 * 100.0;
-                        double mean_attenuation = 0.02;  // todo: put in profile
+                        double mean_attenuation = profile.det_envir_effects.mean_attenuation_in_cluster;
                         double attenuation_factor = exp(-2.0 * mean_attenuation * distance_in_spray_cluster);
                         double attenuated_intensity = attenuation_factor * current_intensity;
                         osi3::Spherical3d tmp_detection_sensor_sph;
@@ -336,7 +334,7 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
     {
         if (detection_y_ccord > 2.0 && detection_y_ccord < 7.0)
         {
-            const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;
+            const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;    //todo: calibrated to intensity values of Velodyne sensor. Change for other lidar types.
             const double n_air = 1.0003;
             const double n_w = 1.33;
             const double pavement_depth_m = 0.0005;     //todo: get from OSI once incorporated
@@ -504,7 +502,10 @@ void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data
         {
             osi3::Dimension3d spray_vol_dimension = current_spray_volume.volume.dimension();
             // todo: adjust for object class
-            double mean_num_clusters = (0.20 * water_film_height + 0.1) * (object_velocity * 3.6 - 50.0);  // todo: put in profile
+            const double num_clusters_wfh_factor = profile.det_envir_effects.num_clusters_wfh_factor;
+            const double num_clusters_wfh_offset = profile.det_envir_effects.num_clusters_wfh_offset;
+            const double num_clusters_velocity_offset_kmh = profile.det_envir_effects.num_clusters_velocity_offset_kmh;
+            const double mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset_kmh);
             // std::normal_distribution<double> distribution_num_clusters(mean_num_clusters,
             // spray_profile.num_clusters_std);
             int num_spray_cluster = (int)round(std::max(0.0, mean_num_clusters));
@@ -520,8 +521,8 @@ void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data
                     TF::transform_position_from_object_to_world_coordinates(current_spray_cluster_vol_coord, current_spray_volume.volume);
                 SprayCluster current_spray_cluster_global;
                 current_spray_cluster_global.position_global = current_spray_cluster_world_coord;
-                auto mu = float(-1.2);    // todo: put in profile
-                auto sigma = float(0.8);  // todo: put in profile
+                auto mu = profile.det_envir_effects.cluster_radius_dist_mu;
+                auto sigma = profile.det_envir_effects.cluster_radius_dist_sigma;
                 auto distribution_cluster_radius = std::lognormal_distribution<float>(mu, sigma);
                 current_spray_cluster_global.radius = std::min(float(1.0), distribution_cluster_radius(generator));
                 current_spray_cluster_global.age_in_s = float(-update_cycle_time_s);
