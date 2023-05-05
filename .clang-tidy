@@ -263,5 +263,7 @@ CheckOptions:
     value:           'x|y|z|id|mu|a|b|c'
   - key:             readability-identifier-length.IgnoredParameterNames
     value:           'x|y|z|id'
+  - key:             readability-function-cognitive-complexity.Threshold
+    value:           '50'
 ...
 
