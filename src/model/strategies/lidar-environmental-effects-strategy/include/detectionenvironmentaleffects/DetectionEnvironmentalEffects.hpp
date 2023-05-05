@@ -71,7 +71,6 @@ class DetectionEnvironmentalEffects : public Strategy
                            osi3::LidarDetectionData* current_sensor,
                            const osi3::SpatialSignalStrength& current_beam);
     static void get_min_max_azimuth_of_cluster(SprayCluster& cluster, const osi3::MountingPosition& mounting_pose, const TF::EgoData& ego_data);
-    static bool check_if_sensor_in_cluster_volume(SprayCluster& cluster, const osi3::MountingPosition& mounting_pose, const TF::EgoData& ego_data);
     static std::vector<double> intersection_with_sphere(const osi3::Vector3d& center, float radius, double azimuth, double elevation);
 
     void simulate_wet_pavement(osi3::SensorData& sensor_data, const TF::EgoData& ego_data, LidarDetection& existing_detection, int sensor_idx, double water_film_height);

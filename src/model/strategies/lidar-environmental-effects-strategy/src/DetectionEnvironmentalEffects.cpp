@@ -21,8 +21,8 @@
 constexpr float speed_of_light = 299792458.0;
 
 #endif
-// experimental structs
-struct Sun
+// Sun struct only used until the data is part of OSI
+struct Sun  //todo: remove when switching to new OSI version
 {
     double azimuth = 0;    // Azimuth of the sun, counted counterclockwise, 0=north, PI/2 = east, PI=south, 3/2 PI=west.
                            // Unit: radian; Range: [0..2PI].
@@ -68,16 +68,8 @@ void DetectionEnvironmentalEffects::apply(SensorData& sensor_data)
 
 void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data)
 {
-    float weather_intensity = 0;
-    if (!weather_sequence.empty())
-    {
-        double update_cycle_time_s =
-            ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
-        double current_time = (double)sensor_data.sensor_view(0).timestamp().seconds() + sensor_data.sensor_view(0).timestamp().nanos() * pow(10, -9);
-        int current_time_step = int(current_time / update_cycle_time_s);
-        weather_intensity = weather_sequence.at(current_time_step);
-    }
-    else if (sensor_data.sensor_view(0).global_ground_truth().has_environmental_conditions() &&
+    float weather_intensity = 0;    //either fog or rain intensity defined as follows
+    if (sensor_data.sensor_view(0).global_ground_truth().has_environmental_conditions() &&
              sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().has_precipitation() &&
              sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().precipitation() > 2)
     {
@@ -105,7 +97,7 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
         {
             atm_detection_probability = static_cast<float>(profile.det_envir_effects.rain_det_prob_factor * weather_intensity);
         }
-        else if (is_snow)
+        else if (is_snow)   // todo: is_snow can only be set manually. Change once the parameter has been incorporated in OSI.
         {
             atm_detection_probability = static_cast<float>(profile.det_envir_effects.snow_det_prob_factor * weather_intensity);
         }
@@ -141,8 +133,8 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
                 if (random_var > (1 - (atm_detection_probability * profile.det_envir_effects.layer_comp_factors.at(layer_idx))))
                 {
                     // decide by statistics at what range
-                    double distance_distr_mu = 1.362;
-                    double distance_distr_sigma = 0.784;
+                    double distance_distr_mu = 1.362;   //todo: put to profile
+                    double distance_distr_sigma = 0.784;    //todo: put to profile
                     std::lognormal_distribution<double> distribution_distance(distance_distr_mu, distance_distr_sigma);
                     double rain_detection_distance = std::abs(distribution_distance(generator));
                     rain_detection_distance =
@@ -188,7 +180,7 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
 
 void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data)
 {
-    double water_film_height = sensor_data.sensor_view(0).global_ground_truth().lane(0).classification().road_condition().surface_water_film();
+    double water_film_height = sensor_data.sensor_view(0).global_ground_truth().lane(0).classification().road_condition().surface_water_film();     //currently only an equal water film across all lanes is covered
     if (water_film_height <= 0.0)
     {
         return;
@@ -347,7 +339,7 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
             const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;
             const double n_air = 1.0003;
             const double n_w = 1.33;
-            const double pavement_depth_m = 0.0005;
+            const double pavement_depth_m = 0.0005;     //todo: get from OSI once incorporated
             const double range = existing_detection.position().distance();
 
             double a_in = atan(range / sensor_height_over_ground);
@@ -402,6 +394,7 @@ osi3::LidarDetectionData DetectionEnvironmentalEffects::get_beam_indices(osi3::S
 
 std::vector<int> DetectionEnvironmentalEffects::update_spray_cluster(const TF::EgoData& ego_data, osi3::MountingPosition& mounting_pose)
 {
+    //todo: The following values are hardcoded, as they are not part of the current OSI version. Adjust, when changing to newer OSI version
     double wind_direction_deg = 208.0;  // wind direction clock wise from north
     double wind_speed = 2.0;            // absolute wind speed in m/s
     std::array<double, 3> wind_direction = {sin(wind_direction_deg * M_PI / 180.0), cos(wind_direction_deg * M_PI / 180.0), 0.0};
@@ -610,16 +603,9 @@ void DetectionEnvironmentalEffects::get_min_max_azimuth_of_cluster(SprayCluster&
     cluster.dist_to_sensor = cluster_sensor_coord_sph.distance();
 }
 
-bool DetectionEnvironmentalEffects::check_if_sensor_in_cluster_volume(SprayCluster& cluster, const osi3::MountingPosition& mounting_pose, const TF::EgoData& ego_data)
-{
-    auto cluster_sensor_coord = TF::transform_position_from_world_to_sensor_coordinates(cluster.position_global, ego_data, mounting_pose);
-    auto cluster_sensor_coord_sph = TF::transform_cartesian_to_spherical(cluster_sensor_coord);
-    return cluster_sensor_coord_sph.distance() < cluster.radius;
-}
-
 void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, const TF::EgoData& ego_data)
 {
-    // todo: temporary sun definition until corresponding osi message is defined
+    // todo: Temporary sun definition until corresponding OSI message is defined
     Sun sun;
     sun.azimuth = 1.5 * M_PI / 180;
     sun.elevation = 19.1 * M_PI / 180;
@@ -691,6 +677,8 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
                         blinding_detection_sensor_sph.set_azimuth(current_beam.horizontal_angle());
                         blinding_detection_sensor_sph.set_elevation(current_beam.vertical_angle());
                         blinding_detection_sensor_sph.set_distance(distance);
+                        //todo: The following values are calibrated to a Velodyne VLP16 lidar. They need to be adjusted for other lidar types.
+                        // But since the intensity calibration is rather complex, this cannot be set by a parameter in the profile.
                         double intensity = 63.0 / 255.0 * 100.0;
                         if (distance <= 20)
                         {
