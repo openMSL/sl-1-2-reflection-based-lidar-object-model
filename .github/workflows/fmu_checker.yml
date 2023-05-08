@@ -1,0 +1,67 @@
+name: FMU Compliance Checker
+
+on:
+  workflow_call:
+
+jobs:
+  fmu-compliance-checker:
+    name: FMU Compliance Checker
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Cache Model FMU
+      id: cache-model-fmu
+      uses: actions/cache@v3
+      with:
+        path: /tmp/model_fmu
+        key: ${{ runner.os }}-model-fmu
+
+    - name: Cache FMUComplianceChecker
+      id: cache-fmu-checker
+      uses: actions/cache@v3
+      with:
+        path: /tmp/FMUComplianceChecker
+        key: ${{ runner.os }}-fmu-checker
+
+    - name: Get FMUComplianceChecker
+      if: steps.cache-fmu-checker.outputs.cache-hit != 'true'
+      working-directory: /tmp
+      run: git clone https://github.com/modelica-tools/FMUComplianceChecker.git
+
+    - name: Build FMUComplianceChecker
+      if: steps.cache-fmu-checker.outputs.cache-hit != 'true'
+      working-directory: /tmp/FMUComplianceChecker
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build .
+
+    - name: Run FMUComplianceChecker
+      working-directory: /tmp/FMUComplianceChecker/build
+      run: ./fmuCheck.linux64 /tmp/model_fmu/${{ github.event.repository.name }}.fmu
+      
+    - name: Commit ID
+      working-directory: /tmp/FMUComplianceChecker
+      run: |
+        echo "Commit ID: "
+        echo $(git rev-parse --short HEAD)
+
+  fmpy:
+    name: FMPy Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cache Model FMU
+        id: cache-model-fmu
+        uses: actions/cache@v3
+        with:
+          path: /tmp/model_fmu
+          key: ${{ runner.os }}-model-fmu
+
+      - name: Install FMPy
+        run: python -m pip install fmpy[complete]
+
+      - name: Run FMPy Validate
+        working-directory: /tmp/model_fmu
+        run: fmpy validate ${{ github.event.repository.name }}.fmu

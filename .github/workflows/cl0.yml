@@ -1,10 +1,7 @@
 name: Credibility Assessment Level 0
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_call:
 
 jobs:
   check-spdx-headers:
