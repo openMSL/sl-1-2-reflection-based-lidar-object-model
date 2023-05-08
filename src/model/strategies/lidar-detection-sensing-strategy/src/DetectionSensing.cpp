@@ -392,13 +392,12 @@ void DetectionSensing::threshold_summed_beam_cell(LidarBeamCellmW* summed_dist_c
 {
     auto summed_signal_strength_in_dBm = 10 * std::log10(summed_dist_cell_of_beam_ptr->signal_strength_in_mW);
     double threshold = profile.detection_sensing_parameters.signal_strength_threshold_in_dBm;
-    double thres_distance_m = 30.0;  // todo: put to profile
     if (profile.detection_sensing_parameters.range_comp_threshold)
     {
         float range = profile.min_range + ((float)summed_dist_cell_of_beam_ptr->dist_cell_idx + (float)0.5) * profile.detection_sensing_parameters.distance_resolution_adc;
-        if (range > thres_distance_m)
+        if (range > profile.detection_sensing_parameters.thres_distance_m)
         {
-            double threshold_mW = pow(10.0, threshold / 10.0) * pow(thres_distance_m, 2) / pow(range, 2);
+            double threshold_mW = pow(10.0, threshold / 10.0) * pow(profile.detection_sensing_parameters.thres_distance_m, 2) / pow(range, 2);
             threshold = 10 * std::log10(threshold_mW);
         }
     }

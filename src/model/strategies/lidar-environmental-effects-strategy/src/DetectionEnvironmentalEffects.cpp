@@ -17,12 +17,10 @@
 #else
 #include <cmath>
 #include <iostream>
-
-constexpr float speed_of_light = 299792458.0;
-
 #endif
-// experimental structs
-struct Sun
+
+// Sun struct only used until the data is part of OSI
+struct Sun  // todo: remove when switching to new OSI version
 {
     double azimuth = 0;    // Azimuth of the sun, counted counterclockwise, 0=north, PI/2 = east, PI=south, 3/2 PI=west.
                            // Unit: radian; Range: [0..2PI].
@@ -68,18 +66,10 @@ void DetectionEnvironmentalEffects::apply(SensorData& sensor_data)
 
 void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data)
 {
-    float weather_intensity = 0;
-    if (!weather_sequence.empty())
-    {
-        double update_cycle_time_s =
-            ((double)profile.sensor_view_configuration.update_cycle_time().seconds() + profile.sensor_view_configuration.update_cycle_time().nanos() * pow(10, -9));
-        double current_time = (double)sensor_data.sensor_view(0).timestamp().seconds() + sensor_data.sensor_view(0).timestamp().nanos() * pow(10, -9);
-        int current_time_step = int(current_time / update_cycle_time_s);
-        weather_intensity = weather_sequence.at(current_time_step);
-    }
-    else if (sensor_data.sensor_view(0).global_ground_truth().has_environmental_conditions() &&
-             sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().has_precipitation() &&
-             sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().precipitation() > 2)
+    float weather_intensity = 0;  // either fog or rain intensity defined as follows
+    if (sensor_data.sensor_view(0).global_ground_truth().has_environmental_conditions() &&
+        sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().has_precipitation() &&
+        sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().precipitation() > 2)
     {
         std::vector<float> precipitation_intensity_class_mean = {0, 0, 0, 0.2, 0.6, 3, 12.9, 57.5, 150};
         weather_intensity = precipitation_intensity_class_mean[sensor_data.sensor_view(0).global_ground_truth().environmental_conditions().precipitation()];
@@ -105,7 +95,7 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
         {
             atm_detection_probability = static_cast<float>(profile.det_envir_effects.rain_det_prob_factor * weather_intensity);
         }
-        else if (is_snow)
+        else if (is_snow)  // todo: is_snow can only be set manually. Change once the parameter has been incorporated in OSI.
         {
             atm_detection_probability = static_cast<float>(profile.det_envir_effects.snow_det_prob_factor * weather_intensity);
         }
@@ -138,11 +128,11 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
                 int layer_idx = (int)search_closest(profile.beam_center_elevation, current_beam.vertical_angle() / M_PI * 180.0);
                 // decide by chance if detection from raindrop exists
                 auto random_var = (float)uniform_distrib(generator);
-                if (random_var > (1 - (atm_detection_probability * profile.det_envir_effects.layer_comp_factors.at(layer_idx))))
+                if (is_rain && (random_var > (1 - (atm_detection_probability * profile.det_envir_effects.layer_comp_factors.at(layer_idx)))))
                 {
                     // decide by statistics at what range
-                    double distance_distr_mu = 1.362;
-                    double distance_distr_sigma = 0.784;
+                    double distance_distr_mu = profile.det_envir_effects.rain_detection_dist_distr_mu;
+                    double distance_distr_sigma = profile.det_envir_effects.rain_detection_dist_distr_sigma;
                     std::lognormal_distribution<double> distribution_distance(distance_distr_mu, distance_distr_sigma);
                     double rain_detection_distance = std::abs(distribution_distance(generator));
                     rain_detection_distance =
@@ -168,7 +158,7 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
                 }
                 else if (is_rain)
                 {
-                    attenuation = weather_intensity * 7.677 * pow(10, -5);  // todo: put to profile
+                    attenuation = weather_intensity * profile.det_envir_effects.rain_attenuation_factor * pow(10, -5);
                 }
                 add_attenuated_existing_detection(environmental_detection_intensities,
                                                   environmental_detection_distances,
@@ -188,7 +178,8 @@ void DetectionEnvironmentalEffects::add_hydrometeor_detections(osi3::SensorData&
 
 void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, int sensor_idx, const TF::EgoData& ego_data)
 {
-    double water_film_height = sensor_data.sensor_view(0).global_ground_truth().lane(0).classification().road_condition().surface_water_film();
+    double water_film_height = sensor_data.sensor_view(0).global_ground_truth().lane(0).classification().road_condition().surface_water_film();  // currently only an equal water
+                                                                                                                                                 // film across all lanes is covered
     if (water_film_height <= 0.0)
     {
         return;
@@ -264,8 +255,8 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
                 {
                     double length_beam_in_cluster = dist_to_intersect.at(1) - dist_to_intersect.at(0);
                     distance_in_spray_cluster += length_beam_in_cluster;
-                    auto mu = float(-2.3);    // todo: put in profile
-                    auto sigma = float(1.1);  // todo: put to profile
+                    auto mu = profile.det_envir_effects.distance_distr_in_cluster_mu;
+                    auto sigma = profile.det_envir_effects.distance_distr_in_cluster_sigma;
                     auto detection_distribution = std::lognormal_distribution(mu, sigma);
                     float existence_probability = std::min(float(1.0), detection_distribution(generator));
                     existence_probability *= std::min(float(1.0), std::exp(-current_spray_cluster.age_in_s / current_spray_cluster.time_constant));
@@ -277,7 +268,7 @@ void DetectionEnvironmentalEffects::add_spray_detections(osi3::SensorData& senso
                         std::normal_distribution<double> distribution_dist_in_cluster(cluster_center_range, length_beam_in_cluster / 6.0);
                         double current_distance_to_spray_detection = distribution_dist_in_cluster(generator);
                         double current_intensity = normal_distrib_0_5(generator) / 255.0 * 100.0;
-                        double mean_attenuation = 0.02;  // todo: put in profile
+                        double mean_attenuation = profile.det_envir_effects.mean_attenuation_in_cluster;
                         double attenuation_factor = exp(-2.0 * mean_attenuation * distance_in_spray_cluster);
                         double attenuated_intensity = attenuation_factor * current_intensity;
                         osi3::Spherical3d tmp_detection_sensor_sph;
@@ -344,10 +335,10 @@ void DetectionEnvironmentalEffects::simulate_wet_pavement(osi3::SensorData& sens
     {
         if (detection_y_ccord > 2.0 && detection_y_ccord < 7.0)
         {
-            const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;
+            const double Gamma = existing_detection.intensity() / 100.0 * 255.0 / 100.0;  // todo: calibrated to intensity values of Velodyne sensor. Change for other lidar types.
             const double n_air = 1.0003;
             const double n_w = 1.33;
-            const double pavement_depth_m = 0.0005;
+            const double pavement_depth_m = 0.0005;  // todo: get from OSI once incorporated
             const double range = existing_detection.position().distance();
 
             double a_in = atan(range / sensor_height_over_ground);
@@ -402,6 +393,7 @@ osi3::LidarDetectionData DetectionEnvironmentalEffects::get_beam_indices(osi3::S
 
 std::vector<int> DetectionEnvironmentalEffects::update_spray_cluster(const TF::EgoData& ego_data, osi3::MountingPosition& mounting_pose)
 {
+    // todo: The following values are hardcoded, as they are not part of the current OSI version. Adjust, when changing to newer OSI version
     double wind_direction_deg = 208.0;  // wind direction clock wise from north
     double wind_speed = 2.0;            // absolute wind speed in m/s
     std::array<double, 3> wind_direction = {sin(wind_direction_deg * M_PI / 180.0), cos(wind_direction_deg * M_PI / 180.0), 0.0};
@@ -511,7 +503,10 @@ void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data
         {
             osi3::Dimension3d spray_vol_dimension = current_spray_volume.volume.dimension();
             // todo: adjust for object class
-            double mean_num_clusters = (0.20 * water_film_height + 0.1) * (object_velocity * 3.6 - 50.0);  // todo: put in profile
+            const double num_clusters_wfh_factor = profile.det_envir_effects.num_clusters_wfh_factor;
+            const double num_clusters_wfh_offset = profile.det_envir_effects.num_clusters_wfh_offset;
+            const double num_clusters_velocity_offset_kmh = profile.det_envir_effects.num_clusters_velocity_offset_kmh;
+            const double mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset_kmh);
             // std::normal_distribution<double> distribution_num_clusters(mean_num_clusters,
             // spray_profile.num_clusters_std);
             int num_spray_cluster = (int)round(std::max(0.0, mean_num_clusters));
@@ -527,8 +522,8 @@ void DetectionEnvironmentalEffects::append_spray_cluster(SensorData& sensor_data
                     TF::transform_position_from_object_to_world_coordinates(current_spray_cluster_vol_coord, current_spray_volume.volume);
                 SprayCluster current_spray_cluster_global;
                 current_spray_cluster_global.position_global = current_spray_cluster_world_coord;
-                auto mu = float(-1.2);    // todo: put in profile
-                auto sigma = float(0.8);  // todo: put in profile
+                auto mu = profile.det_envir_effects.cluster_radius_dist_mu;
+                auto sigma = profile.det_envir_effects.cluster_radius_dist_sigma;
                 auto distribution_cluster_radius = std::lognormal_distribution<float>(mu, sigma);
                 current_spray_cluster_global.radius = std::min(float(1.0), distribution_cluster_radius(generator));
                 current_spray_cluster_global.age_in_s = float(-update_cycle_time_s);
@@ -610,16 +605,9 @@ void DetectionEnvironmentalEffects::get_min_max_azimuth_of_cluster(SprayCluster&
     cluster.dist_to_sensor = cluster_sensor_coord_sph.distance();
 }
 
-bool DetectionEnvironmentalEffects::check_if_sensor_in_cluster_volume(SprayCluster& cluster, const osi3::MountingPosition& mounting_pose, const TF::EgoData& ego_data)
-{
-    auto cluster_sensor_coord = TF::transform_position_from_world_to_sensor_coordinates(cluster.position_global, ego_data, mounting_pose);
-    auto cluster_sensor_coord_sph = TF::transform_cartesian_to_spherical(cluster_sensor_coord);
-    return cluster_sensor_coord_sph.distance() < cluster.radius;
-}
-
 void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sensor_data, osi3::LidarDetectionData* current_sensor, const TF::EgoData& ego_data)
 {
-    // todo: temporary sun definition until corresponding osi message is defined
+    // todo: Temporary sun definition until corresponding OSI message is defined
     Sun sun;
     sun.azimuth = 1.5 * M_PI / 180;
     sun.elevation = 19.1 * M_PI / 180;
@@ -673,14 +661,14 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
                     double azimuth_distance = sun_sensor_coord.azimuth - current_beam.horizontal_angle();
                     double elevation_distance = sun_sensor_coord.elevation - current_beam.vertical_angle();
                     double angle_distance = sqrt(pow(azimuth_distance, 2) + pow(elevation_distance, 2));
-                    // double detection_probability = -32.82 * pow(angle_distance,2) + 4.26 * angle_distance - 0.09663;
-                    // //from fit to measurement
+                    // todo: The following values are calibrated to a Velodyne VLP16 lidar. They need to be adjusted for other lidar types.
+                    //  But since the intensity calibration is rather complex, this cannot be set by a parameter in the profile.
                     double brightness_factor = 1.0;
                     if (sun.intensity < 30000)
                     {
-                        brightness_factor = 0.0000333 * sun.intensity;  // todo: put in profile
+                        brightness_factor = 0.0000333 * sun.intensity;
                     }
-                    double detection_probability = brightness_factor * (-598.28 * pow(angle_distance - 0.05298, 2) + 0.281);  // from fit to measurement //todo: put in profile
+                    double detection_probability = brightness_factor * (-598.28 * pow(angle_distance - 0.05298, 2) + 0.281);  // function fit from measurement
 
                     auto random_var = (float)uniform_distrib(generator);
                     if (random_var > (1 - detection_probability))
@@ -691,6 +679,8 @@ void DetectionEnvironmentalEffects::add_sun_blinding_detections(SensorData& sens
                         blinding_detection_sensor_sph.set_azimuth(current_beam.horizontal_angle());
                         blinding_detection_sensor_sph.set_elevation(current_beam.vertical_angle());
                         blinding_detection_sensor_sph.set_distance(distance);
+                        // todo: The following values are calibrated to a Velodyne VLP16 lidar. They need to be adjusted for other lidar types.
+                        //  But since the intensity calibration is rather complex, this cannot be set by a parameter in the profile.
                         double intensity = 63.0 / 255.0 * 100.0;
                         if (distance <= 20)
                         {
@@ -761,25 +751,22 @@ void DetectionEnvironmentalEffects::add_attenuated_existing_detection(std::vecto
                 attenuation_factor * receiver_aperture_area * emitted_signal_strength_mW * existing_detection.intensity() / 100.0 * 255.0 / 100.0 / M_PI / pow(range, 2);
             double new_intensity = existing_detection.intensity() * attenuation_factor;
             std::random_device generator;
-            // std::normal_distribution<double> noise_distribution(attenuated_power_mW, (30.0*pow(10,-9)));
-            std::normal_distribution<double> noise_distribution(attenuated_power_mW, (0.285 * pow(10, -6)));  // todo: put to profile
+            std::normal_distribution<double> noise_distribution(attenuated_power_mW, profile.det_envir_effects.std_attenuation_in_cluster);
             double attenuated_power_noise_mW = noise_distribution(generator);
             double attenuated_power_dBm = 10 * log10(attenuated_power_noise_mW);
 
             double threshold = profile.detection_sensing_parameters.signal_strength_threshold_in_dBm;
-            double thres_distance_m = 30.0;  // todo: put to profile
             if (profile.detection_sensing_parameters.range_comp_threshold)
             {
-                if (range > thres_distance_m)
+                if (range > profile.detection_sensing_parameters.thres_distance_m)
                 {
-                    double threshold_mW = pow(10.0, threshold / 10.0) * pow(thres_distance_m, 2) / pow(range, 2);
+                    double threshold_mW = pow(10.0, threshold / 10.0) * pow(profile.detection_sensing_parameters.thres_distance_m, 2) / pow(range, 2);
                     threshold = 10 * std::log10(threshold_mW);
                 }
             }
             if (attenuated_power_dBm > threshold)
             {
-                // detection_intensities.emplace_back(existing_detection.intensity());
-                detection_intensities.emplace_back(new_intensity);  // todo:set flag in profile if intensity should be reduced
+                detection_intensities.emplace_back(new_intensity);
                 detection_distances.emplace_back(existing_detection.position().distance());
             }
         }

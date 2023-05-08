@@ -10,6 +10,9 @@
 
         bool calibrated_rain;                   // does a parameter set for rain calibrated from to world measurements exist?
         float rain_det_prob_factor;             // factor for linear function with precipitation rate
+        double rain_detection_dist_distr_mu;    // mean value for distance distribution of rain detections
+        double rain_detection_dist_distr_sigma; // standard deviation for distance distribution of rain detections
+        double rain_attenuation_factor;         // factor for rain intensity dependent signal attenuation calculated by rain_intensity * rain_attenuation_factor * pow(10, -5)
 
         bool calibrated_snow;                   // does a parameter set for snow calibrated from to world measurements exist?
         float snow_det_prob_factor;             // factor for linear function with precipitation rate
@@ -23,6 +26,14 @@
 
         //spray
         bool calibrated_spray;                  // does a parameter set for spray calibrated to real world measurements exist?
-
+        float distance_distr_in_cluster_mu;     // log mean value for distance distribution of detections in a spray cluster
+        float distance_distr_in_cluster_sigma;  // log standard deviation for distance distribution of detections in a spray cluster
+        float mean_attenuation_in_cluster;      // mean attenuation in spray cluster used for attenuation_factor = exp(-2.0 * mean_attenuation_in_cluster * distance_in_spray_cluster);
+        float std_attenuation_in_cluster;       // standard deviation for attenuation of existing detections due to spray
+        double num_clusters_wfh_factor;         // mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
+        double num_clusters_wfh_offset;         // mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
+        double num_clusters_velocity_offset_kmh;// mean_num_clusters = (num_clusters_wfh_factor * water_film_height + num_clusters_wfh_offset) * (object_velocity * 3.6 - num_clusters_velocity_offset);
+        float cluster_radius_dist_mu;           // log mean value for radius distribution of spray cluster
+        float cluster_radius_dist_sigma;        // log standard deviation for radius distribution of spray cluster
 
     } det_envir_effects;

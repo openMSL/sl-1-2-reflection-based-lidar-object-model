@@ -9,7 +9,10 @@
         VLP16.det_envir_effects.fog_det_prob_factor = 0;                // factor for linear function with meteorological visibility
 
         VLP16.det_envir_effects.calibrated_rain = true;                 // does a parameter set for rain calibrated from to world measurements exist?
-        VLP16.det_envir_effects.rain_det_prob_factor = 0.000169;      // factor for linear function with precipitation rate
+        VLP16.det_envir_effects.rain_det_prob_factor = 0.000169;        // factor for linear function with precipitation rate
+        VLP16.det_envir_effects.rain_detection_dist_distr_mu = 1.362;   // mean value for distance distribution of rain detections
+        VLP16.det_envir_effects.rain_detection_dist_distr_sigma = 0.784;// standard deviation for distance distribution of rain detections
+        VLP16.det_envir_effects.rain_attenuation_factor = 7.677;        // factor for rain intensity dependent signal attenuation calculated by rain_intensity * rain_attenuation_factor * pow(10, -5
 
         VLP16.det_envir_effects.calibrated_snow = true;                 // does a parameter set for snow calibrated from to world measurements exist?
         VLP16.det_envir_effects.snow_det_prob_factor = 0.01569;         // factor for linear function with precipitation rate
@@ -21,5 +24,5 @@
         VLP16.det_envir_effects.distance_distr_sigma = 0.7868;          // standard deviation of log-normal distance distribution
         VLP16.det_envir_effects.intensity_distr_lambda = 0.69312;       // mean value of poisson intensity distribution
 
-                //spray
+        //spray
         VLP16.det_envir_effects.calibrated_spray = false;                // does a parameter set for spray calibrated to real world measurements exist?
