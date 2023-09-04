@@ -11,22 +11,22 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
 
-    - name: Get Sensor Model Testing
-      run: git clone https://github.com/openMSL/sl-1-5-sensor-model-testing.git
+    - name: Get SRMD Validator
+      run: git clone https://github.com/openMSL/sl-5-1-srmd-validator.git
 
     - name: Init Submodules
-      working-directory: sl-1-5-sensor-model-testing
+      working-directory: sl-5-1-srmd-validator
       run: git submodule update --init --recursive
 
     - name: Install Dependencies
       run: pip3 install xmlschema
 
     - name: Validate SRMD
-      working-directory: sl-1-5-sensor-model-testing/src/srmd-validator
+      working-directory: sl-5-1-srmd-validator
       run: python3 srmd-validator.py
 
     - name: Commit ID
-      working-directory: sl-1-5-sensor-model-testing
+      working-directory: sl-5-1-srmd-validator
       run: |
         echo "Commit ID: "
         echo $(git rev-parse --short HEAD)
